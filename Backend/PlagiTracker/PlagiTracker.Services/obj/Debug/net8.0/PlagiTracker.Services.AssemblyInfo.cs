@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PlagiTracker.Services")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1a59f4f59cf7d6a6171adecf9f37182b92f848ac")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7cb360caf7c7e48ea4b55265dcb6bc0eae0fe08a")]
 [assembly: System.Reflection.AssemblyProductAttribute("PlagiTracker.Services")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PlagiTracker.Services")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

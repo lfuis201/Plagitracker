@@ -3,12 +3,20 @@
   "WorkspaceRootPath": "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{6F7551C5-3EC4-4D1A-B15C-9E05186A7E3B}|PlagiTracker.WebAPI\\PlagiTracker.WebAPI.csproj|e:\\uni\\semester-9\\configuration and change management\\plagitracker\\backend\\plagitracker\\plagitracker.webapi\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6F7551C5-3EC4-4D1A-B15C-9E05186A7E3B}|PlagiTracker.WebAPI\\PlagiTracker.WebAPI.csproj|solutionrelative:plagitracker.webapi\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{529B0D1D-A555-4F2F-80BF-36D1C96E76F6}|PlagiTracker.Data\\PlagiTracker.Data.csproj|e:\\uni\\semester-9\\configuration and change management\\plagitracker\\backend\\plagitracker\\plagitracker.data\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{529B0D1D-A555-4F2F-80BF-36D1C96E76F6}|PlagiTracker.Data\\PlagiTracker.Data.csproj|solutionrelative:plagitracker.data\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A8C3459B-A431-4688-A483-5968C87B31FD}|PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj|e:\\uni\\semester-9\\configuration and change management\\plagitracker\\backend\\plagitracker\\plagitracker.analyzer\\plagitracker.analyzer.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
+      "RelativeMoniker": "D:0:0:{A8C3459B-A431-4688-A483-5968C87B31FD}|PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj|solutionrelative:plagitracker.analyzer\\plagitracker.analyzer.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6F7551C5-3EC4-4D1A-B15C-9E05186A7E3B}|PlagiTracker.WebAPI\\PlagiTracker.WebAPI.csproj|e:\\uni\\semester-9\\configuration and change management\\plagitracker\\backend\\plagitracker\\plagitracker.webapi\\dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{6F7551C5-3EC4-4D1A-B15C-9E05186A7E3B}|PlagiTracker.WebAPI\\PlagiTracker.WebAPI.csproj|solutionrelative:plagitracker.webapi\\dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6F7551C5-3EC4-4D1A-B15C-9E05186A7E3B}|PlagiTracker.WebAPI\\PlagiTracker.WebAPI.csproj|e:\\uni\\semester-9\\configuration and change management\\plagitracker\\backend\\plagitracker\\plagitracker.webapi\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6F7551C5-3EC4-4D1A-B15C-9E05186A7E3B}|PlagiTracker.WebAPI\\PlagiTracker.WebAPI.csproj|solutionrelative:plagitracker.webapi\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,28 +26,49 @@
       "DocumentGroups": [
         {
           "DockedWidth": 247,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 0,
           "Children": [
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Class1.cs",
+              "DocumentMoniker": "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Data\\Class1.cs",
+              "RelativeDocumentMoniker": "PlagiTracker.Data\\Class1.cs",
+              "ToolTip": "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Data\\Class1.cs",
+              "RelativeToolTip": "PlagiTracker.Data\\Class1.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-14T05:27:14.872Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "PlagiTracker.Analyzer",
+              "DocumentMoniker": "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj",
+              "RelativeDocumentMoniker": "PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj",
+              "ToolTip": "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj",
+              "RelativeToolTip": "PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-09-14T05:25:35.287Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "Dockerfile",
               "DocumentMoniker": "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.WebAPI\\Dockerfile",
               "RelativeDocumentMoniker": "PlagiTracker.WebAPI\\Dockerfile",
               "ToolTip": "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.WebAPI\\Dockerfile",
               "RelativeToolTip": "PlagiTracker.WebAPI\\Dockerfile",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAsAAABPAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2024-09-14T04:25:02.36Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "WeatherForecastController.cs",
               "DocumentMoniker": "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.WebAPI\\Controllers\\WeatherForecastController.cs",
               "RelativeDocumentMoniker": "PlagiTracker.WebAPI\\Controllers\\WeatherForecastController.cs",
@@ -47,8 +76,7 @@
               "RelativeToolTip": "PlagiTracker.WebAPI\\Controllers\\WeatherForecastController.cs",
               "ViewState": "AQIAAAsAAAAAAAAAAAAQwB4AAAAJAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-14T04:24:14.125Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-09-14T04:24:14.125Z"
             }
           ]
         }
