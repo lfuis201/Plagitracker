@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Data\\PlagiTracker.Data.csproj": {}
+    "E:\\UNI\\semester-9\\Configuration and Change Management\\plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Data\\PlagiTracker.Data.csproj": {}
   },
   "projects": {
-    "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Data\\PlagiTracker.Data.csproj": {
+    "E:\\UNI\\semester-9\\Configuration and Change Management\\plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Data\\PlagiTracker.Data.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Data\\PlagiTracker.Data.csproj",
+        "projectUniqueName": "E:\\UNI\\semester-9\\Configuration and Change Management\\plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Data\\PlagiTracker.Data.csproj",
         "projectName": "PlagiTracker.Data",
-        "projectPath": "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Data\\PlagiTracker.Data.csproj",
+        "projectPath": "E:\\UNI\\semester-9\\Configuration and Change Management\\plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Data\\PlagiTracker.Data.csproj",
         "packagesPath": "C:\\Users\\Death Knight\\.nuget\\packages\\",
-        "outputPath": "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Data\\obj\\",
+        "outputPath": "E:\\UNI\\semester-9\\Configuration and Change Management\\plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Data\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Death Knight\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -44,6 +44,28 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
+            "Npgsql.EntityFrameworkCore.PostgreSQL": {
+              "target": "Package",
+              "version": "[8.0.4, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",

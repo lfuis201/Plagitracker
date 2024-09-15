@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PlagiTracker.Data.Entities
 {
+    /// <summary>
+    /// Entrega del estudiante, con la url de la entrega
+    /// </summary>
     public  class Submission
     {
         [Key]
@@ -17,6 +20,7 @@ namespace PlagiTracker.Data.Entities
 
         [Required]
         public Guid StudentId { get; set; }
+
         [Required]
         public Guid AssignmentId { get; set; }
     }
