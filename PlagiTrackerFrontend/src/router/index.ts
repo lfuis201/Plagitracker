@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import authRoutes from './auth/authRoutes'
-
+import authTeacherRoutes from './teacher/auth/authTeacherRoutes'
+import authStudentRouters from './student/auth/authStudentRouters'
 import CalendarView from '@/views/CalendarView.vue'
 import BasicChartView from '@/views/Charts/BasicChartView.vue'
 import ECommerceView from '@/views/Dashboard/ECommerceView.vue'
@@ -94,6 +95,8 @@ const routes = [
     }
   },
   ...authRoutes,
+  ...authTeacherRoutes,
+  ...authStudentRouters,
 ]
 
 const router = createRouter({
@@ -105,7 +108,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  document.title = `Vue.js ${to.meta.title} | TailAdmin - Vue.js Tailwind CSS Dashboard Template`
+  document.title = `PlagiTracker ${to.meta.title}`
   next()
 })
 
