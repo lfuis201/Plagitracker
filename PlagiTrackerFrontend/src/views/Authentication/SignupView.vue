@@ -13,31 +13,31 @@ const teacher = ref<Teacher>({
   firstName: 'asdasd',
   lastName: 'asdasd',
   email: 'lmamania@ulasalle.edu.pe',
-  passwordHash: 'emerson'
+  passwordHash: ''
 })
+// Para manejar la confirmación de la contraseña sin encriptar
+const password = ref<string>('emerson'); 
 const confirmPassword = ref<string>('emerson');
-
 
 const handleSubmit = async (event: Event) => {
   event.preventDefault();
 
-  if (teacher.value.passwordHash !== confirmPassword.value) {
+  if (password.value !== confirmPassword.value) {
     alert('Passwords do not match!');
     return;
   }
 
   try {
-    // Encriptar la contraseña
-    const encryptedPassword = encrypt(teacher.value.passwordHash || '');
-    teacher.value.passwordHash = encryptedPassword;
-
-    // Registrar al profesor
+    // Encriptar la contraseña antes de enviar
+    const encryptedPassword = encrypt(password.value || '');
+    
+    teacher.value.passwordHash=encryptedPassword;
+    console.log(teacher)
+    // Registrar al profesor con los datos
     await TeacherService.registerTeacher(teacher.value);
 
-    // Mostrar alert si el registro es exitoso
     alert('Teacher registered successfully!');
   } catch (error) {
-    // Mostrar alert en caso de error
     alert('Error registering teacher. Please try again.');
   }
 };
@@ -109,7 +109,7 @@ const handleSubmit = async (event: Event) => {
           </svg>
         </InputGroup>
 
-        <InputGroup v-model="teacher.passwordHash" label="Password" type="password" placeholder="Enter your password">
+        <InputGroup v-model="password" label="Password" type="password" placeholder="Enter your password">
           <svg
             class="fill-current"
             width="22"
