@@ -24,51 +24,55 @@ namespace PlagiTracker.Services.SeleniumServices
             driver = new ChromeDriver(chromeDriverService, options);
         }
 
-        public void StartScraping()
+        public void StartScraping(List<string> urls)
         {
             try
             {
-                // Generar una nueva carpeta con un nombre único basado en la fecha y hora actuales (modificar para que se ajuste a la distribucion de tus discos y carpetas)
-                string baseDirectory = @"D:\WS Text\Codigo";
-                string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-                string newDirectory = Path.Combine(baseDirectory, $"Codigo_{timestamp}");
-
-                //Nos aseguramos que la carpeta fue creada y existe
-                Directory.CreateDirectory(newDirectory);
-
-                Thread.Sleep(1000);
-                driver.Navigate().GoToUrl("https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3");
-                Thread.Sleep(1000);
-
-                // Encuentra todos los elementos <label> con el título de la clase
-                var labels = driver.FindElements(By.XPath("//label[starts-with(@for, 'tab-java-')]"));
-
-                foreach (var label in labels)
+                foreach (var url in urls)
                 {
-                    //Obtenemos el nombre de las "n" clases que hay en el compilador online codiva
-                    string className = label.GetAttribute("title");
+                    // Generar una nueva carpeta para cada URL con un nombre único
+                    string baseDirectory = @"D:\WS Text\Codigo";
+                    string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                    string newDirectory = Path.Combine(baseDirectory, $"Codigo_{timestamp}");
 
-                    //Selecciona la clase por su nombre si es que hay más de una
-                    var tabElement = driver.FindElement(By.XPath($"//label[@title='{className}']"));
-                    tabElement.Click();
-                    Thread.Sleep(1000);
+                    // Nos aseguramos de que la carpeta fue creada
+                    Directory.CreateDirectory(newDirectory);
 
-                    //Chapa el codigo de la clase
-                    var codeElements = driver.FindElements(By.XPath("//div[contains(@class, 'CodeMirror-code')]//pre"));
+                    
+                    driver.Navigate().GoToUrl(url);
+                    Thread.Sleep(800);
 
-                    //Genera una ruta de archivo única dentro de la nueva carpeta con la extensión .txt
-                    string filePath = Path.Combine(newDirectory, $"{className}.txt");
+                    // Encuentra todos los elementos <label> con el título de la clase
+                    var labels = driver.FindElements(By.XPath("//label[starts-with(@for, 'tab-java-')]"));
 
-                    //Con StreamWriter se escribe el texto de cada elemento en el archivo que llevara el nombre de la clase que se chapo antes con Selenium
-                    using (StreamWriter writer = new StreamWriter(filePath))
+                    foreach (var label in labels)
                     {
-                        foreach (var codeElement in codeElements)
+                        // Obtenemos el nombre de las clases
+                        string className = label.GetAttribute("title");
+
+                        // Selecciona la clase por su nombre
+                        var tabElement = driver.FindElement(By.XPath($"//label[@title='{className}']"));
+                        tabElement.Click();
+
+                        // Extrae el código de la clase
+                        var codeElements = driver.FindElements(By.XPath("//div[contains(@class, 'CodeMirror-code')]//pre"));
+
+                        // Genera una ruta de archivo única dentro de la nueva carpeta
+                        string filePath = Path.Combine(newDirectory, $"{className}.txt");
+
+                        // Escribe el código en el archivo
+                        using (StreamWriter writer = new StreamWriter(filePath))
                         {
-                            writer.WriteLine(codeElement.Text); //Escribre el texto de cada elemento en el archivo que llevara el nombre de la clase que se chapo antes con Selenium
+                            foreach (var codeElement in codeElements)
+                            {
+                                writer.WriteLine(codeElement.Text);
+                            }
                         }
+
+                        Console.WriteLine($"Scraping terminado para {className} y código guardado en el archivo: {filePath}");
                     }
 
-                    Console.WriteLine($"Scraping terminado y código guardado en el archivo: {filePath}");
+                    Console.WriteLine($"Scraping completo para la URL: {url}");
                 }
             }
             catch (Exception ex)
@@ -87,8 +91,20 @@ namespace PlagiTracker.Services.SeleniumServices
         static void Main(string[] args)
         {
             Web_Scraping scraper = new Web_Scraping();
-            scraper.StartScraping();
-            Console.WriteLine("Scraping Terminado.");
+            List<string> urls = new List<string>
+            {
+                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
+                "https://www.codiva.io/p/20816608-16ad-45ca-b812-9406105efbc3",
+                                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
+                "https://www.codiva.io/p/20816608-16ad-45ca-b812-9406105efbc3",
+                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
+                "https://www.codiva.io/p/20816608-16ad-45ca-b812-9406105efbc3"
+
+                // Agrega más URLs si es necesario
+            };
+
+            // Llamas al método StartScraping pasándole la lista de URLs
+            scraper.StartScraping(urls);
         }
     }
 }
