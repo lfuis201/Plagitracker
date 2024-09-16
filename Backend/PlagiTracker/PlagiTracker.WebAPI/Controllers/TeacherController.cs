@@ -39,7 +39,7 @@ namespace PlagiTracker.WebAPI.Controllers
 
         [HttpPost]
         [Route("LogIn")]
-        public async Task<ActionResult<LogInResponse>> LogIn(LogInRequest logInRequest)
+        public async Task<ActionResult> LogIn(LogInRequest logInRequest)
         {
             try
             {
@@ -79,61 +79,51 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
-        /*
-         * password = "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg="
-         * 123456789 = "FeKw08M4keuw8e9gnsQZQgwg4yDOlMZfvIwzEkSOsiU="
-        {
-          "firstName": "Pepe",
-          "lastName": "Malgesto",
-          "email": "pmalgesto@gmail.com",
-          "passwordHash":
-        }
-        */
-        /*
-        [HttpGet]
-        [Route("GetAll")]
-        public async Task<ActionResult<IEnumerable<Genre>>> GetAll()
-        {
-            var genres = await _context!.Genres!.ToListAsync();
-            return Ok(genres);
-        }
 
         [HttpGet]
         [Route("Get")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<ActionResult> Get(Guid id)
         {
-            var genre = await _context!.Genres!.FindAsync(id);
+            var teacher = await _context!.Teachers!.FindAsync(id);
 
-            if (genre == null)
+            if (teacher == null)
             {
                 return NotFound();
             }
 
-            return Ok(genre);
+            return Ok(new TeacherResponse()
+            {
+                Id = teacher.Id,
+                FirstName = teacher.FirstName,
+                LastName = teacher.LastName,
+                Email = teacher.Email
+            });
         }
 
+        
         [HttpPut]
         [Route("Update")]
-        public async Task<IActionResult> Update(int id, Genre genre)
+        public async Task<ActionResult> Update(Guid id, TeacherRequest teacherRequest)
         {
+            /*
             var getGenre = await _context!.Genres!.FindAsync(id);
             getGenre!.Name = genre.Name;
             await _context.SaveChangesAsync();
-
+            */
             return Ok();
         }
 
         [HttpDelete]
         [Route("Delete")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<ActionResult> Delete(Guid id)
         {
+            /*
             var genre = await _context!.Genres!.FindAsync(id);
             _context.Genres.Remove(genre!);
 
             await _context.SaveChangesAsync();
-
+            */
             return Ok();
         }
-        */
     }
 }

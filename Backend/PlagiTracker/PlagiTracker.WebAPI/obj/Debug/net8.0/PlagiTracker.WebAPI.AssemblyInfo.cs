@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PlagiTracker.WebAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7ef86968261fa58b4cd6f70188f2c28e9787ca91")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+810548be620f07bf100f3612f5d4b1144a8d6709")]
 [assembly: System.Reflection.AssemblyProductAttribute("PlagiTracker.WebAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PlagiTracker.WebAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

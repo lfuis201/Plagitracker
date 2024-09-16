@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "E3iYqdto9mQEFuWQmAgk4uDzQRr3UWdIXmgG5z5Iep8rlhWSf/Yv8vZW0wgbNtOnUGh1Wb+XSN0m/5H0Qle2uA==",
+  "dgSpecHash": "4PJdrJat8r09oYKNqotJPDyG6/vf12JURUekx3I0it9hee2cwk4ZwApOHaGsnoJ6eTSo4DrwlY4hhymiv4q7DA==",
   "success": true,
-  "projectFilePath": "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.WebAPI\\PlagiTracker.WebAPI.csproj",
+  "projectFilePath": "E:\\UNI\\semester-9\\Configuration and Change Management\\plagitracker\\Backend\\PlagiTracker\\PlagiTracker.WebAPI\\PlagiTracker.WebAPI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Death Knight\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\Death Knight\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\6.0.0\\microsoft.bcl.asyncinterfaces.6.0.0.nupkg.sha512",
