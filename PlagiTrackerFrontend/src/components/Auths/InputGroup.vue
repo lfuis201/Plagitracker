@@ -1,5 +1,17 @@
 <script setup lang="ts">
-const props = defineProps(['label', 'type', 'placeholder'])
+const props = defineProps({
+  label: String,
+  type: String,
+  placeholder: String,
+  modelValue: String
+})
+
+const emit = defineEmits(['update:modelValue'])
+
+const updateValue = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  emit('update:modelValue', target.value)
+}
 </script>
 
 <template>
@@ -9,9 +21,10 @@ const props = defineProps(['label', 'type', 'placeholder'])
       <input
         :type="props.type"
         :placeholder="props.placeholder"
+        :value="props.modelValue"
+        @input="updateValue"
         class="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary text-black dark:text-white"
       />
-
       <span class="absolute right-4 top-4">
         <slot></slot>
       </span>

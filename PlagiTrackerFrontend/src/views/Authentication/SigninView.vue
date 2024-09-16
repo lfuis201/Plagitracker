@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import DefaultAuthCard from '@/components/Auths/DefaultAuthCard.vue'
 import InputGroup from '@/components/Auths/InputGroup.vue'
-import BreadcrumbDefault from '@/components/Breadcrumbs/BreadcrumbDefault.vue'
-import DefaultLayout from '@/layouts/DefaultLayout.vue'
-import FullScreenLayout from '@/layouts/FullScreenLayout.vue'
 
+import FullScreenLayout from '@/layouts/FullScreenLayout.vue'
+import EncryptForm from '@/components/EncryptForm.vue'
 import { ref } from 'vue'
 
 const pageTitle = ref('Sign In')
@@ -12,7 +11,8 @@ const pageTitle = ref('Sign In')
 
 <template>
   <FullScreenLayout>
-
+    
+    <EncryptForm/>
 
     <DefaultAuthCard subtitle="Start for free" title="Sign In to PlagiTracker">
       <form>

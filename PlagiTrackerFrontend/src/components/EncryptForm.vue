@@ -37,50 +37,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import CryptoJS from 'crypto-js'
-import axios from 'axios'
-// Accede a la variable de entorno usando process.env
-const backendUrl = process.env.PLAGITRACKER_BACKEND_URL
+import { ref } from 'vue';
 
-console.log('Backend URL:', backendUrl)
-// Definir clave secreta y IV (vector de inicialización)
-const secretKey = CryptoJS.enc.Utf8.parse('1234567890123456') // 16 bytes para AES-128
-const iv = CryptoJS.enc.Utf8.parse('1234567890123456') // Debe ser de 16 bytes
+import { encrypt } from '@/utils/cryptoUtils';
+import TeacherService from '@/services/TeacherService';
+// Definir variables reactivas para almacenar el nombre de usuario y la contraseña
+const username = ref<string>('');
+const password = ref<string>('');
 
-const username = ref<string>('')
-const password = ref<string>('')
-
-const encrypt = (text: string) => {
-  const encrypted = CryptoJS.AES.encrypt(text, secretKey, { iv: iv }).toString()
-  return encrypted
-}
-
-const decrypt = (ciphertext: string) => {
-  const bytes = CryptoJS.AES.decrypt(ciphertext, secretKey, { iv: iv })
-  return bytes.toString(CryptoJS.enc.Utf8)
-}
-
+// Función para manejar el envío del formulario
 const handleSubmit = async () => {
   try {
-    const encryptedPassword = encrypt(password.value)
-    console.log('Contraseña encriptada:', encryptedPassword)
+    // Cifrar la contraseña antes de enviarla
+    const encryptedPassword = encrypt(password.value);
 
-    // Enviar la solicitud de inicio de sesión al servidor
-    const response = await axios.post('http://localhost:5086/identity/login', {
-      email: username.value, // Enviar el email en lugar de username
-      password: encryptedPassword,
-      twoFactorCode: '', // Deja estos valores vacíos si no se usan
-      twoFactorRecoveryCode: ''
-    })
+    // Llamar al servicio de login
+    const response = await TeacherService.loginTeacher(username.value, encryptedPassword);
 
-    console.log('Respuesta del servidor:', response.data)
+    // Manejar la respuesta del servidor (por ejemplo, almacenar el token de autenticación)
+    console.log('Login successful:', response);
+    alert('Login successful:');
 
-    // Maneja la respuesta del servidor (por ejemplo, almacenar el token de autenticación)
   } catch (error) {
-    console.error('Error al iniciar sesión:', error)
+    console.error('Error logging in:', error);
   }
-}
+};
 </script>
 
 <style scoped>
