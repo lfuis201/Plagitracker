@@ -50,6 +50,18 @@ class TeacherService {
       throw error;
     }
   }
+
+  static async updateTeacher(): Promise<any> {
+ 
+  }
+
+  static async deleteTeacher(): Promise<any> {
+ 
+  }
+  static async getTeacher(): Promise<any> {
+ 
+  }
+
 }
 
 export default TeacherService;
