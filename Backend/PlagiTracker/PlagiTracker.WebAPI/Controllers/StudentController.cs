@@ -43,7 +43,7 @@ namespace PlagiTracker.WebAPI.Controllers
         {
             try
             {
-                var student = await _context!.Students!.FirstOrDefaultAsync(t => t.Email == logInRequest.Email);
+                var student = await _context!.Students!.FirstOrDefaultAsync(s => s.Email == logInRequest.Email);
 
                 if (student == null)
                 {
@@ -80,7 +80,6 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
-
         [HttpGet]
         [Route("Get")]
         public async Task<ActionResult> Get(Guid id)
@@ -101,7 +100,36 @@ namespace PlagiTracker.WebAPI.Controllers
             });
         }
 
-        
+        [HttpGet]
+        [Route("GetAllByCourse")]
+        public async Task<ActionResult> GetAllByCourse(Guid courseId)
+        {
+            var enrollments = await _context!.Enrollments!.Where(e => e.CourseId == courseId).ToListAsync();
+
+            if (enrollments == null || enrollments.Count < 1)
+            {
+                return NotFound();
+            }
+            else
+            {
+                var students = new List<StudentResponse>();
+
+                foreach (var enrollment in enrollments)
+                {
+                    var student = await _context!.Students!.FindAsync(enrollment.StudentId);
+                    students.Add(new StudentResponse()
+                    {
+                        Id = student!.Id,
+                        FirstName = student.FirstName,
+                        LastName = student.LastName,
+                        Email = student.Email
+                    });
+                }
+
+                return Ok(students);
+            }
+        }
+
         [HttpPut]
         [Route("Update")]
         public async Task<ActionResult> Update(StudentUpdateRequest studentUpdateRequest)

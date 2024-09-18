@@ -24,7 +24,7 @@ namespace PlagiTracker.Data.Entities
         /// Fecha y hora límite de la entrega
         /// </summary>
         [Required]
-        public DateTime? SubmissionDate { get; set; }
+        public DateTime SubmissionDate { get; set; }
 
         [Required]
         public Guid CourseId { get; set; }

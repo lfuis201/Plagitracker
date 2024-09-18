@@ -18,6 +18,12 @@ namespace PlagiTracker.Data.Entities
         [Required]
         public string? Url { get; set; }
 
+        /// <summary>
+        /// Fecha y hora de la entrega
+        /// </summary>
+        [Required]
+        public DateTime SubmissionDate { get; set; }
+
         [Required]
         public Guid StudentId { get; set; }
 

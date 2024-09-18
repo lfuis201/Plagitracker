@@ -1,4 +1,6 @@
-﻿namespace PlagiTracker.Data.Requests
+﻿
+
+namespace PlagiTracker.Data.Requests
 {
     public class SubmissionRequest
     {
@@ -7,5 +9,7 @@
         public Guid StudentId { get; set; }
 
         public Guid AssignmentId { get; set; }
+
+        public DateTime SubmissionDate { get; set; }
     }
 }

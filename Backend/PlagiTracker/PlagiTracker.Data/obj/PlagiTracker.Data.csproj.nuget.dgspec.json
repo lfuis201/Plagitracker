@@ -1,15 +1,15 @@
 {
   "format": 1,
   "restore": {
-    "E:\\UNI\\semester-9\\Configuration and Change Management\\plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Data\\PlagiTracker.Data.csproj": {}
+    "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Data\\PlagiTracker.Data.csproj": {}
   },
   "projects": {
-    "E:\\UNI\\semester-9\\Configuration and Change Management\\plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Data\\PlagiTracker.Data.csproj": {
+    "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Data\\PlagiTracker.Data.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\UNI\\semester-9\\Configuration and Change Management\\plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Data\\PlagiTracker.Data.csproj",
+        "projectUniqueName": "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Data\\PlagiTracker.Data.csproj",
         "projectName": "PlagiTracker.Data",
-        "projectPath": "E:\\UNI\\semester-9\\Configuration and Change Management\\plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Data\\PlagiTracker.Data.csproj",
+        "projectPath": "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Data\\PlagiTracker.Data.csproj",
         "packagesPath": "C:\\Users\\Death Knight\\.nuget\\packages\\",
         "outputPath": "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Data\\obj\\",
         "projectStyle": "PackageReference",
