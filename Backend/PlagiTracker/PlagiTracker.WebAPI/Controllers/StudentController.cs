@@ -11,11 +11,11 @@ namespace PlagiTracker.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TeacherController : ControllerBase
+    public class StudentController : ControllerBase
     {
         private readonly DataContext _context;
 
-        public TeacherController(DataContext context)
+        public StudentController(DataContext context)
         {
             _context = context;
         }
@@ -24,7 +24,7 @@ namespace PlagiTracker.WebAPI.Controllers
         [Route("SignUp")]
         public async Task<ActionResult> SignUp(SignUpRequest signUpRequest)
         {
-            await _context!.Teachers!.AddAsync(new Teacher()
+            await _context!.Students!.AddAsync(new Student()
             {
                 Id = Guid.NewGuid(),
                 FirstName = signUpRequest.FirstName,
@@ -43,20 +43,21 @@ namespace PlagiTracker.WebAPI.Controllers
         {
             try
             {
-                var teacher = await _context!.Teachers!.FirstOrDefaultAsync(t => t.Email == logInRequest.Email);
+                var student = await _context!.Students!.FirstOrDefaultAsync(t => t.Email == logInRequest.Email);
 
-                if (teacher == null)
+                if (student == null)
                 {
                     return NotFound();
                 }
                 else
                 {
+                    //Comparando bytes de la contraseña
                     using (SHA256 sha256Hash = SHA256.Create())
                     {
                         byte[] bytes = logInRequest.PasswordHash!;
                         for (int i = 0; i < bytes.Length; i++)
                         {
-                            if (bytes[i] != teacher.PasswordHash![i])
+                            if (bytes[i] != student.PasswordHash![i])
                             {
                                 return Unauthorized();
                             }
@@ -65,10 +66,10 @@ namespace PlagiTracker.WebAPI.Controllers
 
                     return Ok(new LogInResponse
                     {
-                        Id = teacher.Id,
-                        FirstName = teacher.FirstName,
-                        LastName = teacher.LastName,
-                        Email = teacher.Email
+                        Id = student.Id,
+                        FirstName = student.FirstName,
+                        LastName = student.LastName,
+                        Email = student.Email
                     });
                 }
             }
@@ -84,31 +85,31 @@ namespace PlagiTracker.WebAPI.Controllers
         [Route("Get")]
         public async Task<ActionResult> Get(Guid id)
         {
-            var teacher = await _context!.Teachers!.FindAsync(id);
+            var student = await _context!.Students!.FindAsync(id);
 
-            if (teacher == null)
+            if (student == null)
             {
                 return NotFound();
             }
 
             return Ok(new TeacherResponse()
             {
-                Id = teacher.Id,
-                FirstName = teacher.FirstName,
-                LastName = teacher.LastName,
-                Email = teacher.Email
+                Id = student.Id,
+                FirstName = student.FirstName,
+                LastName = student.LastName,
+                Email = student.Email
             });
         }
 
         
         [HttpPut]
         [Route("Update")]
-        public async Task<ActionResult> Update(TeacherUpdateRequest teacherUpdateRequest)
+        public async Task<ActionResult> Update(StudentUpdateRequest studentUpdateRequest)
         {
-            var teacher = await _context!.Teachers!.FindAsync(teacherUpdateRequest.Id);
-            teacher!.FirstName = teacherUpdateRequest.FirstName;
-            teacher!.LastName = teacherUpdateRequest.LastName;
-            teacher!.Email = teacherUpdateRequest.Email;
+            var student = await _context!.Students!.FindAsync(studentUpdateRequest.Id);
+            student!.FirstName = studentUpdateRequest.FirstName;
+            student!.LastName = studentUpdateRequest.LastName;
+            student!.Email = studentUpdateRequest.Email;
 
             await _context.SaveChangesAsync();
             return Ok();
@@ -118,8 +119,8 @@ namespace PlagiTracker.WebAPI.Controllers
         [Route("Delete")]
         public async Task<ActionResult> Delete(Guid id)
         {
-            var teacher = await _context!.Teachers!.FindAsync(id);
-            _context.Teachers.Remove(teacher!);
+            var student = await _context!.Students!.FindAsync(id);
+            _context.Students.Remove(student!);
 
             await _context.SaveChangesAsync();
             return Ok();
