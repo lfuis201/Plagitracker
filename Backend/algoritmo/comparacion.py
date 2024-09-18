@@ -10,14 +10,40 @@ from algoritmo_plagio import generar_kgrams, generar_fingerprints, convertir_a_h
 model = SentenceTransformer('all-mpnet-base-v2')
 
 # Función de coincidencia difusa usando Levenshtein
-def fuzzy_match(code1, code2):
-    return fuzz.ratio(code1, code2)
+def levenshtein_distance(s1, s2):
+    dp = [[0] * (len(s2) + 1) for _ in range(len(s1) + 1)]
+
+    for i in range(len(s1) + 1):
+        for j in range(len(s2) + 1):
+            if i == 0:
+                dp[i][j] = j  # Insertar todas las letras de s2
+            elif j == 0:
+                dp[i][j] = i  # Eliminar todas las letras de s1
+            else:
+                cost = 0 if s1[i - 1] == s2[j - 1] else 1
+                dp[i][j] = min(dp[i - 1][j] + 1,       # Eliminación
+                               dp[i][j - 1] + 1,       # Inserción
+                               dp[i - 1][j - 1] + cost)  # Reemplazo
+    return dp[len(s1)][len(s2)]
+
+# Función para convertir la distancia de Levenshtein en una similitud (100% = idéntico)
+def levenshtein_similarity(s1, s2):
+    max_len = max(len(s1), len(s2))
+    if max_len == 0:
+        return 100
+    dist = levenshtein_distance(s1, s2)
+    return (1 - dist / max_len) * 100
+
+
 
 # Función de similitud semántica usando embeddings
 def semantic_similarity(code1, code2):
     embeddings1 = model.encode(code1)
     embeddings2 = model.encode(code2)
-    similarity = np.dot(embeddings1, embeddings2.T)
+    similarity = np.dot(embeddings1, embeddings2.T) / (np.linalg.norm(embeddings1) * np.linalg.norm(embeddings2))
+
+    #print(f"{embeddings1} vs {embeddings2}: Semantic Similarity")
+    
     return similarity
 
 # Análisis contextual para reducir falsos positivos
@@ -40,7 +66,7 @@ def comparar_pareja_archivos(file1, kGrams1, HL1, fpList1, file2, kGrams2, HL2, 
 
     # Si hay similitud suficiente, proceder con análisis más profundo
     if kgram_similarity > 0.5:
-        fuzzy_score = fuzzy_match(code1, code2)
+        fuzzy_score = levenshtein_similarity(code1, code2)
         nlp_score = semantic_similarity(code1, code2)
 
         # Ponderar los resultados

@@ -1,24 +1,30 @@
 # main.py
 
+import os
 from archivo_processing import cargar_archivos_desde_carpeta
 from algoritmo_plagio import generar_kgrams, convertir_a_hash_list, generar_fingerprints
 from comparacion import comparar_pareja_archivos
 from generar_reporte import generar_reporte_pdf
-
-import os
 
 # Función principal para ejecutar la comparación y generar el reporte
 def plagiarismCheckMultiReport(root_folder, output_filename="reporte_plagio.pdf"):
     subcarpetas_comparaciones = {}
 
     # Obtener todas las subcarpetas de la ruta base
-    subcarpetas = [d for d in os.listdir(root_folder) if os.path.isdir(os.path.join(root_folder, d))]
+    try:
+        subcarpetas = [d for d in os.listdir(root_folder) if os.path.isdir(os.path.join(root_folder, d))]
+    except FileNotFoundError:
+        print(f"La ruta especificada no existe: {root_folder}")
+        return
+    except PermissionError:
+        print(f"Permiso denegado para acceder a la ruta: {root_folder}")
+        return
 
     # Comprobar que haya subcarpetas en la ruta
     if len(subcarpetas) < 1:
         print("No se encontraron subcarpetas en la ruta.")
         return
-    
+
     # Comparar cada subcarpeta con las demás subcarpetas
     for i in range(len(subcarpetas)):
         for j in range(i + 1, len(subcarpetas)):
@@ -28,10 +34,13 @@ def plagiarismCheckMultiReport(root_folder, output_filename="reporte_plagio.pdf"
             ruta_subcarpeta1 = os.path.join(root_folder, subcarpeta1)
             ruta_subcarpeta2 = os.path.join(root_folder, subcarpeta2)
 
+            print(f"Procesando subcarpeta: {ruta_subcarpeta1}")
             archivos_procesados1 = cargar_archivos_desde_carpeta(ruta_subcarpeta1)
+            print(f"Procesando subcarpeta: {ruta_subcarpeta2}")
             archivos_procesados2 = cargar_archivos_desde_carpeta(ruta_subcarpeta2)
 
             if len(archivos_procesados1) < 1 or len(archivos_procesados2) < 1:
+                print(f"Una o ambas subcarpetas no contienen archivos válidos: {ruta_subcarpeta1}, {ruta_subcarpeta2}")
                 continue
 
             kGramData1 = []
@@ -79,7 +88,7 @@ def plagiarismCheckMultiReport(root_folder, output_filename="reporte_plagio.pdf"
 
             subcarpetas_comparaciones[f"Comparación entre {subcarpeta1} y {subcarpeta2}"] = comparaciones
 
-    # Aquí puedes generar el PDF o el reporte con la información de `subcarpetas_comparaciones`
+    # Generar el PDF o el reporte con la información de `subcarpetas_comparaciones`
     generar_reporte_pdf(subcarpetas_comparaciones, output_filename)
 
 # Llamada de la función principal
