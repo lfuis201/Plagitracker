@@ -64,6 +64,23 @@ def plagiarismCheckMultiReport(root_folder, output_filename="reporte_plagio.pdf"
                 hashLists1.append(hashL1)
                 fingerprintsList1.append(fprints1)
 
+
+                """
+
+
+                # Leer e imprimir el contenido del archivo1
+                print(f"\nContenido de {archivo1}:")
+                with open(archivo1, 'r', encoding='utf-8') as f:
+                    contenido_archivo1 = f.read()
+                    print(contenido_archivo1)
+
+                """
+
+
+
+
+
+
             # Procesar cada archivo en la segunda subcarpeta
             for archivo2, strToken2 in archivos_procesados2:
                 kGrams2 = generar_kgrams(strToken2)
@@ -73,6 +90,18 @@ def plagiarismCheckMultiReport(root_folder, output_filename="reporte_plagio.pdf"
                 kGramData2.append(kGrams2)
                 hashLists2.append(hashL2)
                 fingerprintsList2.append(fprints2)
+
+
+                """
+                print(f"\nContenido de {archivo2}:")
+                with open(archivo2, 'r', encoding='utf-8') as f:
+                    contenido_archivo2 = f.read()
+                    print(contenido_archivo2)
+                """
+
+
+
+
 
             # Comparar archivos entre sí
             for k in range(len(archivos_procesados1)):

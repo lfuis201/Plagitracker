@@ -34,16 +34,11 @@ def levenshtein_similarity(s1, s2):
     dist = levenshtein_distance(s1, s2)
     return (1 - dist / max_len) * 100
 
-
-
 # Función de similitud semántica usando embeddings
 def semantic_similarity(code1, code2):
     embeddings1 = model.encode(code1)
     embeddings2 = model.encode(code2)
     similarity = np.dot(embeddings1, embeddings2.T) / (np.linalg.norm(embeddings1) * np.linalg.norm(embeddings2))
-
-    #print(f"{embeddings1} vs {embeddings2}: Semantic Similarity")
-    
     return similarity
 
 # Análisis contextual para reducir falsos positivos
@@ -54,20 +49,31 @@ def contextual_analysis(code1, code2):
             return 0  # Descartar patrones comunes
     return 1
 
-# Modificar esta función para incluir todas las técnicas de comparación
+# Función modificada con depuración
 def comparar_pareja_archivos(file1, kGrams1, HL1, fpList1, file2, kGrams2, HL2, fpList2):
     with open(file1, "r") as f1:
-        code1 = f1.read()
+        code1 = f1.read().strip()  # Eliminar espacios y líneas en blanco
     with open(file2, "r") as f2:
-        code2 = f2.read()
+        code2 = f2.read().strip()  # Eliminar espacios y líneas en blanco
+
+    # Imprimir el contenido de los archivos antes de comparar
+    print(f"\nContenido del archivo {file1}:\n{code1}")
+    print(f"\nContenido del archivo {file2}:\n{code2}")
 
     # Primera comparación con similitud de k-grams usando Jaccard
     kgram_similarity = jaccard_similarity(fpList1, fpList2)
+
+    # Depuración de puntajes
+    print(f"Similitud Jaccard (k-grams): {kgram_similarity}")
 
     # Si hay similitud suficiente, proceder con análisis más profundo
     if kgram_similarity > 0.5:
         fuzzy_score = levenshtein_similarity(code1, code2)
         nlp_score = semantic_similarity(code1, code2)
+
+        # Depuración de puntajes
+        print(f"Similitud Levenshtein (fuzzy matching): {fuzzy_score}")
+        print(f"Similitud Semántica (NLP): {nlp_score}")
 
         # Ponderar los resultados
         combined_score = (0.4 * kgram_similarity) + (0.3 * fuzzy_score / 100) + (0.3 * nlp_score)
