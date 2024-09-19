@@ -15,7 +15,7 @@ namespace PlagiTracker.Services.SeleniumServices
     internal class Web_Scraping
     {
         private IWebDriver driver;
-
+        //Constructor de la clase Web_Scraping que inicializa el driver de Chrome con las opciones necesarias para el scraping
         public Web_Scraping()
         {
             var chromeDriverService = ChromeDriverService.CreateDefaultService(@"C:\Users\Luis\Downloads\Chrome Selenium\chromedriver-win64 (2)\chromedriver-win64");
@@ -31,7 +31,7 @@ namespace PlagiTracker.Services.SeleniumServices
 
             driver = new ChromeDriver(chromeDriverService, options);
         }
-
+        //Funcion que verifica si la url es valida para el scraping para evitar errores
         private async Task<bool> UrlExists(string url)
         {
             try
@@ -47,13 +47,12 @@ namespace PlagiTracker.Services.SeleniumServices
                 return false;
             }
         }
-
+        //Funcion que verifica si la url es de codiva
         public bool IsCodivaUrl(string url)
         {
-            // Verifica si la URL contiene "codiva.io"
             return url.Contains("codiva.io");
         }
-
+        //Funcion que inicia el scraping de las urls proporcionadas y guarda los datos en un archivo jsoN (Esto es de prueba solo para ver como bota el JSON)
         public async Task StartScraping(List<string> urls)
         {
             Stopwatch sw = new Stopwatch();
@@ -79,7 +78,6 @@ namespace PlagiTracker.Services.SeleniumServices
                         continue;
                     }
 
-                    // Si la URL es válida y es de Codiva, proceder con el scraping
                     driver.Navigate().GoToUrl(url);
                     Thread.Sleep(1400);
 
@@ -107,7 +105,6 @@ namespace PlagiTracker.Services.SeleniumServices
                         Console.WriteLine($"Scraping terminado para {className}");
                     }
 
-                    // Añadir los datos solo si se obtuvieron archivos de código
                     if (studentFiles.Count > 0)
                     {
                         jsonData[studentId] = studentFiles;
@@ -140,12 +137,14 @@ namespace PlagiTracker.Services.SeleniumServices
             }
         }
     }
-
+    //Clase que se encarga de generar el scraping
     internal class Program
     {
+        
         static async Task Main(string[] args)
         {
             //Falta solucionar que cuando encuentre una url que no es no genere su json vacio
+            //Funcion que inicia el scraping de las urls proporcionadas y guarda los datos en un archivo jsoN (Esto es de prueba solo para ver como bota el JSON)
             Web_Scraping scraper = new Web_Scraping();
             List<string> urls = new List<string>
             {
