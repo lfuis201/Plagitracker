@@ -3,6 +3,7 @@ using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Requests;
 using PlagiTracker.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using PlagiTracker.Services.SeleniumServices;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
@@ -34,6 +35,38 @@ namespace PlagiTracker.WebAPI.Controllers
 
             await _context.SaveChangesAsync();
             return Ok(id);
+        }
+
+        [HttpPost]
+        [Route("Start")]
+        public async Task<ActionResult> Start(List<string> urls)
+        {
+            PlagiTracker.Services.SeleniumServices.Web_Scraping scraper = new Web_Scraping();
+            
+            List<string> urls2 = new List<string>
+            {
+                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
+                "https://www.invalid-url.com",
+                "https://www.youtube.com/watch?v=TpNDSyDnUwc",
+                "https://www.codiva.io/p/valid-url",
+                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
+                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
+                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
+                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
+                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
+                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
+                "https://classroom.google.com/c/NzA0MDM0NzM0MzYy",
+                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
+                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
+                "https://chatgpt.com/c/66e8b455-d26c-8005-90e1-7fbb273e3801",
+                "https://classroom.google.com/c/NzA0MDM0NzM0MzYy",
+                "https://www.fundeu.es/recomendacion/colaboracion-posible-alternativa-a-featuring/",
+
+            };
+
+            var data = await scraper.StartScraping(urls2);
+
+            return Ok(data);
         }
 
         [HttpGet]

@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PlagiTracker.Data\PlagiTracker.Data.csproj" />
+    <ProjectReference Include="..\PlagiTracker.Services\PlagiTracker.Services.csproj" />
   </ItemGroup>
 
 </Project>
