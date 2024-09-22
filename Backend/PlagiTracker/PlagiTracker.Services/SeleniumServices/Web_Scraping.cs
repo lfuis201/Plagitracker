@@ -32,7 +32,7 @@ namespace PlagiTracker.Services.SeleniumServices
             driver = new ChromeDriver(chromeDriverService, options);
         }
         //Funcion que verifica si la url es valida para el scraping para evitar errores
-        private async Task<bool> UrlExists(string url)
+        public async Task<bool> UrlExists(string url)
         {
             try
             {
@@ -60,6 +60,12 @@ namespace PlagiTracker.Services.SeleniumServices
 
             var jsonData = new Dictionary<string, List<Dictionary<string, string>>>();
 
+            // Contenidos que deseas ignorar (puedes ajustarlo si encuentras más casos similares)
+            var ignorePatterns = new List<string>
+    {
+        "System.out.println(\"Hello Codiva\");"
+    };
+
             try
             {
                 foreach (var url in urls)
@@ -79,10 +85,10 @@ namespace PlagiTracker.Services.SeleniumServices
                     }
 
                     driver.Navigate().GoToUrl(url);
-                    Thread.Sleep(1400);
+                    Thread.Sleep(1000);
 
                     var labels = driver.FindElements(By.XPath("//label[starts-with(@for, 'tab-java-')]"));
-                    string studentId =Guid.NewGuid().ToString(); 
+                    string studentId = Guid.NewGuid().ToString(); // Usarás el identificador correcto para cada alumno
 
                     var studentFiles = new List<Dictionary<string, string>>();
 
@@ -92,8 +98,19 @@ namespace PlagiTracker.Services.SeleniumServices
                         var tabElement = driver.FindElement(By.XPath($"//label[@title='{className}']"));
                         tabElement.Click();
 
+                        // Esperar un poco para asegurar que el contenido se haya actualizado
+                        Thread.Sleep(1000);
+
                         var codeElements = driver.FindElements(By.XPath("//div[contains(@class,'CodeMirror-code')]//pre"));
-                        string codeContent = string.Join("\n", codeElements.Select(e => e.Text));
+                        string codeContent = string.Join("\n", codeElements.Select(e => e.Text).Select(c => c.Trim()));
+
+                        // Comprobar si el contenido contiene patrones que debemos ignorar
+                        bool containsIgnoredPattern = ignorePatterns.Any(pattern => codeContent.Contains(pattern));
+                        if (containsIgnoredPattern)
+                        {
+                            Console.WriteLine($"Archivo {className}.java ignorado debido a contenido irrelevante.");
+                            continue; // Omitir este archivo y continuar con el siguiente
+                        }
 
                         var fileData = new Dictionary<string, string>
                 {
@@ -105,6 +122,7 @@ namespace PlagiTracker.Services.SeleniumServices
                         Console.WriteLine($"Scraping terminado para {className}");
                     }
 
+                    // Añadir los datos solo si se obtuvieron archivos de código
                     if (studentFiles.Count > 0)
                     {
                         jsonData[studentId] = studentFiles;
@@ -136,8 +154,10 @@ namespace PlagiTracker.Services.SeleniumServices
                 driver.Quit();
             }
         }
+
+
     }
-    //Clase que se encarga de generar el scraping
+    
     internal class Program
     {
         
