@@ -1,28 +1,29 @@
 {
   "format": 1,
   "restore": {
-    "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Services\\PlagiTracker.Services.csproj": {}
+    "D:\\PlagiTrackers\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Services\\PlagiTracker.Services.csproj": {}
   },
   "projects": {
-    "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Services\\PlagiTracker.Services.csproj": {
+    "D:\\PlagiTrackers\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Services\\PlagiTracker.Services.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Services\\PlagiTracker.Services.csproj",
+        "projectUniqueName": "D:\\PlagiTrackers\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Services\\PlagiTracker.Services.csproj",
         "projectName": "PlagiTracker.Services",
-        "projectPath": "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Services\\PlagiTracker.Services.csproj",
-        "packagesPath": "C:\\Users\\Death Knight\\.nuget\\packages\\",
-        "outputPath": "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Services\\obj\\",
+        "projectPath": "D:\\PlagiTrackers\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Services\\PlagiTracker.Services.csproj",
+        "packagesPath": "C:\\Users\\Luis\\.nuget\\packages\\",
+        "outputPath": "D:\\PlagiTrackers\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Services\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Death Knight\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Luis\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "https://api.nuget.org/v3/index.json": {},
-          "https://contoso.com/packages/": {}
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
@@ -44,6 +45,36 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
+          "dependencies": {
+            "Selenium.Support": {
+              "target": "Package",
+              "version": "[4.24.0, )"
+            },
+            "Selenium.WebDriver": {
+              "target": "Package",
+              "version": "[4.24.0, )"
+            },
+            "Selenium.WebDriver.ChromeDriver": {
+              "target": "Package",
+              "version": "[128.0.6613.13700, )"
+            },
+            "SeleniumExtras.WaitHelpers": {
+              "target": "Package",
+              "version": "[1.0.2, )"
+            },
+            "iTextSharp": {
+              "target": "Package",
+              "version": "[5.5.13.4, )"
+            },
+            "itext": {
+              "target": "Package",
+              "version": "[8.0.5, )"
+            },
+            "itext7": {
+              "target": "Package",
+              "version": "[8.0.5, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -60,7 +91,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.205/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
