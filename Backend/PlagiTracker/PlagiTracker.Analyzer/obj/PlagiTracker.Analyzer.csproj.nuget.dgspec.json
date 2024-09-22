@@ -1,15 +1,15 @@
 {
   "format": 1,
   "restore": {
-    "E:\\UNI\\semester-9\\Configuration and Change Management\\plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj": {}
+    "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj": {}
   },
   "projects": {
-    "E:\\UNI\\semester-9\\Configuration and Change Management\\plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj": {
+    "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\UNI\\semester-9\\Configuration and Change Management\\plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj",
+        "projectUniqueName": "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj",
         "projectName": "PlagiTracker.Analyzer",
-        "projectPath": "E:\\UNI\\semester-9\\Configuration and Change Management\\plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj",
+        "projectPath": "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj",
         "packagesPath": "C:\\Users\\Death Knight\\.nuget\\packages\\",
         "outputPath": "E:\\UNI\\semester-9\\Configuration and Change Management\\plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\obj\\",
         "projectStyle": "PackageReference",

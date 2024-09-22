@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium.Chrome;
+﻿using OpenQA.Selenium.Firefox;
+using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium;
 using System.Diagnostics;
 using PlagiTracker.Services.Reportes;
@@ -12,24 +13,27 @@ using Newtonsoft.Json;
 
 namespace PlagiTracker.Services.SeleniumServices
 {
-    internal class Web_Scraping
+    public class Web_Scraping
     {
         private IWebDriver driver;
-        //Constructor de la clase Web_Scraping que inicializa el driver de Chrome con las opciones necesarias para el scraping
+
+        /// <summary>
+        /// Constructor de la clase Web_Scraping que inicializa el driver de Chrome con las opciones necesarias para el scraping
+        /// </summary>
         public Web_Scraping()
         {
-            var chromeDriverService = ChromeDriverService.CreateDefaultService(@"C:\Users\Luis\Downloads\Chrome Selenium\chromedriver-win64 (2)\chromedriver-win64");
-            chromeDriverService.HideCommandPromptWindow = false;
-            var options = new ChromeOptions();
+            //var chromeDriverService = FirefoxDriverService.CreateDefaultService(@"C:\Users\Luis\Downloads\Chrome Selenium\chromedriver-win64 (2)\chromedriver-win64");
+            //chromeDriverService.HideCommandPromptWindow = false;
+            var options = new FirefoxOptions();
 
             options.AddArgument("--disable-usb");
             options.AddArgument("--headless");
 
             options.AddArgument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
-            options.AddExcludedArgument("enable-automation");
+            //options.AddExcludedArgument("enable-automation");
             options.AddAdditionalOption("useAutomationExtension", false);
 
-            driver = new ChromeDriver(chromeDriverService, options);
+            driver = new FirefoxDriver(options);
         }
         //Funcion que verifica si la url es valida para el scraping para evitar errores
         public async Task<bool> UrlExists(string url)
@@ -52,8 +56,12 @@ namespace PlagiTracker.Services.SeleniumServices
         {
             return url.Contains("codiva.io");
         }
-        //Funcion que inicia el scraping de las urls proporcionadas y guarda los datos en un archivo jsoN (Esto es de prueba solo para ver como bota el JSON)
-        public async Task StartScraping(List<string> urls)
+        /// <summary>
+        /// Funcion que inicia el scraping de las urls proporcionadas y guarda los datos en un archivo jsoN (Esto es de prueba solo para ver como bota el JSON)
+        /// </summary>
+        /// <param name="urls">asdasd</param>
+        /// <returns>asdasdasd</returns>
+        public async Task<Dictionary<string, List<Dictionary<string, string>>>> StartScraping(List<string> urls)
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -132,10 +140,10 @@ namespace PlagiTracker.Services.SeleniumServices
 
                 if (jsonData.Count > 0)
                 {
-                    string jsonOutput = JsonConvert.SerializeObject(jsonData, Formatting.Indented);
-                    string jsonFilePath = @"D:\WS Text\Codigo\codigos.json";
-                    File.WriteAllText(jsonFilePath, jsonOutput);
-                    Console.WriteLine($"Datos guardados en formato JSON en: {jsonFilePath}");
+                    //string jsonOutput = JsonConvert.SerializeObject(jsonData, Formatting.Indented);
+                    //string jsonFilePath = @"D:\WS Text\Codigo\codigos.json";
+                    //File.WriteAllText(jsonFilePath, jsonOutput);
+                    //Console.WriteLine($"Datos guardados en formato JSON en: {jsonFilePath}");
                 }
                 else
                 {
@@ -152,7 +160,9 @@ namespace PlagiTracker.Services.SeleniumServices
             finally
             {
                 driver.Quit();
+                
             }
+            return jsonData;
         }
 
 
