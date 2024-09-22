@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PlagiTracker.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class AllEntitiesAdded : Migration
+    public partial class CreateAllEntities : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -27,19 +27,6 @@ namespace PlagiTracker.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Courses",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: false),
-                    TeacherId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Courses", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Enrollments",
                 columns: table => new
                 {
@@ -52,26 +39,12 @@ namespace PlagiTracker.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Students",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    FirstName = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
-                    LastName = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
-                    Email = table.Column<string>(type: "character varying(35)", maxLength: 35, nullable: false),
-                    PasswordHash = table.Column<byte[]>(type: "bytea", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Students", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Submissions",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Url = table.Column<string>(type: "text", nullable: false),
+                    SubmissionDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     StudentId = table.Column<Guid>(type: "uuid", nullable: false),
                     AssignmentId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
@@ -81,18 +54,74 @@ namespace PlagiTracker.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Teachers",
+                name: "Users",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     FirstName = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                     LastName = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                     Email = table.Column<string>(type: "character varying(35)", maxLength: 35, nullable: false),
-                    PasswordHash = table.Column<byte[]>(type: "bytea", nullable: false)
+                    PasswordHash = table.Column<byte[]>(type: "bytea", nullable: false),
+                    LogInAttempts = table.Column<int>(type: "integer", nullable: false),
+                    IsLocked = table.Column<bool>(type: "boolean", nullable: false),
+                    UnlockDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Students",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Students", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Students_Users_Id",
+                        column: x => x.Id,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Teachers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Teachers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Teachers_Users_Id",
+                        column: x => x.Id,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Courses",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: false),
+                    TeacherId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Courses", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Courses_Teachers_TeacherId",
+                        column: x => x.TeacherId,
+                        principalTable: "Teachers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -102,22 +131,9 @@ namespace PlagiTracker.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Courses_Name",
+                name: "IX_Courses_TeacherId",
                 table: "Courses",
-                column: "Name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Students_Email",
-                table: "Students",
-                column: "Email",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Students_FirstName_LastName",
-                table: "Students",
-                columns: new[] { "FirstName", "LastName" },
-                unique: true);
+                column: "TeacherId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Submissions_Url",
@@ -126,8 +142,8 @@ namespace PlagiTracker.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Teachers_Email",
-                table: "Teachers",
+                name: "IX_Users_Email",
+                table: "Users",
                 column: "Email",
                 unique: true);
         }
@@ -152,6 +168,9 @@ namespace PlagiTracker.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Teachers");
+
+            migrationBuilder.DropTable(
+                name: "Users");
         }
     }
 }

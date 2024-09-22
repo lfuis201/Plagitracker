@@ -29,5 +29,11 @@ namespace PlagiTracker.Data.Entities
 
         [Required]
         public Guid AssignmentId { get; set; }
+
+        [ForeignKey(nameof(StudentId))]
+        public virtual Student? Student { get; set; }
+
+        [ForeignKey(nameof(AssignmentId))]
+        public virtual Assignment? Assignment { get; set; }
     }
 }

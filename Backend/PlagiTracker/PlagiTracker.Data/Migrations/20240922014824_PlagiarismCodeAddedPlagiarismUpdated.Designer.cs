@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PlagiTracker.Data.DataAccess;
@@ -11,9 +12,11 @@ using PlagiTracker.Data.DataAccess;
 namespace PlagiTracker.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240922014824_PlagiarismCodeAddedPlagiarismUpdated")]
+    partial class PlagiarismCodeAddedPlagiarismUpdated
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,8 +47,6 @@ namespace PlagiTracker.Data.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CourseId");
 
                     b.HasIndex("Title")
                         .IsUnique();
@@ -245,17 +246,6 @@ namespace PlagiTracker.Data.Migrations
                     b.HasBaseType("PlagiTracker.Data.Entities.User");
 
                     b.ToTable("Teachers", (string)null);
-                });
-
-            modelBuilder.Entity("PlagiTracker.Data.Entities.Assignment", b =>
-                {
-                    b.HasOne("PlagiTracker.Data.Entities.Course", "Course")
-                        .WithMany()
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("PlagiTracker.Data.Entities.Code", b =>

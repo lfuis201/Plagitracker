@@ -12,8 +12,8 @@ using PlagiTracker.Data.DataAccess;
 namespace PlagiTracker.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240915051946_AllEntitiesAdded")]
-    partial class AllEntitiesAdded
+    [Migration("20240921235128_CreateAllEntities")]
+    partial class CreateAllEntities
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,8 +38,7 @@ namespace PlagiTracker.Data.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("character varying(250)");
 
-                    b.Property<DateTime?>("SubmissionDate")
-                        .IsRequired()
+                    b.Property<DateTime>("SubmissionDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Title")
@@ -71,8 +70,7 @@ namespace PlagiTracker.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasIndex("TeacherId");
 
                     b.ToTable("Courses");
                 });
@@ -90,42 +88,6 @@ namespace PlagiTracker.Data.Migrations
                     b.ToTable("Enrollments");
                 });
 
-            modelBuilder.Entity("PlagiTracker.Data.Entities.Student", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(35)
-                        .HasColumnType("character varying(35)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("character varying(40)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("character varying(40)");
-
-                    b.Property<byte[]>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.HasIndex("FirstName", "LastName")
-                        .IsUnique();
-
-                    b.ToTable("Students");
-                });
-
             modelBuilder.Entity("PlagiTracker.Data.Entities.Submission", b =>
                 {
                     b.Property<Guid>("Id")
@@ -137,6 +99,9 @@ namespace PlagiTracker.Data.Migrations
 
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uuid");
+
+                    b.Property<DateTime>("SubmissionDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Url")
                         .IsRequired()
@@ -150,7 +115,7 @@ namespace PlagiTracker.Data.Migrations
                     b.ToTable("Submissions");
                 });
 
-            modelBuilder.Entity("PlagiTracker.Data.Entities.Teacher", b =>
+            modelBuilder.Entity("PlagiTracker.Data.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -166,21 +131,78 @@ namespace PlagiTracker.Data.Migrations
                         .HasMaxLength(40)
                         .HasColumnType("character varying(40)");
 
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(40)
                         .HasColumnType("character varying(40)");
 
+                    b.Property<int>("LogInAttempts")
+                        .HasColumnType("integer");
+
                     b.Property<byte[]>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("bytea");
+
+                    b.Property<DateTime>("UnlockDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Teachers");
+                    b.ToTable("Users");
+
+                    b.UseTptMappingStrategy();
+                });
+
+            modelBuilder.Entity("PlagiTracker.Data.Entities.Student", b =>
+                {
+                    b.HasBaseType("PlagiTracker.Data.Entities.User");
+
+                    b.ToTable("Students", (string)null);
+                });
+
+            modelBuilder.Entity("PlagiTracker.Data.Entities.Teacher", b =>
+                {
+                    b.HasBaseType("PlagiTracker.Data.Entities.User");
+
+                    b.ToTable("Teachers", (string)null);
+                });
+
+            modelBuilder.Entity("PlagiTracker.Data.Entities.Course", b =>
+                {
+                    b.HasOne("PlagiTracker.Data.Entities.Teacher", null)
+                        .WithMany("Courses")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PlagiTracker.Data.Entities.Student", b =>
+                {
+                    b.HasOne("PlagiTracker.Data.Entities.User", null)
+                        .WithOne()
+                        .HasForeignKey("PlagiTracker.Data.Entities.Student", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PlagiTracker.Data.Entities.Teacher", b =>
+                {
+                    b.HasOne("PlagiTracker.Data.Entities.User", null)
+                        .WithOne()
+                        .HasForeignKey("PlagiTracker.Data.Entities.Teacher", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PlagiTracker.Data.Entities.Teacher", b =>
+                {
+                    b.Navigation("Courses");
                 });
 #pragma warning restore 612, 618
         }

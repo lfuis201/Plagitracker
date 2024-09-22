@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PlagiTracker.Data.DataAccess;
@@ -11,9 +12,11 @@ using PlagiTracker.Data.DataAccess;
 namespace PlagiTracker.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240922001755_PlagiarismAndCodeAdded")]
+    partial class PlagiarismAndCodeAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,8 +47,6 @@ namespace PlagiTracker.Data.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CourseId");
 
                     b.HasIndex("Title")
                         .IsUnique();
@@ -92,17 +93,9 @@ namespace PlagiTracker.Data.Migrations
                     b.Property<Guid>("TeacherId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("TeacherId1")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("TeacherId2")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
                     b.HasIndex("TeacherId");
-
-                    b.HasIndex("TeacherId1");
 
                     b.ToTable("Courses");
                 });
@@ -134,28 +127,19 @@ namespace PlagiTracker.Data.Migrations
                     b.Property<double>("Similarity")
                         .HasColumnType("double precision");
 
+                    b.Property<Guid>("SubmissionId1")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SubmissionId2")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("SubmissionId1");
+
+                    b.HasIndex("SubmissionId2");
+
                     b.ToTable("Plagiarisms");
-                });
-
-            modelBuilder.Entity("PlagiTracker.Data.Entities.PlagiarismCode", b =>
-                {
-                    b.Property<Guid>("PlagiarismId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CodeId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("CodeSnippet")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("PlagiarismId", "CodeId");
-
-                    b.HasIndex("CodeId");
-
-                    b.ToTable("PlagiarismCodes");
                 });
 
             modelBuilder.Entity("PlagiTracker.Data.Entities.Submission", b =>
@@ -178,10 +162,6 @@ namespace PlagiTracker.Data.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AssignmentId");
-
-                    b.HasIndex("StudentId");
 
                     b.HasIndex("Url")
                         .IsUnique();
@@ -247,17 +227,6 @@ namespace PlagiTracker.Data.Migrations
                     b.ToTable("Teachers", (string)null);
                 });
 
-            modelBuilder.Entity("PlagiTracker.Data.Entities.Assignment", b =>
-                {
-                    b.HasOne("PlagiTracker.Data.Entities.Course", "Course")
-                        .WithMany()
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Course");
-                });
-
             modelBuilder.Entity("PlagiTracker.Data.Entities.Code", b =>
                 {
                     b.HasOne("PlagiTracker.Data.Entities.Submission", "Submission")
@@ -276,12 +245,6 @@ namespace PlagiTracker.Data.Migrations
                         .HasForeignKey("TeacherId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("PlagiTracker.Data.Entities.Teacher", "Teacher")
-                        .WithMany()
-                        .HasForeignKey("TeacherId1");
-
-                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("PlagiTracker.Data.Entities.Enrollment", b =>
@@ -303,42 +266,23 @@ namespace PlagiTracker.Data.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("PlagiTracker.Data.Entities.PlagiarismCode", b =>
+            modelBuilder.Entity("PlagiTracker.Data.Entities.Plagiarism", b =>
                 {
-                    b.HasOne("PlagiTracker.Data.Entities.Code", "Code")
+                    b.HasOne("PlagiTracker.Data.Entities.Submission", "Submission1")
                         .WithMany()
-                        .HasForeignKey("CodeId")
+                        .HasForeignKey("SubmissionId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlagiTracker.Data.Entities.Plagiarism", "Plagiarism")
+                    b.HasOne("PlagiTracker.Data.Entities.Submission", "Submission2")
                         .WithMany()
-                        .HasForeignKey("PlagiarismId")
+                        .HasForeignKey("SubmissionId2")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Code");
+                    b.Navigation("Submission1");
 
-                    b.Navigation("Plagiarism");
-                });
-
-            modelBuilder.Entity("PlagiTracker.Data.Entities.Submission", b =>
-                {
-                    b.HasOne("PlagiTracker.Data.Entities.Assignment", "Assignment")
-                        .WithMany()
-                        .HasForeignKey("AssignmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PlagiTracker.Data.Entities.Student", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Assignment");
-
-                    b.Navigation("Student");
+                    b.Navigation("Submission2");
                 });
 
             modelBuilder.Entity("PlagiTracker.Data.Entities.Student", b =>
