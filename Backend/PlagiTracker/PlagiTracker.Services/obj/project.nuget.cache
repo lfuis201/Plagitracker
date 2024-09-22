@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "iPPas+xh00YpEJcURuh08sb0/E2XAKYkrPoPc04e7JcEA5KQFPmen8GZHtfrrtiMOekqNKi+UiVMRGgTKq8GvQ==",
+  "dgSpecHash": "/snI8FOU/eOVa6xq1uesguPxDC09ec8/cBqieZ+dhL38Yq1KLLF0EWAWX2LHPY9HY6LLoQlDk1XT2V4oyTrG3w==",
   "success": true,
-  "projectFilePath": "E:\\UNI\\semester-9\\Configuration and Change Management\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Services\\PlagiTracker.Services.csproj",
+  "projectFilePath": "E:\\UNI\\semester-9\\Configuration and Change Management\\plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Services\\PlagiTracker.Services.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }
