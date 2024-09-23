@@ -2,23 +2,23 @@
 
 import SignupView from "@/views/Student/auth/SignupView.vue";
 import SigninView from "@/views/Student/auth/SigninView.vue";
-const authStudentRouters = [
+const authStudentRoutes = [
   {
     path: '/student/auth/signin',
-    name: 'signin',
+    name: 'studentsignin',
     component: SigninView,
     meta: {
-      title: 'Signin',
+      title: 'StudentSignin',
     },
   },
   {
     path: '/student/auth/signup',
-    name: 'signup',
+    name: 'studentsignup',
     component: SignupView,
     meta: {
-      title: 'Signup',
+      title: 'StudentSignup',
     },
   },
 ];
 
-export default authStudentRouters;
+export default authStudentRoutes;

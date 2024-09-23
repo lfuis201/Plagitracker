@@ -30,7 +30,7 @@ const menuGroups = ref([
                     fill=""
                   />
                 </svg>`,
-        label: 'Cursos',
+        label: 'Courses',
         route: '/teacher/courses'
       },
       {

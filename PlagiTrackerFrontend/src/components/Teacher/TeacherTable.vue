@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-const props = defineProps({
-  
-})
+
 
 //Poner datos del teacher oLGER
 const packages = ref([

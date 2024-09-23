@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { onClickOutside } from '@vueuse/core'
-import { ref } from 'vue'
+import { useTeacherStore } from '@/stores/teacher/teacherStore';
+import { computed, ref } from 'vue'
 
 const target = ref(null)
 const dropdownOpen = ref(false)
+const store = useTeacherStore();
+const teacher = computed(() => store.getTeacher);
 
 onClickOutside(target, () => {
   dropdownOpen.value = false
@@ -18,7 +21,7 @@ onClickOutside(target, () => {
       @click.prevent="dropdownOpen = !dropdownOpen"
     >
       <span class="hidden text-right lg:block">
-        <span class="block text-sm font-medium text-black dark:text-white">Thomas Anree</span>
+        <span class="block text-sm font-medium text-black dark:text-white">{{ teacher?.firstName }}</span>
         <span class="block text-xs font-medium">UX Designer</span>
       </span>
 

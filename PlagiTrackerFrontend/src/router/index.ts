@@ -1,8 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import authRoutes from './auth/authRoutes'
-import authTeacherRoutes from './teacher/auth/authTeacherRoutes'
-import authStudentRouters from './student/auth/authStudentRouters'
-import coursesRoutes from './courses/coursesRoutes'
+import assigmentsRoutes from './student/assigments/assigmentsRoutes'
+import coursesRoutes from './teacher/courses/coursesRoutes'
 import CalendarView from '@/views/CalendarView.vue'
 import BasicChartView from '@/views/Charts/BasicChartView.vue'
 import ECommerceView from '@/views/Dashboard/ECommerceView.vue'
@@ -97,6 +96,7 @@ const routes = [
   },
   ...authRoutes,
   ...coursesRoutes,
+  ...assigmentsRoutes,
 
 ]
 

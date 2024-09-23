@@ -1,44 +1,55 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import FullScreenLayout from '@/layouts/FullScreenLayout.vue'
-import DefaultAuthCard from '@/components/Auths/DefaultAuthCard.vue'
-import InputGroup from '@/components/Auths/InputGroup.vue'
-
-import { encrypt, decrypt } from '@/utils/cryptoUtils';
+import { ref } from 'vue';
+import FullScreenLayout from '@/layouts/FullScreenLayout.vue';
+import DefaultAuthCard from '@/components/Auths/DefaultAuthCard.vue';
+import InputGroup from '@/components/Auths/InputGroup.vue';
+import { encrypt } from '@/utils/cryptoUtils';
 import type { Teacher } from '@/types/Teacher';
 import TeacherService from '@/services/TeacherService';
-
+import { TeacherSchema } from '@/schemas/teacherSchema'; 
+import { z } from 'zod';
 
 const teacher = ref<Teacher>({
-  firstName: 'asdasd',
-  lastName: 'asdasd',
-  email: 'lmamania@ulasalle.edu.pe',
+  firstName: '',
+  lastName: '',
+  email: '',
   passwordHash: ''
-})
-// Para manejar la confirmación de la contraseña sin encriptar
-const password = ref<string>('emerson'); 
-const confirmPassword = ref<string>('emerson');
+});
+const password = ref<string>('');
+const confirmPassword = ref<string>('');
+const errors = ref<{ [key: string]: string }>({}); // Objeto para manejar errores
 
 const handleSubmit = async (event: Event) => {
   event.preventDefault();
-
-  if (password.value !== confirmPassword.value) {
-    alert('Passwords do not match!');
-    return;
-  }
+  errors.value = {}; // Resetear errores
 
   try {
-    // Encriptar la contraseña antes de enviar
-    const encryptedPassword = encrypt(password.value || '');
-    
-    teacher.value.passwordHash=encryptedPassword;
-    console.log(teacher)
-    // Registrar al profesor con los datos
-    await TeacherService.registerTeacher(teacher.value);
+    // Validar todos los campos
+    TeacherSchema.parse({
+      ...teacher.value,
+      passwordHash: password.value
+    });
 
+    // Validar contraseñas
+    if (password.value !== confirmPassword.value) {
+      errors.value.confirmPassword = 'Passwords do not match!';
+      return;
+    }
+
+    // Encriptar la contraseña
+    teacher.value.passwordHash = encrypt(password.value);
+    
+    // Registrar al profesor
+    await TeacherService.registerTeacher(teacher.value);
     alert('Teacher registered successfully!');
   } catch (error) {
-    alert('Error registering teacher. Please try again.');
+    if (error instanceof z.ZodError) {
+      error.errors.forEach(err => {
+        errors.value[err.path[0]] = err.message; // Guardar el mensaje de error en el objeto
+      });
+    } else {
+      alert('Error registering teacher. Please try again.');
+    }
   }
 };
 </script>
@@ -68,6 +79,7 @@ const handleSubmit = async (event: Event) => {
             </g>
           </svg>
         </InputGroup>
+        <div v-if="errors.firstName" class="text-red-500 mb-2">{{ errors.firstName }}</div>
 
         <InputGroup v-model="teacher.lastName" label="Last Name" type="text" placeholder="Enter your Last Name">
           <svg
@@ -90,6 +102,7 @@ const handleSubmit = async (event: Event) => {
             </g>
           </svg>
         </InputGroup>
+        <div v-if="errors.lastName" class="text-red-500 mb-2">{{ errors.lastName }}</div>
 
         <InputGroup v-model="teacher.email" label="Email" type="email" placeholder="Enter your email">
           <svg
@@ -108,8 +121,9 @@ const handleSubmit = async (event: Event) => {
             </g>
           </svg>
         </InputGroup>
+        <div v-if="errors.email" class="text-red-500 mb-2">{{ errors.email }}</div>
 
-        <InputGroup v-model="password" label="Password" type="password" placeholder="Enter your password">
+        <InputGroup v-model="password" label="Password" type="password" placeholder="6+ Characters, 1 Capital letter" >
           <svg
             class="fill-current"
             width="22"
@@ -152,6 +166,9 @@ const handleSubmit = async (event: Event) => {
             </g>
           </svg>
         </InputGroup>
+        <div v-if="password !== confirmPassword" class="text-red mb-2">Passwords do not match!</div>
+
+        
 
         <div class="mb-5 mt-6">
           <input

@@ -15,6 +15,7 @@ class TeacherService {
    */
   static async registerTeacher(teacher: Teacher): Promise<any> {
     try {
+      // Envía el objeto Teacher completo en el cuerpo de la solicitud
       const response = await axiosInstance.post(`${API_ENDPOINT}/SignUp`, teacher);
       return response.data;
     } catch (error) {

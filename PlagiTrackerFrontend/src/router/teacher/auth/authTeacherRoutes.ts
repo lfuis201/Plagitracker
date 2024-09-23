@@ -6,18 +6,18 @@ import SignupView from '@/views/Teacher/auth/SignupView.vue';
 const authTeacherRoutes = [
   {
     path: '/teacher/auth/signin',
-    name: 'signin',
+    name: 'teachersignin',
     component: SigninView,
     meta: {
-      title: 'Signin',
+      title: 'TeacherSignin',
     },
   },
   {
     path: '/teacher/auth/signup',
-    name: 'signup',
+    name: 'teachersignup',
     component: SignupView,
     meta: {
-      title: 'Signup',
+      title: 'TeacherSignup',
     },
   },
 ];

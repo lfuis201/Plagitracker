@@ -2,7 +2,8 @@
 
 import SigninView from '@/views/Authentication/SigninView.vue';
 import SignupView from '@/views/Authentication/SignupView.vue';
-
+import authTeacherRoutes from '../teacher/auth/authTeacherRoutes';
+import authStudentRoutes from '../student/auth/authStudentRoutes';
 const authRoutes = [
   {
     path: '/auth/signin',
@@ -20,6 +21,9 @@ const authRoutes = [
       title: 'Signup',
     },
   },
+  ...authTeacherRoutes,
+  ...authStudentRoutes
 ];
+
 
 export default authRoutes;
