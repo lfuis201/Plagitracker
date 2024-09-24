@@ -15,7 +15,7 @@
               required
             />
           </div>
-         
+
           <button
             type="submit"
             class="mt-4 block w-full rounded bg-blue-500 p-3 text-white hover:bg-blue-600"
@@ -23,7 +23,6 @@
             Create Course
           </button>
         </form>
-   
       </template>
     </ModalLayout>
   </div>
@@ -32,7 +31,8 @@
 <script setup lang="ts">
 import { ref, defineEmits, defineProps } from 'vue'
 import ModalLayout from '@/layouts/ModalLayout.vue'
-import Course from '@/components/Courses/Course.vue'
+import { useUserStore } from '@/stores/userStore' // Importa el store
+import CourseService from '@/services/CourseService' // Asegúrate de importar el servicio
 // Definir las propiedades que el componente recibe del padre
 const props = defineProps({
   modalOpen: Boolean
@@ -42,11 +42,20 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 // Estado para el curso
-const course = ref<Course>({
-  id: '',
+const course = ref({
+  id: '', // Este se puede dejar vacío, ya que lo genera el servidor
   name: '',
-  teacherId: ''
+  teacherId: '' // Este se llenará con el ID del usuario
 })
+
+// Inicializa el store
+const userStore = useUserStore()
+const user = userStore.getUser // Obtiene el usuario del store
+
+// Asigna el teacherId al curso
+if (user) {
+  course.value.teacherId = user.id // Asegúrate de que el ID del usuario esté disponible
+}
 
 // Función para cerrar el modal y emitir el evento 'close'
 const handleClose = () => {
@@ -54,20 +63,18 @@ const handleClose = () => {
 }
 
 // Función para manejar el envío del formulario
-const handleSubmit = () => {
-  // Generar un ID único para el curso
-  course.value.id = generateUniqueId()
-  console.log('Course Created:', course.value)
-  // Opcional: cerrar el modal después de crear el curso
-  handleClose()
-}
-
-// Función para generar un ID único (puedes adaptarla según tus necesidades)
-const generateUniqueId = () => {
-  return 'course-' + Math.random().toString(36).substr(2, 9)
+const handleSubmit = async () => {
+  try {
+    // Crea el curso usando el servicio
+    const createdCourse = await CourseService.createCourse(course.value)
+    console.log('Course Created:', createdCourse)
+ 
+  } catch (error) {
+    console.error('Error creating course:', error)
+  }
 }
 </script>
 
 <style scoped>
-/* Estilos opcionales adicionales */
+
 </style>

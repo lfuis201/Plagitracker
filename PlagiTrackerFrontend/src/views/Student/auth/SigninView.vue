@@ -99,8 +99,8 @@ const handleSubmit = async (event: Event) => {
             class="relative w-full flex items-center justify-center cursor-pointer rounded-lg border border-primary bg-primary p-4 font-medium text-white transition hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <!-- Texto del botón que cambia según el estado de carga -->
-            <span v-if="!isLoading">Create account</span>
-            <span v-else>Creating account...</span>
+            <span v-if="!isLoading">Login</span>
+            <span v-else>Login...</span>
 
             <svg
               v-if="isLoading"

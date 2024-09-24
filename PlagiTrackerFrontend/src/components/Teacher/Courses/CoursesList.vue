@@ -1,21 +1,43 @@
 <script setup lang="ts">
-// Importamos el tipo Course desde el archivo de tipos
-import type { Course } from '@/types/Courses';
+import { ref, onMounted } from 'vue';
+import { useUserStore } from '@/stores/userStore';
+import CourseCard from './CourseCard.vue'; // Asegúrate de importar el componente CourseCard
+import CourseService from '@/services/CourseService'; // Importa el servicio para obtener cursos
+import type { Course } from '@/types/Course'; // Importa el tipo Course
 
-// Importamos el componente CourseCard que creamos previamente
-import CourseCard from './CourseCard.vue';
-// Definimos las props, donde `courses` es una lista de objetos de tipo Course
-const props = defineProps<{
-  courses: Course[]; // Un array de Course
-}>();
+// Estado reactivo para almacenar los cursos
+const courses = ref<Course[]>([]); 
+
+// Obtener el store del usuario
+const userStore = useUserStore();
+
+// Método para obtener los cursos del profesor
+const fetchCourses = async () => {
+  const user = userStore.getUser; // Obtener el usuario desde el store
+
+  // Verifica que el usuario esté autenticado y tenga un ID
+  if (user && user.id) {
+    try {
+      courses.value = await CourseService.getAllByTeacher(user.id); // Llama al servicio para obtener cursos
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+    }
+  } else {
+    console.error('User not authenticated or ID not available.');
+  }
+};
+
+// Llama a fetchCourses al montar el componente
+onMounted(() => {
+  fetchCourses();
+});
 </script>
 
 <template>
-  <!-- Grid para mostrar múltiples CourseCard -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
     <!-- Iteramos sobre la lista de cursos y mostramos un CourseCard para cada uno -->
     <CourseCard
-      v-for="course in props.courses"
+      v-for="course in courses"
       :key="course.id"
       :course="course"
     />

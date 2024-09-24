@@ -8,7 +8,7 @@ import type { Student } from '@/types/Student';
 
 export const useUserStore = defineStore('user', () => {
   // Estado reactivo para almacenar el usuario (puede ser Teacher o Student)
-  const user = ref<any>(null); // Se utiliza `any` para manejar tanto Teacher como Student
+  const user = ref<any>(JSON.parse(localStorage.getItem('user') || 'null')); // Cargar el usuario desde localStorage
 
   // Getter para acceder al usuario
   const getUser = computed(() => user.value);
@@ -16,6 +16,7 @@ export const useUserStore = defineStore('user', () => {
   // Setter para actualizar el usuario
   const setUser = (newUser: any) => {
     user.value = newUser;
+    localStorage.setItem('user', JSON.stringify(newUser)); // Guardar el usuario en localStorage
   };
 
   // Acción para iniciar sesión (puede ser Teacher o Student)
@@ -55,6 +56,7 @@ export const useUserStore = defineStore('user', () => {
   // Acción para limpiar el estado del usuario
   const clearUser = () => {
     user.value = null;
+    localStorage.removeItem('user'); // Limpiar el localStorage
   };
 
   return {
