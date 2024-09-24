@@ -45,7 +45,7 @@ class TeacherService {
       const response = await axiosInstance.post(`${API_ENDPOINT}/Login`, requestBody);
       
       // Devuelve los datos de la respuesta
-      return response.data;
+      return response;
     } catch (error) {
       console.error('Error logging in teacher:', error);
       throw error;

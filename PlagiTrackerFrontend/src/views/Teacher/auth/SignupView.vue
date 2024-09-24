@@ -1,64 +1,78 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import FullScreenLayout from '@/layouts/FullScreenLayout.vue';
-import DefaultAuthCard from '@/components/Auths/DefaultAuthCard.vue';
-import InputGroup from '@/components/Auths/InputGroup.vue';
-import { encrypt } from '@/utils/cryptoUtils';
-import type { Teacher } from '@/types/Teacher';
-import TeacherService from '@/services/TeacherService';
-import { TeacherSchema } from '@/schemas/teacherSchema'; 
-import { z } from 'zod';
+import { ref } from 'vue'
+import FullScreenLayout from '@/layouts/FullScreenLayout.vue'
+import DefaultAuthCard from '@/components/Auths/DefaultAuthCard.vue'
+import InputGroup from '@/components/Auths/InputGroup.vue'
+import { encrypt } from '@/utils/cryptoUtils'
+import type { Teacher } from '@/types/Teacher'
+import TeacherService from '@/services/TeacherService'
+import { TeacherSchema } from '@/schemas/teacherSchema'
+import { z } from 'zod'
+import router from '@/router'
 
 const teacher = ref<Teacher>({
   firstName: '',
   lastName: '',
   email: '',
   passwordHash: ''
-});
-const password = ref<string>('');
-const confirmPassword = ref<string>('');
-const errors = ref<{ [key: string]: string }>({}); // Objeto para manejar errores
+})
+const password = ref<string>('')
+const confirmPassword = ref<string>('')
+const errors = ref<{ [key: string]: string }>({}) // Objeto para manejar errores
+const isLoading = ref<boolean>(false) // Estado para controlar la carga
 
 const handleSubmit = async (event: Event) => {
-  event.preventDefault();
-  errors.value = {}; // Resetear errores
-
+  event.preventDefault()
+  errors.value = {} // Resetear errores
+  isLoading.value = true
   try {
     // Validar todos los campos
     TeacherSchema.parse({
       ...teacher.value,
       passwordHash: password.value
-    });
+    })
 
     // Validar contraseñas
     if (password.value !== confirmPassword.value) {
-      errors.value.confirmPassword = 'Passwords do not match!';
-      return;
+      errors.value.confirmPassword = 'Passwords do not match!'
+      isLoading.value = false // Detener el spinner
+
+      return
     }
 
     // Encriptar la contraseña
-    teacher.value.passwordHash = encrypt(password.value);
-    
+    teacher.value.passwordHash = encrypt(password.value)
+
     // Registrar al profesor
-    await TeacherService.registerTeacher(teacher.value);
-    alert('Teacher registered successfully!');
+    await TeacherService.registerTeacher(teacher.value)
+    alert('Teacher registered successfully!')
+    router.push('/teacher/auth/signin')
   } catch (error) {
     if (error instanceof z.ZodError) {
-      error.errors.forEach(err => {
-        errors.value[err.path[0]] = err.message; // Guardar el mensaje de error en el objeto
-      });
+      error.errors.forEach((err) => {
+        errors.value[err.path[0]] = err.message // Guardar el mensaje de error en el objeto
+      })
+      isLoading.value = false // Detener el spinner
+
     } else {
-      alert('Error registering teacher. Please try again.');
+      alert('Error registering teacher. Please try again.')
+      isLoading.value = false // Detener el spinner
+
     }
   }
-};
+}
 </script>
 
 <template>
   <FullScreenLayout>
     <DefaultAuthCard subtitle="Start for free" title="Sign Up to PlagiTracker">
       <form @submit="handleSubmit">
-        <InputGroup v-model="teacher.firstName" label="First Name" type="text" placeholder="Enter your first name">
+        <InputGroup
+          v-model="teacher.firstName"
+          label="First Name"
+          type="text"
+          placeholder="Enter your first name"
+        >
           <svg
             class="fill-current"
             width="22"
@@ -79,9 +93,14 @@ const handleSubmit = async (event: Event) => {
             </g>
           </svg>
         </InputGroup>
-        <div v-if="errors.firstName" class="text-red-500 mb-2">{{ errors.firstName }}</div>
+        <div v-if="errors.firstName" class="text-red mb-2">{{ errors.firstName }}</div>
 
-        <InputGroup v-model="teacher.lastName" label="Last Name" type="text" placeholder="Enter your Last Name">
+        <InputGroup
+          v-model="teacher.lastName"
+          label="Last Name"
+          type="text"
+          placeholder="Enter your Last Name"
+        >
           <svg
             class="fill-current"
             width="22"
@@ -102,9 +121,14 @@ const handleSubmit = async (event: Event) => {
             </g>
           </svg>
         </InputGroup>
-        <div v-if="errors.lastName" class="text-red-500 mb-2">{{ errors.lastName }}</div>
+        <div v-if="errors.lastName" class="text-red mb-2">{{ errors.lastName }}</div>
 
-        <InputGroup v-model="teacher.email" label="Email" type="email" placeholder="Enter your email">
+        <InputGroup
+          v-model="teacher.email"
+          label="Email"
+          type="email"
+          placeholder="Enter your email"
+        >
           <svg
             class="fill-current"
             width="22"
@@ -121,9 +145,14 @@ const handleSubmit = async (event: Event) => {
             </g>
           </svg>
         </InputGroup>
-        <div v-if="errors.email" class="text-red-500 mb-2">{{ errors.email }}</div>
+        <div v-if="errors.email" class="text-red mb-2">{{ errors.email }}</div>
 
-        <InputGroup v-model="password" label="Password" type="password" placeholder="6+ Characters, 1 Capital letter" >
+        <InputGroup
+          v-model="password"
+          label="Password"
+          type="password"
+          placeholder="6+ Characters, 1 Capital letter"
+        >
           <svg
             class="fill-current"
             width="22"
@@ -145,7 +174,12 @@ const handleSubmit = async (event: Event) => {
           </svg>
         </InputGroup>
 
-        <InputGroup v-model="confirmPassword" label="Re-type Password" type="password" placeholder="Re-enter your password">
+        <InputGroup
+          v-model="confirmPassword"
+          label="Re-type Password"
+          type="password"
+          placeholder="Re-enter your password"
+        >
           <svg
             class="fill-current"
             width="22"
@@ -166,17 +200,58 @@ const handleSubmit = async (event: Event) => {
             </g>
           </svg>
         </InputGroup>
+        <div v-if="errors.passwordHash" class="text-red mb-2">{{ errors.passwordHash }}</div>
+
         <div v-if="password !== confirmPassword" class="text-red mb-2">Passwords do not match!</div>
 
-        
-
         <div class="mb-5 mt-6">
-          <input
+          <button
             type="submit"
-            value="Create account"
-            class="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 font-medium text-white transition hover:bg-opacity-90"
-          />
+            :disabled="isLoading"
+            class="relative w-full flex items-center justify-center cursor-pointer rounded-lg border border-primary bg-primary p-4 font-medium text-white transition hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <!-- Texto del botón que cambia según el estado de carga -->
+            <span v-if="!isLoading">Create account</span>
+            <span v-else>Creating account...</span>
+
+            <svg
+              v-if="isLoading"
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              class="ml-4"
+            >
+              <path
+                fill="none"
+                stroke="#ffffff"
+                stroke-dasharray="16"
+                stroke-dashoffset="16"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 3c4.97 0 9 4.03 9 9"
+              >
+                <animate fill="freeze" attributeName="stroke-dashoffset" dur="0.2s" values="16;0" />
+                <animateTransform
+                  attributeName="transform"
+                  dur="1.5s"
+                  repeatCount="indefinite"
+                  type="rotate"
+                  values="0 12 12;360 12 12"
+                />
+              </path>
+            </svg>
+          </button>
         </div>
+
+        <div class="mt-6 text-center">
+          <p class="font-medium">
+            Already have an account?
+            <router-link to="/teacher/auth/signin" class="text-primary">Sign in</router-link>
+          </p>
+        </div>
+
       </form>
     </DefaultAuthCard>
   </FullScreenLayout>

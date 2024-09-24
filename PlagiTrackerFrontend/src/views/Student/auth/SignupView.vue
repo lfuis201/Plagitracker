@@ -3,51 +3,75 @@ import { ref } from 'vue'
 import FullScreenLayout from '@/layouts/FullScreenLayout.vue'
 import DefaultAuthCard from '@/components/Auths/DefaultAuthCard.vue'
 import InputGroup from '@/components/Auths/InputGroup.vue'
+import { encrypt } from '@/utils/cryptoUtils'
+import type { Student } from '@/types/Student'
+import StudentService from '@/services/StudentService' // Ensure you have this service implemented
+import { StudentSchema } from '@/schemas/studentSchema' // Create a corresponding schema for Student
+import { z } from 'zod'
+import router from '@/router'
 
-import { encrypt, decrypt } from '@/utils/cryptoUtils';
-import type { Teacher } from '@/types/Teacher';
-import TeacherService from '@/services/TeacherService';
-
-
-const teacher = ref<Teacher>({
-  firstName: 'asdasd',
-  lastName: 'asdasd',
-  email: 'lmamania@ulasalle.edu.pe',
+const student = ref<Student>({
+  firstName: '',
+  lastName: '',
+  email: '',
   passwordHash: ''
 })
-// Para manejar la confirmación de la contraseña sin encriptar
-const password = ref<string>('emerson'); 
-const confirmPassword = ref<string>('emerson');
+const password = ref<string>('')
+const confirmPassword = ref<string>('')
+const errors = ref<{ [key: string]: string }>({}) // Object to manage errors
+const isLoading = ref<boolean>(false) // Estado para controlar la carga
 
 const handleSubmit = async (event: Event) => {
-  event.preventDefault();
-
-  if (password.value !== confirmPassword.value) {
-    alert('Passwords do not match!');
-    return;
-  }
+  event.preventDefault()
+  errors.value = {} // Reset errors
+  isLoading.value = true
 
   try {
-    // Encriptar la contraseña antes de enviar
-    const encryptedPassword = encrypt(password.value || '');
-    
-    teacher.value.passwordHash=encryptedPassword;
-    console.log(teacher)
-    // Registrar al profesor con los datos
-    await TeacherService.registerTeacher(teacher.value);
+    // Validate all fields
+    StudentSchema.parse({
+      ...student.value,
+      passwordHash: password.value
+    })
 
-    alert('Teacher registered successfully!');
+    // Validate passwords
+    if (password.value !== confirmPassword.value) {
+      errors.value.confirmPassword = 'Passwords do not match!'
+      isLoading.value = false // Detener el spinner
+
+      return
+    }
+
+    // Encrypt the password
+    student.value.passwordHash = encrypt(password.value)
+
+    // Register the student
+    await StudentService.registerStudent(student.value) // Ensure this method exists
+    alert('Student registered successfully!')
+    router.push('/student/auth/signin')
   } catch (error) {
-    alert('Error registering teacher. Please try again.');
+    if (error instanceof z.ZodError) {
+      error.errors.forEach((err) => {
+        errors.value[err.path[0]] = err.message // Store the error message in the object
+      })
+      isLoading.value = false // Detener el spinner
+    } else {
+      alert('Error registering student. Please try again.')
+      isLoading.value = false // Detener el spinner
+    }
   }
-};
+}
 </script>
 
 <template>
   <FullScreenLayout>
     <DefaultAuthCard subtitle="Start for free" title="Sign Up to PlagiTracker">
       <form @submit="handleSubmit">
-        <InputGroup v-model="teacher.firstName" label="First Name" type="text" placeholder="Enter your first name">
+        <InputGroup
+          v-model="student.firstName"
+          label="First Name"
+          type="text"
+          placeholder="Enter your first name"
+        >
           <svg
             class="fill-current"
             width="22"
@@ -68,8 +92,14 @@ const handleSubmit = async (event: Event) => {
             </g>
           </svg>
         </InputGroup>
+        <div v-if="errors.firstName" class="text-red mb-2">{{ errors.firstName }}</div>
 
-        <InputGroup v-model="teacher.lastName" label="Last Name" type="text" placeholder="Enter your Last Name">
+        <InputGroup
+          v-model="student.lastName"
+          label="Last Name"
+          type="text"
+          placeholder="Enter your Last Name"
+        >
           <svg
             class="fill-current"
             width="22"
@@ -90,8 +120,14 @@ const handleSubmit = async (event: Event) => {
             </g>
           </svg>
         </InputGroup>
+        <div v-if="errors.lastName" class="text-red mb-2">{{ errors.lastName }}</div>
 
-        <InputGroup v-model="teacher.email" label="Email" type="email" placeholder="Enter your email">
+        <InputGroup
+          v-model="student.email"
+          label="Email"
+          type="email"
+          placeholder="Enter your email"
+        >
           <svg
             class="fill-current"
             width="22"
@@ -108,8 +144,14 @@ const handleSubmit = async (event: Event) => {
             </g>
           </svg>
         </InputGroup>
+        <div v-if="errors.email" class="text-red mb-2">{{ errors.email }}</div>
 
-        <InputGroup v-model="password" label="Password" type="password" placeholder="Enter your password">
+        <InputGroup
+          v-model="password"
+          label="Password"
+          type="password"
+          placeholder="Enter your password"
+        >
           <svg
             class="fill-current"
             width="22"
@@ -131,7 +173,12 @@ const handleSubmit = async (event: Event) => {
           </svg>
         </InputGroup>
 
-        <InputGroup v-model="confirmPassword" label="Re-type Password" type="password" placeholder="Re-enter your password">
+        <InputGroup
+          v-model="confirmPassword"
+          label="Re-type Password"
+          type="password"
+          placeholder="Re-enter your password"
+        >
           <svg
             class="fill-current"
             width="22"
@@ -152,13 +199,55 @@ const handleSubmit = async (event: Event) => {
             </g>
           </svg>
         </InputGroup>
+        <div v-if="errors.passwordHash" class="text-red mb-2">{{ errors.passwordHash }}</div>
 
+        <div v-if="password !== confirmPassword" class="text-red mb-2">Passwords do not match!</div>
         <div class="mb-5 mt-6">
-          <input
+          <button
             type="submit"
-            value="Create account"
-            class="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 font-medium text-white transition hover:bg-opacity-90"
-          />
+            :disabled="isLoading"
+            class="relative w-full flex items-center justify-center cursor-pointer rounded-lg border border-primary bg-primary p-4 font-medium text-white transition hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <!-- Texto del botón que cambia según el estado de carga -->
+            <span v-if="!isLoading">Create account</span>
+            <span v-else>Creating account...</span>
+
+            <svg
+              v-if="isLoading"
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              class="ml-4"
+            >
+              <path
+                fill="none"
+                stroke="#ffffff"
+                stroke-dasharray="16"
+                stroke-dashoffset="16"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 3c4.97 0 9 4.03 9 9"
+              >
+                <animate fill="freeze" attributeName="stroke-dashoffset" dur="0.2s" values="16;0" />
+                <animateTransform
+                  attributeName="transform"
+                  dur="1.5s"
+                  repeatCount="indefinite"
+                  type="rotate"
+                  values="0 12 12;360 12 12"
+                />
+              </path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="mt-6 text-center">
+          <p class="font-medium">
+            Already have an account?
+            <router-link to="/student/auth/signin" class="text-primary">Sign in</router-link>
+          </p>
         </div>
       </form>
     </DefaultAuthCard>

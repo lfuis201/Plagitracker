@@ -5,35 +5,39 @@ import FullScreenLayout from '@/layouts/FullScreenLayout.vue';
 import { ref } from 'vue';
 import { encrypt } from '@/utils/cryptoUtils';
 import router from '@/router';
-import { useTeacherStore } from '@/stores/teacher/teacherStore';
+import { useUserStore } from '@/stores/userStore';
 
 const email = ref<string>('');
 const password = ref<string>('');
 const errorMessage = ref<string>(''); // Variable para el mensaje de error
+  const isLoading = ref<boolean>(false) // Estado para controlar la carga
 
-const teacherStore = useTeacherStore(); // Usar el store de Teacher
+const userStore = useUserStore(); // Usar el store generalizado
 
 // Manejo del formulario
 const handleSubmit = async (event: Event) => {
   event.preventDefault(); // Evitar que el formulario recargue la página
   errorMessage.value = ''; // Limpiar cualquier mensaje de error previo
+  isLoading.value = true
 
   try {
     // Encripta la contraseña antes de enviarla
     const encryptedPassword = encrypt(password.value);
     
     // Llama al método login del store
-    await teacherStore.login(email.value, encryptedPassword);
+    await userStore.login(email.value, encryptedPassword, 'teacher');
     
     // Si el login es exitoso, redirigir al dashboard
-    console.log('Login successful:', teacherStore.getTeacher);
+    console.log('Login successful:', userStore.getUser);
     alert('Login successful:');
 
     // Redirigir al dashboard
-    router.push('/teacher/courses');
+    router.push('/profile');
   } catch (error) {
     console.error('Error logging in:', error);
     errorMessage.value = 'Error logging in, please try again.';
+    isLoading.value = false // Detener el spinner
+
   }
 };
 </script>
@@ -41,7 +45,7 @@ const handleSubmit = async (event: Event) => {
 <template>
   <FullScreenLayout>
     
-    <DefaultAuthCard subtitle="Start for free" title="Sign In to PlagiTracker">
+    <DefaultAuthCard subtitle="Welcome teacher" title="Sign In to PlagiTracker">
       <form @submit="handleSubmit">
         <InputGroup v-model="email" label="Email" type="email" placeholder="Enter your email">
           <svg
@@ -88,19 +92,52 @@ const handleSubmit = async (event: Event) => {
            <p v-if="errorMessage" class="text-red mt-2">{{ errorMessage }}</p>
 
 
-        <div class="mb-5 mt-6">
-          <input
+           <div class="mb-5 mt-6">
+          <button
             type="submit"
-            value="Sign In"
-            class="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 font-medium text-white transition hover:bg-opacity-90"
-          />
+            :disabled="isLoading"
+            class="relative w-full flex items-center justify-center cursor-pointer rounded-lg border border-primary bg-primary p-4 font-medium text-white transition hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <!-- Texto del botón que cambia según el estado de carga -->
+            <span v-if="!isLoading">Create account</span>
+            <span v-else>Creating account...</span>
+
+            <svg
+              v-if="isLoading"
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              class="ml-4"
+            >
+              <path
+                fill="none"
+                stroke="#ffffff"
+                stroke-dasharray="16"
+                stroke-dashoffset="16"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 3c4.97 0 9 4.03 9 9"
+              >
+                <animate fill="freeze" attributeName="stroke-dashoffset" dur="0.2s" values="16;0" />
+                <animateTransform
+                  attributeName="transform"
+                  dur="1.5s"
+                  repeatCount="indefinite"
+                  type="rotate"
+                  values="0 12 12;360 12 12"
+                />
+              </path>
+            </svg>
+          </button>
         </div>
 
 
         <div class="mt-6 text-center">
           <p class="font-medium">
             Don’t have any account?
-            <router-link to="/auth/signup" class="text-primary">Sign up</router-link>
+            <router-link to="/teacher/auth/signup" class="text-primary">Sign up</router-link>
           </p>
         </div>
       </form>
