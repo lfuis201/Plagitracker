@@ -9,6 +9,8 @@ const authStudentRoutes = [
     component: SigninView,
     meta: {
       title: 'StudentSignin',
+      requiresAuth: false,
+      allowedRoles: []
     },
   },
   {
@@ -17,6 +19,8 @@ const authStudentRoutes = [
     component: SignupView,
     meta: {
       title: 'StudentSignup',
+      requiresAuth: false,
+      allowedRoles: []
     },
   },
 ];

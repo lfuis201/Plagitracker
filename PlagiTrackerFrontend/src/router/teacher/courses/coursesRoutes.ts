@@ -1,5 +1,7 @@
-import CoursesView from "@/views/Courses/CoursesView.vue";
-import AssigmentView from "@/views/Assigment/AssigmentView.vue";
+import CoursesView from "@/views/Teacher/Courses/CoursesView.vue";
+import AssigmentView from "@/views/Teacher/Assigment/AssigmentView.vue";
+import SubmissionsView from "@/views/Teacher/Submissions/SubmissionsView.vue";
+
 const coursesRoutes = [
   {
     path: '/teacher/courses',
@@ -7,6 +9,8 @@ const coursesRoutes = [
     component: CoursesView,
     meta: {
       title: 'Courses',
+      requiresAuth: true,
+      allowedRoles: ['teacher']
     },
   },
   {
@@ -15,6 +19,19 @@ const coursesRoutes = [
     component: AssigmentView,
     meta: {
       title: 'Assigments',
+      requiresAuth: true,
+      allowedRoles: ['teacher']
+    },
+  }
+  ,
+  {
+    path: '/teacher/submissions/:id',
+    name: 'teacherSubmissions',
+    component: SubmissionsView,
+    meta: {
+      title: 'Submission',
+      requiresAuth: true,
+      allowedRoles: ['teacher']
     },
   }
 ];

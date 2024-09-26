@@ -5,8 +5,10 @@ import DropdownMessage from './DropdownMessage.vue'
 import DropdownNotification from './DropdownNotification.vue'
 import DropdownUser from './DropdownUser.vue'
 
+
 const { toggleSidebar } = useSidebarStore()
 const sidebarStore = useSidebarStore()
+
 </script>
 
 <template>
@@ -57,6 +59,7 @@ const sidebarStore = useSidebarStore()
           <img src="@/assets/images/logo/logo-icon.svg" alt="Logo" />
         </router-link>
       </div>
+      
       <div class="hidden sm:block">
         <form action="https://formbold.com/s/unique_form_id" method="POST">
           <div class="relative">

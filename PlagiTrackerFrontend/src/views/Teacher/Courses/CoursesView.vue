@@ -2,41 +2,12 @@
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import CoursesList from '@/components/Teacher/Courses/CoursesList.vue' // Asegúrate de que la ruta sea correcta
 import BreadcrumbDefault from '@/components/Breadcrumbs/BreadcrumbDefault.vue'
-import ButtonDefault from '@/components/Buttons/ButtonDefault.vue'
-import { ref } from 'vue'
-// Definimos una lista de cursos como ejemplo
-const courseList = [
-  {
-    id: '1',
-    name: 'Introduction to Programming',
-    teacherId: '123'
-  },
-  {
-    id: '2',
-    name: 'Advanced Mathematics',
-    teacherId: '456'
-  },
-  {
-    id: '3',
-    name: 'Data Structures',
-    teacherId: '789'
-  },
-  {
-    id: '4',
-    name: 'Web Development',
-    teacherId: '012'
-  },
-  {
-    id: '5',
-    name: 'Algorithms',
-    teacherId: '345'
-  }
-]
+
 
 const pageTitle = ref('Courses')
-import ModalExample from '@/components/Modal/ModalExample.vue'
 import ButtonEvent from '@/components/Buttons/ButtonEvent.vue'
 import CreateCourseModal from '@/components/Teacher/Courses/CreateCourseModal.vue'
+import { ref } from 'vue';
 const isModalOpen = ref(false)
 
 // Función para abrir el modal
@@ -71,6 +42,6 @@ const handleModalClose = () => {
 
     <!-- Componente ModalExample con control del estado desde el padre -->
     <CreateCourseModal :modalOpen="isModalOpen" @close="handleModalClose" />
-    <CoursesList :courses="courseList" />
+    <CoursesList/>
   </DefaultLayout>
 </template>

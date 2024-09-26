@@ -7,6 +7,7 @@ import type { Course } from '@/types/Course'; // Importa el tipo Course
 
 // Estado reactivo para almacenar los cursos
 const courses = ref<Course[]>([]); 
+const isLoading = ref(true); // Estado para manejar la pantalla de carga
 
 // Obtener el store del usuario
 const userStore = useUserStore();
@@ -18,12 +19,20 @@ const fetchCourses = async () => {
   // Verifica que el usuario esté autenticado y tenga un ID
   if (user && user.id) {
     try {
-      courses.value = await CourseService.getAllByTeacher(user.id); // Llama al servicio para obtener cursos
+      const coursesData = await CourseService.getAllByTeacher(user.id); // Llama al servicio para obtener cursos
+
+      // Simula un retraso de 2 segundos antes de mostrar los cursos
+      setTimeout(() => {
+        courses.value = coursesData; // Almacena los cursos después de 2 segundos
+        isLoading.value = false; // Finaliza la pantalla de carga
+      }, 2000); // Simula una demora de 2 segundos
     } catch (error) {
       console.error('Error fetching courses:', error);
+      isLoading.value = false; // Finaliza la pantalla de carga si hay un error
     }
   } else {
     console.error('User not authenticated or ID not available.');
+    isLoading.value = false; // Finaliza la pantalla de carga si no hay usuario
   }
 };
 
@@ -34,7 +43,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+  <!-- Pantalla de carga -->
+  <div v-if="isLoading" class="flex items-center justify-center min-h-screen">
+    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+  </div>
+
+  <!-- Lista de cursos -->
+  <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
     <!-- Iteramos sobre la lista de cursos y mostramos un CourseCard para cada uno -->
     <CourseCard
       v-for="course in courses"

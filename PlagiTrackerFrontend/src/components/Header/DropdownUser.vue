@@ -1,12 +1,22 @@
 <script setup lang="ts">
-import { useUserStore } from '@/stores/userStore';
+import { useUserStore } from '@/stores/userStore'
 import { onClickOutside } from '@vueuse/core'
 import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const target = ref(null)
 const dropdownOpen = ref(false)
-const userStore = useUserStore(); // Usar el store generalizado
-const user = computed(() => userStore.getUser);
+const userStore = useUserStore() // Usar el store generalizado
+const user = computed(() => userStore.getUser)
+const role = computed(() => userStore.getRole)
+
+const router = useRouter()
+
+// Función para hacer logout del usuario
+const logout = () => {
+  userStore.clearUser() // Limpiar el estado del usuario
+  router.push('/student/auth/signin') // Redirigir a la página de login
+}
 
 onClickOutside(target, () => {
   dropdownOpen.value = false
@@ -20,13 +30,24 @@ onClickOutside(target, () => {
       to="#"
       @click.prevent="dropdownOpen = !dropdownOpen"
     >
-      <span class="hidden text-right lg:block">
-        <span class="block text-sm font-medium text-black dark:text-white">{{ user?.firstName }}</span>
-        <span class="block text-xs font-medium">UX Designer</span>
-      </span>
+      <span class="flex items-center space-x-4">
+        <!-- Text block -->
+        <span class="hidden text-right lg:block">
+          <span class="block text-sm font-medium text-black dark:text-white">{{
+            user?.firstName
+          }}</span>
+          <span class="block text-xs font-medium">{{ role }}</span>
+        </span>
 
-      <span class="h-12 w-12 rounded-full">
-        <img src="@/assets/images/user/user-01.png" alt="User" />
+        <!-- SVG block -->
+        <span class="flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="fill-current text-gray-600 dark:text-white"  width="40" height="40" viewBox="0 0 256 256">
+            <path
+              fill="currentColor"
+              d="M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24M74.08 197.5a64 64 0 0 1 107.84 0a87.83 87.83 0 0 1-107.84 0M96 120a32 32 0 1 1 32 32a32 32 0 0 1-32-32m97.76 66.41a79.66 79.66 0 0 0-36.06-28.75a48 48 0 1 0-59.4 0a79.66 79.66 0 0 0-36.06 28.75a88 88 0 1 1 131.52 0"
+            />
+          </svg>
+        </span>
       </span>
 
       <svg
@@ -126,6 +147,7 @@ onClickOutside(target, () => {
         </li>
       </ul>
       <button
+        @click="logout"
         class="flex items-center gap-3.5 py-4 px-6 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
       >
         <svg

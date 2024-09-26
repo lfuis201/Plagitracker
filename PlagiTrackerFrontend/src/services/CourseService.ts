@@ -134,6 +134,23 @@ class CourseService {
       throw error
     }
   }
+
+   /**
+   * Obtiene todos los cursos disponibles.
+   *
+   * @returns {Promise<Course[]>} - Una promesa que se resuelve con la lista de cursos.
+   * @throws {Error} - Lanza un error si ocurre algún problema al obtener los cursos.
+   */
+   static async getAllCourses(): Promise<Course[]> {
+    try {
+      const response = await axiosInstance.get(`${API_ENDPOINT}/GetAllCourses`);
+      return response.data;
+    } catch (error) {
+      console.error('Error getting all courses:', error);
+      throw error;
+    }
+  }
+
 }
 
 export default CourseService

@@ -13,13 +13,36 @@ import TablesView from '@/views/TablesView.vue'
 import AlertsView from '@/views/UiElements/AlertsView.vue'
 import ButtonsView from '@/views/UiElements/ButtonsView.vue'
 
+import UnauthorizedView from '@/views/UnauthorizedView.vue'
+import LoginView from '@/views/LoginView.vue'
+
+import { useUserStore } from '@/stores/userStore'
+
 const routes = [
+  {
+    path: '/unauthorized',
+    name: 'unauthorized',
+    component: UnauthorizedView,
+    meta: {
+      title: 'Unauthorized Access'
+    }
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: LoginView,
+    meta: {
+      title: 'Login'
+    }
+  },
   {
     path: '/',
     name: 'eCommerce',
     component: ECommerceView,
     meta: {
-      title: 'eCommerce Dashboard'
+      title: 'eCommerce Dashboard',
+      requiresAuth: true,
+      allowedRoles: []
     }
   },
   {
@@ -96,8 +119,7 @@ const routes = [
   },
   ...authRoutes,
   ...coursesRoutes,
-  ...assigmentsRoutes,
-
+  ...assigmentsRoutes
 ]
 
 const router = createRouter({
@@ -111,6 +133,34 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   document.title = `PlagiTracker ${to.meta.title}`
   next()
+})
+
+router.beforeEach((to, from, next) => {
+  const userStore = useUserStore()
+  const isAuthenticated = !!userStore.getUser // Check if user is authenticated
+  const userRole = userStore.getRole // Get the current user's role
+
+  console.log('Checking route:', to.path)
+  console.log('Is authenticated:', isAuthenticated)
+  console.log('User role:', userRole)
+
+  // Check if the route requires authentication
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  const allowedRoles = to.meta.allowedRoles // Get allowed roles for the route
+
+  if (requiresAuth && !isAuthenticated) {
+    // Redirect to the login page if not authenticated
+    console.log('Redirecting to login: Not authenticated')
+    next({ name: 'Login' }) // Adjust this to your actual login route name
+  } else if (requiresAuth && allowedRoles && !allowedRoles.includes(userRole)) {
+    // Redirect if the user's role is not allowed for this route
+    console.log('Redirecting to unauthorized: Role not allowed')
+    next({ name: 'unauthorized' }) // Redirect to unauthorized page
+  } else {
+    // Proceed normally
+    document.title = `PlagiTracker ${to.meta.title}`
+    next()
+  }
 })
 
 export default router

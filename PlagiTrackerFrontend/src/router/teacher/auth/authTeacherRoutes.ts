@@ -10,6 +10,8 @@ const authTeacherRoutes = [
     component: SigninView,
     meta: {
       title: 'TeacherSignin',
+      requiresAuth: false,
+      allowedRoles: []
     },
   },
   {
@@ -18,6 +20,8 @@ const authTeacherRoutes = [
     component: SignupView,
     meta: {
       title: 'TeacherSignup',
+      requiresAuth: false,
+      allowedRoles: []
     },
   },
 ];
