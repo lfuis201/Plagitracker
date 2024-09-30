@@ -1,12 +1,16 @@
 ﻿using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium;
 using System.Diagnostics;
-using PlagiTracker.Analyzer; // Esto es necesario para acceder a la clase Consumidor
+using PlagiTracker.Analyzer;
+// Esto es necesario para acceder a la clase Consumidor
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Text.Json;
+using Newtonsoft.Json;
+
 
 namespace PlagiTracker.Services.SeleniumServices
 {
@@ -50,17 +54,18 @@ namespace PlagiTracker.Services.SeleniumServices
             return url.Contains("codiva.io");
         }
 
-        public async Task<(int coincidencias, string nombre1, string nombre2, string usuarioId1, string usuarioId2, double jaccard, double levenshtein, double semantica)> StartScraping(List<string> urls)
+        public async Task StartScraping(List<string> urls)
         {
             Stopwatch sw = new Stopwatch(); // Inicializar el cronómetro
             sw.Start(); // Iniciar la medición del tiempo
 
             var jsonData = new Dictionary<string, List<Dictionary<string, string>>>();
+            var allResults = new List<(int coincidencias, string nombre1, string nombre2, string usuarioId1, string usuarioId2, double jaccard, double levenshtein, double semantica)>();
 
             var ignorePatterns = new List<string>
-            {
-                "System.out.println(\"Hello Codiva\");"
-            };
+    {
+        "System.out.println(\"Hello Codiva\");"
+    };
 
             try
             {
@@ -107,10 +112,10 @@ namespace PlagiTracker.Services.SeleniumServices
                         }
 
                         var fileData = new Dictionary<string, string>
-                        {
-                            { "nombre", $"{className}" },
-                            { "contenido", codeContent }
-                        };
+                {
+                    { "nombre", $"{className}" },
+                    { "contenido", codeContent }
+                };
 
                         studentFiles.Add(fileData);
                         Console.WriteLine($"Scraping terminado para {className}");
@@ -120,37 +125,62 @@ namespace PlagiTracker.Services.SeleniumServices
                     {
                         jsonData[studentId] = studentFiles;
                         Console.WriteLine($"Scraping completo para la URL: {url}");
+
+                        // Procesar los resultados
+                        Consumidor consumidor = new Consumidor();
+                        var resultados = await consumidor.Ejecutar(jsonData);
+
+                        // Agregar los resultados a la lista
+                        allResults.AddRange(resultados);
                     }
                 }
 
-                if (jsonData.Count > 0)
+                // Ahora procesamos todos los resultados
+                if (allResults.Count > 0)
                 {
-                    Consumidor consumidor = new Consumidor();
-                    var resultados = await consumidor.Ejecutar(jsonData);
+                    foreach (var resultado in allResults)
+                    {
+                        // Imprimir los resultados individualmente
+                        Console.WriteLine($"Respuesta del servidor:");
+                        Console.WriteLine($"Coincidencias: {resultado.coincidencias}");
+                        Console.WriteLine($"Estudiante 1: {resultado.nombre1}");
+                        Console.WriteLine($"Estudiante 2: {resultado.nombre2}");
+                        Console.WriteLine($"Usuario ID 1: {resultado.usuarioId1}");
+                        Console.WriteLine($"Usuario ID 2: {resultado.usuarioId2}");
+                        Console.WriteLine($"Similitud Jaccard: {resultado.jaccard}%");
+                        Console.WriteLine($"Similitud Levenshtein: {resultado.levenshtein}");
+                        Console.WriteLine($"Similitud Semántica: {resultado.semantica}%");
+                    }
 
-                    // Imprimir los resultados
-                    Console.WriteLine($"Respuesta del servidor:");
-                    Console.WriteLine($"Coincidencias: {resultados.coincidencias}");
-                    Console.WriteLine($"Estudiante 1: {resultados.nombre1}");
-                    Console.WriteLine($"Estudiante 2: {resultados.nombre2}");
-                    Console.WriteLine($"Usuario ID 1: {resultados.usuarioId1}");
-                    Console.WriteLine($"Usuario ID 2: {resultados.usuarioId2}");
-                    Console.WriteLine($"Similitud Jaccard: {resultados.jaccard}%");
-                    Console.WriteLine($"Similitud Levenshtein: {resultados.levenshtein}");
-                    Console.WriteLine($"Similitud Semántica: {resultados.semantica}%");
+                    // Generar el reporte en PDF con todos los resultados
+                    ReportGenerator reportGenerator = new ReportGenerator();
+                    var reportData = new
+                    {
+                        comparaciones_entre_ids = allResults.Select(r => new
+                        {
+                            r.usuarioId1,
+                            r.usuarioId2,
+                            r.coincidencias,
+                            r.jaccard,
+                            r.levenshtein,
+                            r.semantica,
+                            r.nombre1,
+                            r.nombre2
+                        }).ToArray()
+                    };
 
-                    return resultados; // Retorna los resultados como una tupla
+                    string jsonResponse = JsonConvert.SerializeObject(reportData);
+                    Console.WriteLine("JSON Generado: " + jsonResponse); // Imprimir el JSON para revisar la estructura
+                    reportGenerator.GenerateReport(jsonResponse); // Llamada para generar el PDF
                 }
                 else
                 {
                     Console.WriteLine("No se encontró código válido para las URLs proporcionadas.");
-                    return (0, null, null, null, null, 0, 0, 0); // Retorna una tupla vacía
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error: " + ex.Message);
-                return (0, null, null, null, null, 0, 0, 0); // Retorna una tupla vacía en caso de error
             }
             finally
             {
@@ -175,8 +205,13 @@ namespace PlagiTracker.Services.SeleniumServices
                 "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
             };
 
-            var resultados = await scraper.StartScraping(urls);
+            await scraper.StartScraping(urls); // Llama al método sin asignar a una variable
             Console.WriteLine("Resultado del análisis:");
+
+            // Generar el reporte
+            ReportGenerator reportGenerator = new ReportGenerator();
+
+            Console.WriteLine("Scraping completado y reporte generado.");
             // Aquí puedes manejar los resultados de la tupla si es necesario
         }
     }
