@@ -5,14 +5,12 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using PlagiTracker.Analyzer.PlaginDetector;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace PlagiTracker.Analyzer
 {
     public class Consumidor
     {
-        public async Task<(int coincidencias, string nombre1, string nombre2, string usuarioId1, string usuarioId2, double jaccard, double levenshtein, double semantica)> Ejecutar(Dictionary<string, List<Dictionary<string, string>>> studentFiles)
+        public async Task<List<(int coincidencias, string nombre1, string nombre2, string usuarioId1, string usuarioId2, double jaccard, double levenshtein, double semantica)>> Ejecutar(Dictionary<string, List<Dictionary<string, string>>> studentFiles)
         {
             using (HttpClient client = new HttpClient())
             {
@@ -39,37 +37,56 @@ namespace PlagiTracker.Analyzer
 
                     // Deserializar la respuesta JSON a un diccionario
                     var opcionesJson = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                    var resultado = JsonSerializer.Deserialize<Dictionary<string, object>>(responseData, opcionesJson);
+                    var resultado = JsonSerializer.Deserialize<Dictionary<string, List<Dictionary<string, JsonElement>>>>(responseData, opcionesJson);
 
-                    // Extraer los datos que necesitamos
-                    int coincidencias = Convert.ToInt32(resultado["coincidencias"]);
-                    string nombre1 = resultado["nombre1"].ToString();
-                    string nombre2 = resultado["nombre2"].ToString();
-                    string usuarioId1 = resultado["usuario_id1"].ToString();
-                    string usuarioId2 = resultado["usuario_id2"].ToString();
-                    double similitudJaccard = Convert.ToDouble(resultado["similitud_jaccard"]);
-                    double similitudLevenshtein = Convert.ToDouble(resultado["similitud_levenshtein"]);
-                    double similitudSemantica = Convert.ToDouble(resultado["similitud_semantica"]);
+                    // Lista para almacenar todos los resultados
+                    var resultados = new List<(int coincidencias, string nombre1, string nombre2, string usuarioId1, string usuarioId2, double jaccard, double levenshtein, double semantica)>();
 
-                    // Crear y retornar un objeto de Detector y extraer los resultados formateados
-                    Detector detector = new Detector(similitudJaccard, similitudLevenshtein, similitudSemantica);
+                    // Verificar que contenga la clave 'comparaciones_entre_ids'
+                    if (resultado.TryGetValue("comparaciones_entre_ids", out var comparaciones) && comparaciones.Count > 0)
+                    {
+                        // Iterar sobre todas las comparaciones
+                        foreach (var comparacion in comparaciones)
+                        {
+                            // Extraer los datos necesarios
+                            int coincidencias = comparacion["coincidencias"].GetInt32();
+                            string nombre1 = comparacion["nombre1"].GetString();
+                            string nombre2 = comparacion["nombre2"].GetString();
+                            string usuarioId1 = comparacion["usuario_id1"].GetString();
+                            string usuarioId2 = comparacion["usuario_id2"].GetString();
+                            double similitudJaccard = comparacion["similitud_jaccard"].GetDouble();
+                            double similitudLevenshtein = comparacion["similitud_levenshtein"].GetDouble();
+                            double similitudSemantica = comparacion["similitud_semantica"].GetDouble();
 
-                    // Devolver los valores de los algoritmos procesados y los otros datos
-                    return (
-                        coincidencias,
-                        nombre1,
-                        nombre2,
-                        usuarioId1,
-                        usuarioId2,
-                        detector.Jaccard.Jaccard,
-                        detector.Levenshtein.Levenshtein,
-                        detector.Semantica.Semantica
-                    );
+                            // Aplicar los detectores
+                            Detector detector = new Detector(similitudJaccard, similitudLevenshtein, similitudSemantica);
+
+                            // Añadir el resultado a la lista
+                            resultados.Add((
+                                coincidencias,
+                                nombre1,
+                                nombre2,
+                                usuarioId1,
+                                usuarioId2,
+                                detector.Jaccard.Jaccard,
+                                detector.Levenshtein.Levenshtein,
+                                detector.Semantica.Semantica
+                            ));
+                        }
+
+                        // Retornar la lista de resultados
+                        return resultados;
+                    }
+                    else
+                    {
+                        Console.WriteLine("No se encontraron comparaciones en la respuesta.");
+                        return new List<(int, string, string, string, string, double, double, double)>();
+                    }
                 }
                 else
                 {
                     Console.WriteLine($"Error en la solicitud: {response.StatusCode}");
-                    return (0, null, null, null, null, 0, 0, 0);
+                    return new List<(int, string, string, string, string, double, double, double)>();
                 }
             }
         }

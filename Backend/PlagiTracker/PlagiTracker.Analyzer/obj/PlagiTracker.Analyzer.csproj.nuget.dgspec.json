@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Camino_Emerson\\Semestre_9\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj": {}
+    "D:\\PlagiTracker2\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj": {}
   },
   "projects": {
-    "D:\\Camino_Emerson\\Semestre_9\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj": {
+    "D:\\PlagiTracker2\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Camino_Emerson\\Semestre_9\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj",
+        "projectUniqueName": "D:\\PlagiTracker2\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj",
         "projectName": "PlagiTracker.Analyzer",
-        "projectPath": "D:\\Camino_Emerson\\Semestre_9\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj",
-        "packagesPath": "C:\\Users\\Emer\\.nuget\\packages\\",
-        "outputPath": "D:\\Camino_Emerson\\Semestre_9\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\obj\\",
+        "projectPath": "D:\\PlagiTracker2\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj",
+        "packagesPath": "C:\\Users\\Luis\\.nuget\\packages\\",
+        "outputPath": "D:\\PlagiTracker2\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Emer\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Luis\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -22,8 +22,8 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://nuget.telerik.com/v3/index.json": {}
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
@@ -61,7 +61,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.202/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

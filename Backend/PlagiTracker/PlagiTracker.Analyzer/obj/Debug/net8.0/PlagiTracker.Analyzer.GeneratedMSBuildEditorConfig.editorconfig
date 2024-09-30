@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = PlagiTracker.Analyzer
-build_property.ProjectDir = D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.Analyzer\
+build_property.ProjectDir = D:\PlagiTracker2\Plagitracker\Backend\PlagiTracker\PlagiTracker.Analyzer\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 

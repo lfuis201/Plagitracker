@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "focVcxkDdda2hge5iwKVbk6Ywp8RvDHRqPdNWyhMrF+tMeABlIBk1huEABN2POwWozIqyMhWPzPXTOEHHMKv7Q==",
+  "dgSpecHash": "DiUt95SE+b0=",
   "success": true,
-  "projectFilePath": "D:\\Camino_Emerson\\Semestre_9\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj",
+  "projectFilePath": "D:\\PlagiTracker2\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.Analyzer\\PlagiTracker.Analyzer.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }
