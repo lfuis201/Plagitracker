@@ -83,14 +83,21 @@ import AssignmentService from '@/services/AssigmentService';
   
   // Función para manejar el envío del formulario
   const handleSubmit = async () => {
-    try {
-      // Crear la asignación usando el servicio
-      const createdAssignment = await AssignmentService.createAssignment(assignment.value)
-      console.log('Assignment Created:', createdAssignment)
-    } catch (error) {
-      console.error('Error creating assignment:', error)
-    }
+  try {
+    // Convierte submissionDate a UTC antes de enviar
+    const localDate = new Date(assignment.value.submissionDate);
+    assignment.value.submissionDate = localDate.toISOString(); // Convierte a UTC
+
+    // Crear la asignación usando el servicio
+    const createdAssignment = await AssignmentService.createAssignment(assignment.value);
+    console.log('Assignment Created:', createdAssignment);
+
+    handleClose();
+  } catch (error) {
+    console.error('Error creating assignment:', error);
   }
+};
+
   </script>
   
   <style scoped>

@@ -29,7 +29,7 @@ const handleSubmit = async (event: Event) => {
     
     // Si el login es exitoso, redirigir al dashboard
     console.log('Login successful:', userStore.getUser);
-    alert('Login successful:');
+    //alert('Login successful:');
 
     // Redirigir al dashboard
     router.push('/profile');

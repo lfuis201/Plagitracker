@@ -2,10 +2,10 @@
 import { ref } from 'vue'
 
 const packages = ref([
-  { name: 'Free Package', price: '$0.00', invoiceDate: 'Jan 13, 2025', status: 'Paid' },
-  { name: 'Standard Package', price: '$59.00', invoiceDate: 'Jan 13, 2025', status: 'Paid' },
-  { name: 'Business Package', price: '$99.00', invoiceDate: 'Jan 13, 2025', status: 'Unpaid' },
-  { name: 'Standard Package', price: '$59.00', invoiceDate: 'Jan 13, 2025', status: 'Pending' }
+  { name: 'Free Package', price: '$0.00', invoiceDate: 'Jan 13, 2025', status: 'Paid', SubmissionDate: 'Jan 13, 2025' },
+  { name: 'Standard Package', price: '$59.00', invoiceDate: 'Jan 13, 2025', status: 'Paid', SubmissionDate: 'Jan 13, 2025' },
+  { name: 'Business Package', price: '$99.00', invoiceDate: 'Jan 13, 2025', status: 'Unpaid', SubmissionDate: 'Jan 13, 2025' },
+  { name: 'Standard Package', price: '$59.00', invoiceDate: 'Jan 13, 2025', status: 'Pending', SubmissionDate: 'Jan 13, 2025' }
 ])
 </script>
 
@@ -18,10 +18,15 @@ const packages = ref([
         <thead>
           <tr class="bg-gray-2 text-left dark:bg-meta-4">
             <th class="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-              Package
+              Student
             </th>
+
+            <th class="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
+              Url
+            </th>
+
             <th class="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-              Invoice date
+              Submission Date
             </th>
             <th class="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">Status</th>
             <th class="py-4 px-4 font-medium text-black dark:text-white">Actions</th>
@@ -36,6 +41,11 @@ const packages = ref([
             <td class="py-5 px-4">
               <p class="text-black dark:text-white">{{ item.invoiceDate }}</p>
             </td>
+
+            <td class="py-5 px-4">
+              <p class="text-black dark:text-white">{{ item.SubmissionDate }}</p>
+            </td>
+
             <td class="py-5 px-4">
               <p
                 class="inline-flex rounded-full bg-opacity-10 py-1 px-3 text-sm font-medium"

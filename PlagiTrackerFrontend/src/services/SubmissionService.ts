@@ -1,0 +1,103 @@
+import type { Submission } from '@/types/Submission'
+import axiosInstance from './axiosInstance'
+
+const API_ENDPOINT = '/Submission'
+
+class SubmissionService {
+  /**
+   * Crea una nueva entrega (submission) en el sistema.
+   *
+   * @param {Omit<Submission, 'id'>} submission - Un objeto que contiene la información de la entrega que se va a crear.
+   * @returns {Promise<any>} - Una promesa que se resuelve con la respuesta del servidor en caso de éxito.
+   * @throws {Error} - Lanza un error si ocurre algún problema al crear la entrega.
+   */
+  static async createSubmission(submission: Omit<Submission, 'id'>): Promise<any> {
+    try {
+      const response = await axiosInstance.post(`${API_ENDPOINT}/Create`, submission)
+      return response.data
+    } catch (error) {
+      console.error('Error creating submission:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Obtiene una entrega específica por su ID.
+   *
+   * @param {string} submissionId - El ID de la entrega que se quiere obtener.
+   * @returns {Promise<Submission>} - La entrega solicitada.
+   * @throws {Error} - Lanza un error si ocurre algún problema al obtener la entrega.
+   */
+  static async getSubmissionById(submissionId: string): Promise<Submission> {
+    try {
+      const response = await axiosInstance.get(`${API_ENDPOINT}/Get`, {
+        params: { id: submissionId }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error getting submission by ID:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Obtiene todas las entregas hechas por un estudiante específico.
+   *
+   * @param {string} studentId - El ID del estudiante cuyas entregas se quieren obtener.
+   * @returns {Promise<Submission[]>} - Una lista de entregas asociadas al estudiante.
+   * @throws {Error} - Lanza un error si ocurre algún problema al obtener las entregas.
+   */
+  static async getAllSubmissionsByStudent(studentId: string): Promise<Submission[]> {
+    try {
+      const response = await axiosInstance.get(`${API_ENDPOINT}/GetAllByStudent`, {
+        params: { studentId }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error getting submissions by student:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Actualiza una entrega existente.
+   *
+   * @param {Submission} submission - El objeto Submission con los datos actualizados.
+   * @param {Date} submissionDate - La fecha y hora de la actualización de la entrega.
+   * @returns {Promise<any>} - La respuesta del servidor.
+   * @throws {Error} - Lanza un error si ocurre algún problema al actualizar la entrega.
+   */
+  static async updateSubmission(submission: Submission, submissionDate: Date): Promise<any> {
+    try {
+      const response = await axiosInstance.put(`${API_ENDPOINT}/Update`, {
+        ...submission,
+        dateTime: submissionDate
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error updating submission:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Elimina una entrega del sistema.
+   *
+   * @param {string} submissionId - El ID de la entrega que se va a eliminar.
+   * @returns {Promise<any>} - La respuesta del servidor.
+   * @throws {Error} - Lanza un error si ocurre algún problema al eliminar la entrega.
+   */
+  static async deleteSubmission(submissionId: string): Promise<any> {
+    try {
+      const response = await axiosInstance.delete(`${API_ENDPOINT}/Delete`, {
+        params: { id: submissionId }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error deleting submission:', error)
+      throw error
+    }
+  }
+}
+
+export default SubmissionService
