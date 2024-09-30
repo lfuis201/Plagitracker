@@ -1,4 +1,7 @@
+using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.EntityFrameworkCore;
+using PlagiTracker.WebAPI.HangFire;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +17,26 @@ builder.Services.AddDbContext<PlagiTracker.Data.DataAccess.DataContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("DatabaseConnection"));
 });
 
+builder.Services.AddScoped<HangFireServices>();
+
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins", builder =>
+        {
+            builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+        });
+});
+
+// Add Hangfire
+builder.Services.AddHangfire(config =>  {
+    config.SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+        .UseSimpleAssemblyNameTypeSerializer()
+        .UseRecommendedSerializerSettings()
+        .UsePostgreSqlStorage(options => options.UseNpgsqlConnection(builder.Configuration.GetConnectionString("DatabaseConnection")));
+});
+
+builder.Services.AddHangfireServer();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -27,6 +50,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Enable CORS
+app.UseCors("AllowAllOrigins");
+
+// Enable Hangfire Dashboard
+app.MapHangfireDashboard();
 
 app.UseHttpsRedirection();
 

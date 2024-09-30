@@ -4,6 +4,7 @@ using PlagiTracker.Data.Requests;
 using PlagiTracker.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using PlagiTracker.Services.SeleniumServices;
+using Hangfire;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
@@ -38,11 +39,12 @@ namespace PlagiTracker.WebAPI.Controllers
         }
 
         [HttpPost]
-        [Route("Start")]
-        public async Task<ActionResult> Start(List<string> urls)
+        [Route("Analyze")]
+        public async Task<ActionResult> Analyze(List<string> urls)
         {
-            PlagiTracker.Services.SeleniumServices.Web_Scraping scraper = new Web_Scraping();
-            
+            Web_Scraping scraper = new();
+
+            /*
             List<string> urls2 = new List<string>
             {
                 "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
@@ -63,8 +65,17 @@ namespace PlagiTracker.WebAPI.Controllers
                 "https://www.fundeu.es/recomendacion/colaboracion-posible-alternativa-a-featuring/",
 
             };
+            */
 
-            var data = await scraper.StartScraping(urls2);
+            /*
+            BackgroundJob.Schedule(() => 
+                new HangFire.HangFireServices().SavePlagiarismReport(urls2), 
+                new DateTimeOffset(DateTime.UtcNow.AddMinutes(1))
+            );
+            */
+
+            var data = await scraper.StartScraping(urls);
+            //var data = 2;
 
             return Ok(data);
         }

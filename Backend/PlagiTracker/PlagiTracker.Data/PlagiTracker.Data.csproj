@@ -21,6 +21,5 @@
 
   <ItemGroup>
     <Folder Include="Entities\Support\" />
-    <Folder Include="Migrations\" />
   </ItemGroup>
 </Project>

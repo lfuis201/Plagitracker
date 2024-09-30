@@ -129,3 +129,8 @@ E:\UNI\semester-9\Configuration and Change Management\Plagitracker\Backend\Plagi
 E:\UNI\semester-9\Configuration and Change Management\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\bin\Debug\net8.0\SeleniumExtras.WaitHelpers.dll
 E:\UNI\semester-9\Configuration and Change Management\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\bin\Debug\net8.0\PlagiTracker.Services.dll
 E:\UNI\semester-9\Configuration and Change Management\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\bin\Debug\net8.0\PlagiTracker.Services.pdb
+E:\UNI\semester-9\Configuration and Change Management\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\bin\Debug\net8.0\Dapper.dll
+E:\UNI\semester-9\Configuration and Change Management\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\bin\Debug\net8.0\Hangfire.AspNetCore.dll
+E:\UNI\semester-9\Configuration and Change Management\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\bin\Debug\net8.0\Hangfire.Core.dll
+E:\UNI\semester-9\Configuration and Change Management\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\bin\Debug\net8.0\Hangfire.NetCore.dll
+E:\UNI\semester-9\Configuration and Change Management\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\bin\Debug\net8.0\Hangfire.PostgreSql.dll

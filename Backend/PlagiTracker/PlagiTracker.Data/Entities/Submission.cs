@@ -24,6 +24,9 @@ namespace PlagiTracker.Data.Entities
         [Required]
         public DateTime SubmissionDate { get; set; }
 
+        [Range(0, 20)]
+        public double Grade { get; set; }
+
         [Required]
         public Guid StudentId { get; set; }
 
