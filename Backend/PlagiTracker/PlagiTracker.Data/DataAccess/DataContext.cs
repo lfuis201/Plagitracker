@@ -35,12 +35,6 @@ namespace PlagiTracker.Data.DataAccess
             modelBuilder.Entity<Teacher>(builder =>
             {
                 builder.ToTable("Teachers");
-                builder
-                    .HasMany(teacher => teacher.Courses)
-                    .WithOne()
-                    .HasForeignKey(course => course.TeacherId)
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
             });
 
             //Estudiante
@@ -53,6 +47,9 @@ namespace PlagiTracker.Data.DataAccess
             modelBuilder.Entity<Enrollment>(builder =>
             {
                 builder.HasKey(enrollment => new { enrollment.StudentId, enrollment.CourseId });
+                builder.Property(enrollment => enrollment.Grade)
+                       // Configura la columna como decimal con 2 decimales
+                       .HasColumnType("decimal(4, 2)");
             });
 
             //Tarea
@@ -60,6 +57,14 @@ namespace PlagiTracker.Data.DataAccess
 
             //Entrega
             modelBuilder.Entity<Submission>().HasIndex(s => s.Url).IsUnique();
+
+            //Plagio
+            modelBuilder.Entity<Plagiarism>(builder =>
+            {
+                builder.Property(p => p.Similarity)
+                        // Configura la columna como decimal con 2 decimales
+                       .HasColumnType("decimal(5, 2)"); 
+            });
 
             //Códgio Plagiado
             modelBuilder.Entity<PlagiarismCode>(builder =>
