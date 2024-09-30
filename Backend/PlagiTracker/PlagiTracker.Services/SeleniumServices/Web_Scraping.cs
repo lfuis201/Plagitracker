@@ -1,7 +1,7 @@
 ﻿using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium;
 using System.Diagnostics;
-using PlagiTracker;
+using PlagiTracker.Analyzer; // Esto es necesario para acceder a la clase Consumidor
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -50,7 +50,7 @@ namespace PlagiTracker.Services.SeleniumServices
             return url.Contains("codiva.io");
         }
 
-        public async Task<string> StartScraping(List<string> urls)
+        public async Task<(int coincidencias, string nombre1, string nombre2, string usuarioId1, string usuarioId2, double jaccard, double levenshtein, double semantica)> StartScraping(List<string> urls)
         {
             Stopwatch sw = new Stopwatch(); // Inicializar el cronómetro
             sw.Start(); // Iniciar la medición del tiempo
@@ -126,20 +126,31 @@ namespace PlagiTracker.Services.SeleniumServices
                 if (jsonData.Count > 0)
                 {
                     Consumidor consumidor = new Consumidor();
-                    string response = await consumidor.Ejecutar(jsonData); // Llama al analizador con los datos scrapeados
-                    Console.WriteLine($"Respuesta del servidor: {response}");
-                    return response; // Retorna la respuesta del servidor
+                    var resultados = await consumidor.Ejecutar(jsonData);
+
+                    // Imprimir los resultados
+                    Console.WriteLine($"Respuesta del servidor:");
+                    Console.WriteLine($"Coincidencias: {resultados.coincidencias}");
+                    Console.WriteLine($"Estudiante 1: {resultados.nombre1}");
+                    Console.WriteLine($"Estudiante 2: {resultados.nombre2}");
+                    Console.WriteLine($"Usuario ID 1: {resultados.usuarioId1}");
+                    Console.WriteLine($"Usuario ID 2: {resultados.usuarioId2}");
+                    Console.WriteLine($"Similitud Jaccard: {resultados.jaccard}%");
+                    Console.WriteLine($"Similitud Levenshtein: {resultados.levenshtein}");
+                    Console.WriteLine($"Similitud Semántica: {resultados.semantica}%");
+
+                    return resultados; // Retorna los resultados como una tupla
                 }
                 else
                 {
                     Console.WriteLine("No se encontró código válido para las URLs proporcionadas.");
-                    return "{}"; // Retorna un JSON vacío si no hay resultados
+                    return (0, null, null, null, null, 0, 0, 0); // Retorna una tupla vacía
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error: " + ex.Message);
-                return "{}"; // Retorna un JSON vacío en caso de error
+                return (0, null, null, null, null, 0, 0, 0); // Retorna una tupla vacía en caso de error
             }
             finally
             {
@@ -160,21 +171,13 @@ namespace PlagiTracker.Services.SeleniumServices
                 "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
                 "https://www.codiva.io/p/valid-url",
                 "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-                                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-
-                                                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-
-
+                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
+                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
             };
 
-            string serverResponse = await scraper.StartScraping(urls);
+            var resultados = await scraper.StartScraping(urls);
             Console.WriteLine("Resultado del análisis:");
-            Console.WriteLine(serverResponse);
-
-            var reportGenerator = new ReportGenerator();
-
-            // Aquí se asume que el formato del JSON en la respuesta es correcto
-            reportGenerator.GenerateReport(serverResponse);
+            // Aquí puedes manejar los resultados de la tupla si es necesario
         }
     }
 }

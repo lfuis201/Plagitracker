@@ -30,3 +30,36 @@ E:\UNI\semester-9\Configuration and Change Management\Plagitracker\Backend\Plagi
 E:\UNI\semester-9\Configuration and Change Management\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\PlagiTracker.WebAPI.pdb
 E:\UNI\semester-9\Configuration and Change Management\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\PlagiTracker.WebAPI.genruntimeconfig.cache
 E:\UNI\semester-9\Configuration and Change Management\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\ref\PlagiTracker.WebAPI.dll
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\bin\Debug\net8.0\appsettings.Development.json
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\bin\Debug\net8.0\appsettings.json
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\bin\Debug\net8.0\PlagiTracker.WebAPI.exe
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\bin\Debug\net8.0\PlagiTracker.WebAPI.deps.json
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\bin\Debug\net8.0\PlagiTracker.WebAPI.runtimeconfig.json
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\bin\Debug\net8.0\PlagiTracker.WebAPI.dll
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\bin\Debug\net8.0\PlagiTracker.WebAPI.pdb
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\bin\Debug\net8.0\Microsoft.OpenApi.dll
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\bin\Debug\net8.0\Swashbuckle.AspNetCore.Swagger.dll
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\PlagiTracker.WebAPI.csproj.AssemblyReference.cache
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\PlagiTracker.WebAPI.GeneratedMSBuildEditorConfig.editorconfig
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\PlagiTracker.WebAPI.AssemblyInfoInputs.cache
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\PlagiTracker.WebAPI.AssemblyInfo.cs
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\PlagiTracker.WebAPI.csproj.CoreCompileInputs.cache
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\PlagiTracker.WebAPI.MvcApplicationPartsAssemblyInfo.cs
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\PlagiTracker.WebAPI.MvcApplicationPartsAssemblyInfo.cache
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\PlagiTracker.WebAPI.sourcelink.json
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\staticwebassets.build.json
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\staticwebassets.development.json
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\staticwebassets\msbuild.PlagiTracker.WebAPI.Microsoft.AspNetCore.StaticWebAssets.props
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\staticwebassets\msbuild.build.PlagiTracker.WebAPI.props
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.PlagiTracker.WebAPI.props
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.PlagiTracker.WebAPI.props
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\staticwebassets.pack.json
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\scopedcss\bundle\PlagiTracker.WebAPI.styles.css
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\PlagiTra.BC8B205E.Up2Date
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\PlagiTracker.WebAPI.dll
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\refint\PlagiTracker.WebAPI.dll
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\PlagiTracker.WebAPI.pdb
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\PlagiTracker.WebAPI.genruntimeconfig.cache
+D:\Camino_Emerson\Semestre_9\Plagitracker\Backend\PlagiTracker\PlagiTracker.WebAPI\obj\Debug\net8.0\ref\PlagiTracker.WebAPI.dll

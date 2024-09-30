@@ -517,27 +517,28 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Death Knight\\.nuget\\packages\\": {}
+    "C:\\Users\\Emer\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\UNI\\semester-9\\Configuration and Change Management\\plagitracker\\Backend\\PlagiTracker\\PlagiTracker.WebAPI\\PlagiTracker.WebAPI.csproj",
+      "projectUniqueName": "D:\\Camino_Emerson\\Semestre_9\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.WebAPI\\PlagiTracker.WebAPI.csproj",
       "projectName": "PlagiTracker.WebAPI",
-      "projectPath": "E:\\UNI\\semester-9\\Configuration and Change Management\\plagitracker\\Backend\\PlagiTracker\\PlagiTracker.WebAPI\\PlagiTracker.WebAPI.csproj",
-      "packagesPath": "C:\\Users\\Death Knight\\.nuget\\packages\\",
-      "outputPath": "E:\\UNI\\semester-9\\Configuration and Change Management\\plagitracker\\Backend\\PlagiTracker\\PlagiTracker.WebAPI\\obj\\",
+      "projectPath": "D:\\Camino_Emerson\\Semestre_9\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.WebAPI\\PlagiTracker.WebAPI.csproj",
+      "packagesPath": "C:\\Users\\Emer\\.nuget\\packages\\",
+      "outputPath": "D:\\Camino_Emerson\\Semestre_9\\Plagitracker\\Backend\\PlagiTracker\\PlagiTracker.WebAPI\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Death Knight\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Emer\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {},
-        "https://contoso.com/packages/": {}
+        "https://nuget.telerik.com/v3/index.json": {}
       },
       "frameworks": {
         "net8.0": {
@@ -588,7 +589,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.205/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.202/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
