@@ -78,7 +78,7 @@
           "Dapper": "2.0.123",
           "Hangfire.Core": "1.8.14",
           "Microsoft.CSharp": "4.7.0",
-          "Npgsql": "8.0.3"
+          "Npgsql": "8.0.4"
         },
         "runtime": {
           "lib/netstandard2.0/Hangfire.PostgreSql.dll": {
@@ -474,6 +474,17 @@
           }
         }
       },
+      "Microsoft.EntityFrameworkCore.InMemory/8.0.8": {
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore": "8.0.8"
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.EntityFrameworkCore.InMemory.dll": {
+            "assemblyVersion": "8.0.8.0",
+            "fileVersion": "8.0.824.36704"
+          }
+        }
+      },
       "Microsoft.EntityFrameworkCore.Relational/8.0.8": {
         "dependencies": {
           "Microsoft.EntityFrameworkCore": "8.0.8",
@@ -605,28 +616,28 @@
           }
         }
       },
-      "Npgsql/8.0.3": {
+      "Npgsql/8.0.4": {
         "dependencies": {
           "Microsoft.Extensions.Logging.Abstractions": "8.0.0"
         },
         "runtime": {
           "lib/net8.0/Npgsql.dll": {
-            "assemblyVersion": "8.0.3.0",
-            "fileVersion": "8.0.3.0"
+            "assemblyVersion": "8.0.4.0",
+            "fileVersion": "8.0.4.0"
           }
         }
       },
-      "Npgsql.EntityFrameworkCore.PostgreSQL/8.0.4": {
+      "Npgsql.EntityFrameworkCore.PostgreSQL/8.0.8": {
         "dependencies": {
           "Microsoft.EntityFrameworkCore": "8.0.8",
           "Microsoft.EntityFrameworkCore.Abstractions": "8.0.8",
           "Microsoft.EntityFrameworkCore.Relational": "8.0.8",
-          "Npgsql": "8.0.3"
+          "Npgsql": "8.0.4"
         },
         "runtime": {
           "lib/net8.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll": {
-            "assemblyVersion": "8.0.4.0",
-            "fileVersion": "8.0.4.0"
+            "assemblyVersion": "8.0.8.0",
+            "fileVersion": "8.0.8.0"
           }
         }
       },
@@ -1211,7 +1222,8 @@
       "PlagiTracker.Data/1.0.0": {
         "dependencies": {
           "Microsoft.EntityFrameworkCore": "8.0.8",
-          "Npgsql.EntityFrameworkCore.PostgreSQL": "8.0.4"
+          "Microsoft.EntityFrameworkCore.InMemory": "8.0.8",
+          "Npgsql.EntityFrameworkCore.PostgreSQL": "8.0.8"
         },
         "runtime": {
           "PlagiTracker.Data.dll": {}
@@ -1400,6 +1412,13 @@
       "path": "microsoft.entityframeworkcore.design/8.0.8",
       "hashPath": "microsoft.entityframeworkcore.design.8.0.8.nupkg.sha512"
     },
+    "Microsoft.EntityFrameworkCore.InMemory/8.0.8": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-B4r7MGPHUjuIdoI4dMvGFWK2vIT1svIgR3fITc+62ZHmbkRS+gq0mZ8BU9CXM388MfD5Tsn5KXJjWeu+b9gLlg==",
+      "path": "microsoft.entityframeworkcore.inmemory/8.0.8",
+      "hashPath": "microsoft.entityframeworkcore.inmemory.8.0.8.nupkg.sha512"
+    },
     "Microsoft.EntityFrameworkCore.Relational/8.0.8": {
       "type": "package",
       "serviceable": true,
@@ -1554,19 +1573,19 @@
       "path": "newtonsoft.json/13.0.1",
       "hashPath": "newtonsoft.json.13.0.1.nupkg.sha512"
     },
-    "Npgsql/8.0.3": {
+    "Npgsql/8.0.4": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-6WEmzsQJCZAlUG1pThKg/RmeF6V+I0DmBBBE/8YzpRtEzhyZzKcK7ulMANDm5CkxrALBEC8H+5plxHWtIL7xnA==",
-      "path": "npgsql/8.0.3",
-      "hashPath": "npgsql.8.0.3.nupkg.sha512"
+      "sha512": "sha512-vaYEUlF/pB9m8bs21wQv3Da0kMHT4A9USe47VfY/L2BO97xz5KfIxhEu22QS9d68ZrLxvtL3wQDfDLPr2OjbjA==",
+      "path": "npgsql/8.0.4",
+      "hashPath": "npgsql.8.0.4.nupkg.sha512"
     },
-    "Npgsql.EntityFrameworkCore.PostgreSQL/8.0.4": {
+    "Npgsql.EntityFrameworkCore.PostgreSQL/8.0.8": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-/hHd9MqTRVDgIpsToCcxMDxZqla0HAQACiITkq1+L9J2hmHKV6lBAPlauF+dlNSfHpus7rrljWx4nAanKD6qAw==",
-      "path": "npgsql.entityframeworkcore.postgresql/8.0.4",
-      "hashPath": "npgsql.entityframeworkcore.postgresql.8.0.4.nupkg.sha512"
+      "sha512": "sha512-D5WWJZJTgZYUmGv66BARXbTlinp2a5f5RueJqGYoHuWJw02J0i2va/RA+8N4A5hLORK5YKMRqXhFWtKsZdrksw==",
+      "path": "npgsql.entityframeworkcore.postgresql/8.0.8",
+      "hashPath": "npgsql.entityframeworkcore.postgresql.8.0.8.nupkg.sha512"
     },
     "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.0": {
       "type": "package",
