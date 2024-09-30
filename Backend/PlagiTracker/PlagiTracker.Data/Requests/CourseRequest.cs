@@ -1,6 +1,8 @@
 ﻿namespace PlagiTracker.Data.Requests
 {
     /// <summary>
+    /// - Name
+    /// - TeacherId
     /// </summary>
     public class CourseRequest
     {
