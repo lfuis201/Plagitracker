@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PlagiTracker.Data.DataAccess;
-using PlagiTracker.Data.Requests;
-using PlagiTracker.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using PlagiTracker.Data.DataAccess;
+using PlagiTracker.Data.Entities;
+using PlagiTracker.Data.Requests;
 using PlagiTracker.Services.SeleniumServices;
-using Hangfire;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
@@ -42,7 +41,7 @@ namespace PlagiTracker.WebAPI.Controllers
         [Route("Analyze")]
         public async Task<ActionResult> Analyze(List<string> urls)
         {
-            Web_Scraping scraper = new();
+            WebScraping scraper = new();
 
             /*
             List<string> urls2 = new List<string>
@@ -75,7 +74,11 @@ namespace PlagiTracker.WebAPI.Controllers
             */
 
             var data = await scraper.StartScraping(urls);
-            //var data = 2;
+
+            if(data == null)
+            {
+                return BadRequest();
+            }
 
             return Ok(data);
         }
@@ -100,7 +103,7 @@ namespace PlagiTracker.WebAPI.Controllers
                 }
 
                 return Ok(assignments);
-            }        
+            }
         }
 
         [HttpPut]

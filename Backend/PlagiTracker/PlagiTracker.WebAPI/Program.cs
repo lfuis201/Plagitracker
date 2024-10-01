@@ -29,7 +29,8 @@ builder.Services.AddCors(options =>
 });
 
 // Add Hangfire
-builder.Services.AddHangfire(config =>  {
+builder.Services.AddHangfire(config =>
+{
     config.SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
         .UseSimpleAssemblyNameTypeSerializer()
         .UseRecommendedSerializerSettings()

@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PlagiTracker.Data.DataAccess;
-using PlagiTracker.Data.Requests;
-using PlagiTracker.Data.Entities;
-using PlagiTracker.Data.Responses;
 using Microsoft.EntityFrameworkCore;
+using PlagiTracker.Data.DataAccess;
+using PlagiTracker.Data.Entities;
+using PlagiTracker.Data.Requests;
+using PlagiTracker.Data.Responses;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
@@ -157,7 +156,7 @@ namespace PlagiTracker.WebAPI.Controllers
             });
         }
 
-        
+
         [HttpPut]
         [Route("Update")]
         public async Task<ActionResult> Update(TeacherUpdateRequest teacherUpdateRequest)

@@ -3,7 +3,7 @@ using PlagiTracker.Data.Requests;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
-    public interface IUserController 
+    public interface IUserController
     {
         const int UNLOCK_MINUTES = 10;
         const int MAX_LOGIN_ATTEMPTS = 3;

@@ -7,19 +7,22 @@
   </PropertyGroup>
 
 <ItemGroup>
-  <PackageReference Include="itext" Version="8.0.5" />
-  <PackageReference Include="itext7" Version="8.0.5" />
-  <PackageReference Include="iTextSharp" Version="5.5.13.4" />
-  <PackageReference Include="Selenium.Support" Version="4.24.0" />
-  <PackageReference Include="Selenium.WebDriver" Version="4.24.0" />
-  <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="128.0.6613.13700" />
+  <PackageReference Include="HtmlRendererCore.PdfSharp" Version="1.0.5" />
+  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  <PackageReference Include="Selenium.Support" Version="4.25.0" />
+  <PackageReference Include="Selenium.WebDriver" Version="4.25.0" />
+  <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="129.0.6668.7000" />
   <PackageReference Include="SeleniumExtras.WaitHelpers" Version="1.0.2" />
 </ItemGroup>
 	
   <ItemGroup>
     <Folder Include="FileServices\" />
     <Folder Include="EmailServices\" />
-    <Folder Include="SeleniumServices\" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <ProjectReference Include="..\PlagiTracker.Analyzer\PlagiTracker.Analyzer.csproj" />
+    <ProjectReference Include="..\PlagiTracker.Data\PlagiTracker.Data.csproj" />
   </ItemGroup>
 
 </Project>

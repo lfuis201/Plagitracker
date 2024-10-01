@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PlagiTracker.Data.DataAccess;
-using PlagiTracker.Data.Requests;
-using PlagiTracker.Data.Entities;
-using PlagiTracker.Data.Responses;
 using Microsoft.EntityFrameworkCore;
+using PlagiTracker.Data.DataAccess;
+using PlagiTracker.Data.Entities;
+using PlagiTracker.Data.Requests;
+using PlagiTracker.Data.Responses;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
@@ -41,12 +40,12 @@ namespace PlagiTracker.WebAPI.Controllers
             catch (Exception ex)
             {
                 if (
-                    ex.InnerException != null 
-                    && ex.InnerException.Message.Contains(IUserController.EMAIL_ALREADY_USED_EXCEPTION_MESSAGE_1) 
+                    ex.InnerException != null
+                    && ex.InnerException.Message.Contains(IUserController.EMAIL_ALREADY_USED_EXCEPTION_MESSAGE_1)
                     && ex.InnerException.Message.Contains(IUserController.EMAIL_ALREADY_USED_EXCEPTION_MESSAGE_2)
                 )
                 {
-                        return Conflict(new { message = "Email already used." });
+                    return Conflict(new { message = "Email already used." });
                 }
 
                 return BadRequest(ex.ToString());
@@ -69,10 +68,10 @@ namespace PlagiTracker.WebAPI.Controllers
                 {
                     if (student.IsLocked && student.UnlockDate.ToUniversalTime() > DateTime.UtcNow)
                     {
-                        return Unauthorized(new 
-                        { 
-                            message = "Account is locked.", 
-                            unlockDate = student.UnlockDate.ToUniversalTime() 
+                        return Unauthorized(new
+                        {
+                            message = "Account is locked.",
+                            unlockDate = student.UnlockDate.ToUniversalTime()
                         });
                     }
                     else if (student.IsLocked && student.UnlockDate.ToUniversalTime() <= DateTime.UtcNow)
@@ -98,9 +97,9 @@ namespace PlagiTracker.WebAPI.Controllers
                                 {
                                     student.IsLocked = true;
                                     student.UnlockDate = DateTime.UtcNow.AddMinutes(IUserController.UNLOCK_MINUTES);
-                                    
+
                                     await _context.SaveChangesAsync();
-                                    
+
                                     return Unauthorized(new
                                     {
                                         message = "Account is locked.",
@@ -110,10 +109,10 @@ namespace PlagiTracker.WebAPI.Controllers
 
                                 await _context.SaveChangesAsync();
 
-                                return Unauthorized(new 
-                                { 
-                                    message = "Invalid password.", 
-                                    remainingLogInAttempts = IUserController.MAX_LOGIN_ATTEMPTS - student.LogInAttempts 
+                                return Unauthorized(new
+                                {
+                                    message = "Invalid password.",
+                                    remainingLogInAttempts = IUserController.MAX_LOGIN_ATTEMPTS - student.LogInAttempts
                                 });
                             }
                         }

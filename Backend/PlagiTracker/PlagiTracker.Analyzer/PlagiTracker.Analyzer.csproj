@@ -7,9 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="FirstMethodName\" />
-    <Folder Include="ThirdMethodName\" />
-    <Folder Include="SecondMethodName\" />
+    <Compile Remove="FirstMethodName\**" />
+    <Compile Remove="SecondMethodName\**" />
+    <Compile Remove="ThirdMethodName\**" />
+    <EmbeddedResource Remove="FirstMethodName\**" />
+    <EmbeddedResource Remove="SecondMethodName\**" />
+    <EmbeddedResource Remove="ThirdMethodName\**" />
+    <None Remove="FirstMethodName\**" />
+    <None Remove="SecondMethodName\**" />
+    <None Remove="ThirdMethodName\**" />
   </ItemGroup>
 
 </Project>

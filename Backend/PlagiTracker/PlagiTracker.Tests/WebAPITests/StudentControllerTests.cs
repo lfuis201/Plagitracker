@@ -3,11 +3,7 @@ using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Entities;
 using PlagiTracker.Data.Requests;
 using PlagiTracker.WebAPI.Controllers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace PlagiTracker.Tests.WebAPITests
 {

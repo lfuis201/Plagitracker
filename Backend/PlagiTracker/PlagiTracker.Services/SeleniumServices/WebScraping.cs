@@ -1,41 +1,39 @@
-﻿using OpenQA.Selenium.Firefox;
-using OpenQA.Selenium.Chrome;
+﻿using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium;
 using System.Diagnostics;
-using PlagiTracker.Services.Reportes;
+using PlagiTracker.Analyzer;
+// Esto es necesario para acceder a la clase Consumidor
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
+using System.Text.Json;
 using Newtonsoft.Json;
+using PlagiTracker.Services.FileServices;
+
 
 namespace PlagiTracker.Services.SeleniumServices
 {
-    public class Web_Scraping
+    public class WebScraping
     {
         private IWebDriver driver;
 
-        /// <summary>
-        /// Constructor de la clase Web_Scraping que inicializa el driver de Chrome con las opciones necesarias para el scraping
-        /// </summary>
-        public Web_Scraping()
+        public WebScraping()
         {
-            //var chromeDriverService = FirefoxDriverService.CreateDefaultService(@"C:\Users\Luis\Downloads\Chrome Selenium\chromedriver-win64 (2)\chromedriver-win64");
-            //chromeDriverService.HideCommandPromptWindow = false;
-            var options = new FirefoxOptions();
+            var chromeDriverService = ChromeDriverService.CreateDefaultService(@"C:\Users\Luis\Downloads\Chrome Selenium\chromedriver-win64 (2)\chromedriver-win64");
+            chromeDriverService.HideCommandPromptWindow = false;
+            var options = new ChromeOptions();
 
             options.AddArgument("--disable-usb");
             options.AddArgument("--headless");
-
             options.AddArgument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
-            //options.AddExcludedArgument("enable-automation");
+            options.AddExcludedArgument("enable-automation");
             options.AddAdditionalOption("useAutomationExtension", false);
 
-            driver = new FirefoxDriver(options);
+            driver = new ChromeDriver(chromeDriverService, options);
         }
-        //Funcion que verifica si la url es valida para el scraping para evitar errores
+
         public async Task<bool> UrlExists(string url)
         {
             try
@@ -51,28 +49,23 @@ namespace PlagiTracker.Services.SeleniumServices
                 return false;
             }
         }
-        //Funcion que verifica si la url es de codiva
+
         public bool IsCodivaUrl(string url)
         {
             return url.Contains("codiva.io");
         }
-        /// <summary>
-        /// Funcion que inicia el scraping de las urls proporcionadas y guarda los datos en un archivo jsoN (Esto es de prueba solo para ver como bota el JSON)
-        /// </summary>
-        /// <param name="urls">asdasd</param>
-        /// <returns>asdasdasd</returns>
-        public async Task<Dictionary<string, List<Dictionary<string, string>>>> StartScraping(List<string> urls)
+
+        public async Task<PdfSharpCore.Pdf.PdfDocument> StartScraping(List<string> urls)
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
 
+            PdfSharpCore.Pdf.PdfDocument document = null;
             var jsonData = new Dictionary<string, List<Dictionary<string, string>>>();
+            var allResults = new List<(int coincidencias, string nombre1, string nombre2, string usuarioId1, string usuarioId2, double jaccard, double levenshtein, double semantica)>();
 
-            // Contenidos que deseas ignorar (puedes ajustarlo si encuentras más casos similares)
             var ignorePatterns = new List<string>
-    {
-        "System.out.println(\"Hello Codiva\");"
-    };
+            {
+                "System.out.println(\"Hello Codiva\");"
+            };
 
             try
             {
@@ -96,7 +89,7 @@ namespace PlagiTracker.Services.SeleniumServices
                     Thread.Sleep(1000);
 
                     var labels = driver.FindElements(By.XPath("//label[starts-with(@for, 'tab-java-')]"));
-                    string studentId = Guid.NewGuid().ToString(); // Usarás el identificador correcto para cada alumno
+                    string studentId = Guid.NewGuid().ToString();
 
                     var studentFiles = new List<Dictionary<string, string>>();
 
@@ -106,52 +99,83 @@ namespace PlagiTracker.Services.SeleniumServices
                         var tabElement = driver.FindElement(By.XPath($"//label[@title='{className}']"));
                         tabElement.Click();
 
-                        // Esperar un poco para asegurar que el contenido se haya actualizado
                         Thread.Sleep(1000);
 
                         var codeElements = driver.FindElements(By.XPath("//div[contains(@class,'CodeMirror-code')]//pre"));
                         string codeContent = string.Join("\n", codeElements.Select(e => e.Text).Select(c => c.Trim()));
 
-                        // Comprobar si el contenido contiene patrones que debemos ignorar
                         bool containsIgnoredPattern = ignorePatterns.Any(pattern => codeContent.Contains(pattern));
                         if (containsIgnoredPattern)
                         {
                             Console.WriteLine($"Archivo {className}.java ignorado debido a contenido irrelevante.");
-                            continue; // Omitir este archivo y continuar con el siguiente
+                            continue;
                         }
 
                         var fileData = new Dictionary<string, string>
-                {
-                    { "nombre", $"{className}.java" },
-                    { "contenido", codeContent }
-                };
+                        {
+                            { "nombre", $"{className}" },
+                            { "contenido", codeContent }
+                        };
 
                         studentFiles.Add(fileData);
                         Console.WriteLine($"Scraping terminado para {className}");
                     }
 
-                    // Añadir los datos solo si se obtuvieron archivos de código
                     if (studentFiles.Count > 0)
                     {
                         jsonData[studentId] = studentFiles;
                         Console.WriteLine($"Scraping completo para la URL: {url}");
+
+                        // Procesar los resultados
+                        Consumidor consumidor = new Consumidor();
+                        var resultados = await consumidor.Ejecutar(jsonData);
+
+                        // Agregar los resultados a la lista
+                        allResults.AddRange(resultados);
                     }
                 }
 
-                if (jsonData.Count > 0)
+                // Ahora procesamos todos los resultados
+                if (allResults.Count > 0)
                 {
-                    //string jsonOutput = JsonConvert.SerializeObject(jsonData, Formatting.Indented);
-                    //string jsonFilePath = @"D:\WS Text\Codigo\codigos.json";
-                    //File.WriteAllText(jsonFilePath, jsonOutput);
-                    //Console.WriteLine($"Datos guardados en formato JSON en: {jsonFilePath}");
+                    foreach (var resultado in allResults)
+                    {
+                        // Imprimir los resultados individualmente
+                        Console.WriteLine($"Respuesta del servidor:");
+                        Console.WriteLine($"Coincidencias: {resultado.coincidencias}");
+                        Console.WriteLine($"Estudiante 1: {resultado.nombre1}");
+                        Console.WriteLine($"Estudiante 2: {resultado.nombre2}");
+                        Console.WriteLine($"Usuario ID 1: {resultado.usuarioId1}");
+                        Console.WriteLine($"Usuario ID 2: {resultado.usuarioId2}");
+                        Console.WriteLine($"Similitud Jaccard: {resultado.jaccard}%");
+                        Console.WriteLine($"Similitud Levenshtein: {resultado.levenshtein}");
+                        Console.WriteLine($"Similitud Semántica: {resultado.semantica}%");
+                    }
+
+                    var reportData = new
+                    {
+                        comparaciones_entre_ids = allResults.Select(r => new
+                        {
+                            r.usuarioId1,
+                            r.usuarioId2,
+                            r.coincidencias,
+                            r.jaccard,
+                            r.levenshtein,
+                            r.semantica,
+                            r.nombre1,
+                            r.nombre2
+                        }).ToArray()
+                    };
+
+                    string jsonResponse = JsonConvert.SerializeObject(reportData);
+                    Console.WriteLine("JSON Generado: " + jsonResponse); // Imprimir el JSON para revisar la estructura
+
+                    document = ReportGenerator.GenerateReport(jsonResponse); // Llamada para generar el PDF
                 }
                 else
                 {
                     Console.WriteLine("No se encontró código válido para las URLs proporcionadas.");
                 }
-
-                sw.Stop();
-                Console.WriteLine("Tiempo transcurrido: {0}", sw.Elapsed.ToString("hh\\:mm\\:ss\\.fff"));
             }
             catch (Exception ex)
             {
@@ -160,47 +184,34 @@ namespace PlagiTracker.Services.SeleniumServices
             finally
             {
                 driver.Quit();
-                
             }
-            return jsonData;
+            
+            return document!;
         }
-
-
     }
-    
+
     internal class Program
     {
-        
         static async Task Main(string[] args)
         {
-            //Falta solucionar que cuando encuentre una url que no es no genere su json vacio
-            //Funcion que inicia el scraping de las urls proporcionadas y guarda los datos en un archivo jsoN (Esto es de prueba solo para ver como bota el JSON)
-            Web_Scraping scraper = new Web_Scraping();
+            WebScraping scraper = new WebScraping();
             List<string> urls = new List<string>
             {
                 "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-                "https://www.invalid-url.com",  
-                "https://www.youtube.com/watch?v=TpNDSyDnUwc", 
-                "https://www.codiva.io/p/valid-url", 
+                "https://www.codiva.io/p/valid-url",
                 "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
                 "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
                 "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-                "https://classroom.google.com/c/NzA0MDM0NzM0MzYy",
-                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-                "https://chatgpt.com/c/66e8b455-d26c-8005-90e1-7fbb273e3801",
-                "https://classroom.google.com/c/NzA0MDM0NzM0MzYy",
-                "https://www.fundeu.es/recomendacion/colaboracion-posible-alternativa-a-featuring/",
-
             };
 
-            await scraper.StartScraping(urls);
+            await scraper.StartScraping(urls); // Llama al método sin asignar a una variable
+            Console.WriteLine("Resultado del análisis:");
 
-            ReporteScraping reporte = new ReporteScraping();
-          
+            // Generar el reporte
+            ReportGenerator reportGenerator = new ReportGenerator();
+
+            Console.WriteLine("Scraping completado y reporte generado.");
+            // Aquí puedes manejar los resultados de la tupla si es necesario
         }
     }
 }

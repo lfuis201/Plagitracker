@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PlagiTracker.Data.DataAccess;
-using PlagiTracker.Data.Requests;
-using PlagiTracker.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using PlagiTracker.Data.DataAccess;
+using PlagiTracker.Data.Entities;
+using PlagiTracker.Data.Requests;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
@@ -87,8 +87,8 @@ namespace PlagiTracker.WebAPI.Controllers
         public async Task<ActionResult> Delete(EnrollmentRequest enrollmentRequest)
         {
             var enrollment = await _context!.Enrollments!.FirstOrDefaultAsync(e => e.CourseId == enrollmentRequest.CourseId && e.StudentId == enrollmentRequest.StudentId);
-            
-            if(enrollment == null)
+
+            if (enrollment == null)
             {
                 return NotFound();
             }

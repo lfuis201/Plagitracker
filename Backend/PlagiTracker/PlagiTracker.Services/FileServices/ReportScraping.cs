@@ -1,84 +1,73 @@
-﻿using iTextSharp.text;
-using iTextSharp.text.pdf;
-using System;
+﻿using System;
 using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using HtmlRendererCore.PdfSharp;
+using System.Net.Http;
+using System.Security.Cryptography;
 
-namespace PlagiTracker.Services.Reportes
+namespace PlagiTracker.Services.FileServices
 {
-    public class ReporteScraping
+    public class ReportGenerator
     {
-        public void GenerarReportePDF(string rutaArchivo, string nombreEstudiante, float porcentajeSimilitud, string codigo, string rutaLogo)
+        public static PdfSharpCore.Pdf.PdfDocument GenerateReport(string jsonData)
         {
-            // Crear un documento PDF con tamaño A4 y márgenes
-            Document documento = new Document(PageSize.A4, 25, 25, 30, 30);
+            PdfSharpCore.Pdf.PdfDocument document = new();
 
+            // Procesar el JSON para extraer los datos necesarios
+            JObject json;
             try
             {
-                // Asegúrate de que el directorio existe
-                string directorio = Path.GetDirectoryName(rutaArchivo);
-                if (!Directory.Exists(directorio))
-                {
-                    Directory.CreateDirectory(directorio);
-                }
-
-                // Crear el escritor para el documento PDF
-                PdfWriter writer = PdfWriter.GetInstance(documento, new FileStream(rutaArchivo, FileMode.Create));
-
-                // Abrir el documento para añadir contenido
-                documento.Open();
-
-                // Añadir el logo (si tienes uno), ajusta la ruta y dimensiones
-                if (!string.IsNullOrEmpty(rutaLogo) && File.Exists(rutaLogo))
-                {
-                    iTextSharp.text.Image logo = iTextSharp.text.Image.GetInstance(rutaLogo);
-                    logo.ScaleToFit(150f, 150f); // Ajusta el tamaño del logo
-                    logo.Alignment = Element.ALIGN_CENTER; // Centrar el logo
-                    documento.Add(logo);
-                }
-
-                
-                Font tituloFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 24, BaseColor.BLACK);
-                Paragraph titulo = new Paragraph("PLAGITRACKER", tituloFont)
-                {
-                    Alignment = Element.ALIGN_CENTER
-                };
-                documento.Add(titulo);
-
-                // Añadir un salto de línea
-                documento.Add(new Paragraph("\n"));
-
-                // Añadir los datos del estudiante y el porcentaje de similitud
-                Font datosFont = FontFactory.GetFont(FontFactory.HELVETICA, 12, BaseColor.BLACK);
-                Paragraph datosEstudiante = new Paragraph($"Nombre del Estudiante: {nombreEstudiante}\nPorcentaje de Similitud: {porcentajeSimilitud}%", datosFont);
-                datosEstudiante.Alignment = Element.ALIGN_LEFT;
-                documento.Add(datosEstudiante);
-
-                // Añadir un salto de línea
-                documento.Add(new Paragraph("\n"));
-
-                // Añadir el código scrapeado en el PDF
-                Font codigoFont = FontFactory.GetFont(FontFactory.COURIER, 10, BaseColor.BLACK);
-                Paragraph codigoTitulo = new Paragraph("Código:", codigoFont);
-                codigoTitulo.Alignment = Element.ALIGN_LEFT;
-                documento.Add(codigoTitulo);
-
-                // Añadir el código con formato de texto
-                Paragraph codigoContenido = new Paragraph(codigo, codigoFont);
-                codigoContenido.Alignment = Element.ALIGN_LEFT;
-                documento.Add(codigoContenido);
+                json = JObject.Parse(jsonData);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error al generar el PDF: " + ex.Message);
+                Console.WriteLine("Error al procesar JSON: " + ex.Message);
+                return document; // Salir si el JSON no es válido
             }
-            finally
+
+            // Asegúrate de que "comparaciones_entre_ids" no es nulo
+            var comparaciones = json["comparaciones_entre_ids"];
+            if (comparaciones == null)
             {
-                // Asegúrate de cerrar el documento correctamente
-                if (documento.IsOpen())
-                {
-                    documento.Close();
-                }
+                Console.WriteLine("No se encontraron comparaciones en el JSON.");
+                return document; // Salir si no hay comparaciones
             }
+
+            string htmlContent = string.Empty;
+            htmlContent += "<html> <body>";
+
+            // Agregar contenido al PDF
+            htmlContent += $"<h1>Reporte de Plagio<h1>";
+            htmlContent += $"<h2>Fecha y Hora de Generación: { DateTime.Now.ToString("dd/MM/yyyy HH:mm")} <h2>";
+
+            foreach (var comparacion in comparaciones)
+            {
+                // Extraer los datos necesarios
+                int coincidencias = (int)comparacion["coincidencias"];
+                string nombre1 = comparacion["nombre1"].ToString();
+                string nombre2 = comparacion["nombre2"].ToString();
+                string usuarioId1 = comparacion["usuarioId1"].ToString();
+                string usuarioId2 = comparacion["usuarioId2"].ToString();
+                double similitudJaccard = (double)comparacion["jaccard"];
+                double similitudLevenshtein = (double)comparacion["levenshtein"];
+                double similitudSemantica = (double)comparacion["semantica"];
+
+                // Agregar los datos al PDF
+
+                htmlContent += $"<p>Estudiante 1: {nombre1} (ID: {usuarioId1}) vs Estudiante 2: {nombre2} (ID: {usuarioId2})</p>";
+                htmlContent += $"<p>Coincidencias: {coincidencias}</p>";
+                htmlContent += $"<p>Similitud Jaccard: {similitudJaccard:F2}%</p>";
+                htmlContent += $"<p>Similitud Levenshtein: {similitudLevenshtein:F2}</p>";
+                htmlContent += $"<p>Similitud Semántica: {similitudSemantica:F2}%</p>";
+                htmlContent += "<br>"; // Espacio en blanco
+            }
+
+            document.Close();
+
+            document = PdfGenerator.GeneratePdf(htmlContent, PdfSharpCore.PageSize.A4);
+
+            return document;
         }
     }
 }

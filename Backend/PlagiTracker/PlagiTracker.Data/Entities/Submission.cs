@@ -1,12 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlagiTracker.Data.Entities
 {
     /// <summary>
     /// Entrega del estudiante, con la url de la entrega
     /// </summary>
-    public  class Submission
+    public class Submission
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

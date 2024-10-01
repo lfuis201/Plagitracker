@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using PlagiTracker.Data.DataAccess;
+﻿using PlagiTracker.Data.DataAccess;
 
 namespace PlagiTracker.WebAPI.HangFire
 {

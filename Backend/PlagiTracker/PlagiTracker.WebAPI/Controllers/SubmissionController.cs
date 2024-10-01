@@ -1,12 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PlagiTracker.Data.DataAccess;
-using PlagiTracker.Data.Requests;
-using PlagiTracker.Data.Entities;
-using PlagiTracker.Data.Responses;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
-using System.Text;
-using System;
+using PlagiTracker.Data.DataAccess;
+using PlagiTracker.Data.Entities;
+using PlagiTracker.Data.Requests;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
@@ -115,7 +111,7 @@ namespace PlagiTracker.WebAPI.Controllers
 
             var submission = await _context!.Submissions!.FindAsync(newSubmission.Id);
 
-            if(submission == null)
+            if (submission == null)
             {
                 return NotFound();
             }
