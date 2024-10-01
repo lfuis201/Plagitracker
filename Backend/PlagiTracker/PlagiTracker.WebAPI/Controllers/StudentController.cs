@@ -11,7 +11,7 @@ namespace PlagiTracker.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class StudentController : ControllerBase
+    public class StudentController : ControllerBase, IUserController
     {
         private readonly DataContext _context;
 
@@ -24,17 +24,33 @@ namespace PlagiTracker.WebAPI.Controllers
         [Route("SignUp")]
         public async Task<ActionResult> SignUp(SignUpRequest signUpRequest)
         {
-            await _context!.Students!.AddAsync(new Student()
+            try
             {
-                Id = Guid.NewGuid(),
-                FirstName = signUpRequest.FirstName,
-                LastName = signUpRequest.LastName,
-                Email = signUpRequest.Email,
-                PasswordHash = signUpRequest.PasswordHash
-            });
+                await _context!.Students!.AddAsync(new Student()
+                {
+                    Id = Guid.NewGuid(),
+                    FirstName = signUpRequest.FirstName,
+                    LastName = signUpRequest.LastName,
+                    Email = signUpRequest.Email,
+                    PasswordHash = signUpRequest.PasswordHash
+                });
 
-            await _context.SaveChangesAsync();
-            return Ok();
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                if (
+                    ex.InnerException != null 
+                    && ex.InnerException.Message.Contains(IUserController.EMAIL_ALREADY_USED_EXCEPTION_MESSAGE_1) 
+                    && ex.InnerException.Message.Contains(IUserController.EMAIL_ALREADY_USED_EXCEPTION_MESSAGE_2)
+                )
+                {
+                        return Conflict(new { message = "Email already used." });
+                }
+
+                return BadRequest(ex.ToString());
+            }
         }
 
         [HttpPost]
@@ -47,10 +63,26 @@ namespace PlagiTracker.WebAPI.Controllers
 
                 if (student == null)
                 {
-                    return NotFound();
+                    return NotFound(new { message = "Account not found." });
                 }
                 else
                 {
+                    if (student.IsLocked && student.UnlockDate.ToUniversalTime() > DateTime.UtcNow)
+                    {
+                        return Unauthorized(new 
+                        { 
+                            message = "Account is locked.", 
+                            unlockDate = student.UnlockDate.ToUniversalTime() 
+                        });
+                    }
+                    else if (student.IsLocked && student.UnlockDate.ToUniversalTime() <= DateTime.UtcNow)
+                    {
+                        // Desbloqueando cuenta
+                        student.IsLocked = false;
+                        student.UnlockDate = DateTime.MinValue;
+                        student.LogInAttempts = 0;
+                    }
+
                     //Comparando bytes de la contraseña
                     using (SHA256 sha256Hash = SHA256.Create())
                     {
@@ -59,10 +91,35 @@ namespace PlagiTracker.WebAPI.Controllers
                         {
                             if (bytes[i] != student.PasswordHash![i])
                             {
-                                return Unauthorized();
+                                student.LogInAttempts++;
+
+                                // Bloqueando cuenta después de n intentos fallidos
+                                if (student.LogInAttempts == IUserController.MAX_LOGIN_ATTEMPTS)
+                                {
+                                    student.IsLocked = true;
+                                    student.UnlockDate = DateTime.UtcNow.AddMinutes(IUserController.UNLOCK_MINUTES);
+                                    
+                                    await _context.SaveChangesAsync();
+                                    
+                                    return Unauthorized(new
+                                    {
+                                        message = "Account is locked.",
+                                        unlockDate = student.UnlockDate.ToUniversalTime()
+                                    });
+                                }
+
+                                await _context.SaveChangesAsync();
+
+                                return Unauthorized(new 
+                                { 
+                                    message = "Invalid password.", 
+                                    remainingLogInAttempts = IUserController.MAX_LOGIN_ATTEMPTS - student.LogInAttempts 
+                                });
                             }
                         }
                     }
+
+                    await _context.SaveChangesAsync();
 
                     return Ok(new LogInResponse
                     {
@@ -75,8 +132,7 @@ namespace PlagiTracker.WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
-                return NotFound();
+                return BadRequest(ex.ToString());
             }
         }
 

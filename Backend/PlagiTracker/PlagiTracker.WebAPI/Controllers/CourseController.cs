@@ -102,6 +102,21 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetAllByTeacher")]
+        public async Task<ActionResult<List<Course>>> GetAllByTeacher(Guid teacherId)
+        {
+            var courses = await _context!.Courses!.Where(c => c.TeacherId == teacherId).ToListAsync();
+
+            // Verificar si no se encontraron cursos
+            if (courses == null || courses.Count < 1)
+            {
+                return NotFound();
+            }
+
+            return Ok(courses);
+        }
+
         [HttpPut]
         [Route("Update")]
         public async Task<ActionResult> Update(CourseUpdateRequest courseUpdateRequest)

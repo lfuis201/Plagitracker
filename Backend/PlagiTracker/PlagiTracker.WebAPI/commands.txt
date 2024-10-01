@@ -1,0 +1,28 @@
+Add-Migration UpdatePlagiarismAndSubmission -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
+Update-Database -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
+
+{
+  "firstName": "Pedro",
+  "lastName": "Picapiedra",
+  "email": "ppicapiedra@gmail.com",
+  "passwordHash": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg="
+}
+
+{
+  "firstName": "Pablo",
+  "lastName": "Marmol",
+  "email": "mmarmol@gmail.com",
+  "passwordHash": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg="
+}
+
+password = "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg="
+123456789 = "FeKw08M4keuw8e9gnsQZQgwg4yDOlMZfvIwzEkSOsiU="
+
+modelBuilder.Entity<User>(builder =>
+{
+    builder.HasIndex(user => user.Email).IsUnique();
+
+    //Configuracón para que el nombre completo sea único
+    builder.HasIndex(user => new { user.FirstName, user.LastName }).IsUnique();
+});
+

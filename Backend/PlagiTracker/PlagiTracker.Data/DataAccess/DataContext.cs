@@ -35,12 +35,6 @@ namespace PlagiTracker.Data.DataAccess
             modelBuilder.Entity<Teacher>(builder =>
             {
                 builder.ToTable("Teachers");
-                builder
-                    .HasMany(teacher => teacher.Courses)
-                    .WithOne()
-                    .HasForeignKey(course => course.TeacherId)
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
             });
 
             //Estudiante
@@ -53,21 +47,36 @@ namespace PlagiTracker.Data.DataAccess
             modelBuilder.Entity<Enrollment>(builder =>
             {
                 builder.HasKey(enrollment => new { enrollment.StudentId, enrollment.CourseId });
+
+                // Configura la columna como decimal con 2 valores enteros y con 2 decimales
+                builder.Property(enrollment => enrollment.Grade).HasColumnType("decimal(4, 2)");
             });
 
             //Tarea
             modelBuilder.Entity<Assignment>().HasIndex(a => a.Title).IsUnique();
 
             //Entrega
-            modelBuilder.Entity<Submission>().HasIndex(s => s.Url).IsUnique();
+            modelBuilder.Entity<Submission>(builder =>
+            {
+                builder.HasIndex(s => s.Url).IsUnique();
+                // Configura la columna como decimal con 2 valores enteros y con 2 decimales
+                builder.Property(s => s.Grade).HasColumnType("decimal(4, 2)");
+            });
+
+            //Plagio
+            modelBuilder.Entity<Plagiarism>(builder =>
+            {
+                // Configura la columna como decimal con 3 valores enteros y con 2 decimales
+                builder.Property(p => p.Similarity).HasColumnType("decimal(5, 2)");
+            });
 
             //Códgio Plagiado
             modelBuilder.Entity<PlagiarismCode>(builder =>
             {
-                builder.HasKey(plagiarismCode => new 
-                { 
-                    plagiarismCode.PlagiarismId, 
-                    plagiarismCode.CodeId 
+                builder.HasKey(plagiarismCode => new
+                {
+                    plagiarismCode.PlagiarismId,
+                    plagiarismCode.CodeId
                 });
             });
         }

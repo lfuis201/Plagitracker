@@ -27,9 +27,9 @@ namespace PlagiTracker.Data.Entities
 
         public enum PlagiarismDetector
         {
-            P1,
-            P2,
-            P3
+            Jaccard,
+            Levenshtein,
+            Semantica
         }
     }
 }
