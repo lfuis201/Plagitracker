@@ -1,16 +1,8 @@
-﻿using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium;
-using System.Diagnostics;
+﻿using OpenQA.Selenium;
 using PlagiTracker.Analyzer;
-// Esto es necesario para acceder a la clase Consumidor
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Linq;
-using System.Text.Json;
 using Newtonsoft.Json;
 using PlagiTracker.Services.FileServices;
+using OpenQA.Selenium.Firefox;
 
 
 namespace PlagiTracker.Services.SeleniumServices
@@ -21,17 +13,16 @@ namespace PlagiTracker.Services.SeleniumServices
 
         public WebScraping()
         {
-            var chromeDriverService = ChromeDriverService.CreateDefaultService(@"C:\Users\Luis\Downloads\Chrome Selenium\chromedriver-win64 (2)\chromedriver-win64");
-            chromeDriverService.HideCommandPromptWindow = false;
-            var options = new ChromeOptions();
+            var options = new FirefoxOptions();
 
             options.AddArgument("--disable-usb");
             options.AddArgument("--headless");
+
             options.AddArgument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
-            options.AddExcludedArgument("enable-automation");
+            //options.AddExcludedArgument("enable-automation");
             options.AddAdditionalOption("useAutomationExtension", false);
 
-            driver = new ChromeDriver(chromeDriverService, options);
+            driver = new FirefoxDriver(options);
         }
 
         public async Task<bool> UrlExists(string url)

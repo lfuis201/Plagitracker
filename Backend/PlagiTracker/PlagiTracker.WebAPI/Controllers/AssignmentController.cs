@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PdfSharpCore.Pdf;
 using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Entities;
 using PlagiTracker.Data.Requests;
@@ -43,9 +44,10 @@ namespace PlagiTracker.WebAPI.Controllers
         {
             WebScraping scraper = new();
 
-            /*
+            
             List<string> urls2 = new List<string>
             {
+                /*
                 "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
                 "https://www.invalid-url.com",
                 "https://www.youtube.com/watch?v=TpNDSyDnUwc",
@@ -57,14 +59,15 @@ namespace PlagiTracker.WebAPI.Controllers
                 "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
                 "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
                 "https://classroom.google.com/c/NzA0MDM0NzM0MzYy",
+                */
                 "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
                 "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
                 "https://chatgpt.com/c/66e8b455-d26c-8005-90e1-7fbb273e3801",
                 "https://classroom.google.com/c/NzA0MDM0NzM0MzYy",
                 "https://www.fundeu.es/recomendacion/colaboracion-posible-alternativa-a-featuring/",
-
             };
-            */
+            
+            urls = urls2;
 
             /*
             BackgroundJob.Schedule(() => 
@@ -80,7 +83,14 @@ namespace PlagiTracker.WebAPI.Controllers
                 return BadRequest();
             }
 
-            return Ok(data);
+            // Convertir el PDF a un array de bytes
+            using (var memoryStream = new MemoryStream())
+            {
+                data.Save(memoryStream);
+                var pdfBytes = memoryStream.ToArray();
+
+                return File(pdfBytes, "application/pdf", "ScrapingResults.pdf");
+            }
         }
 
         [HttpGet]

@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using HtmlRendererCore.PdfSharp;
 using System.Net.Http;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace PlagiTracker.Services.FileServices
 {
@@ -34,12 +35,24 @@ namespace PlagiTracker.Services.FileServices
                 return document; // Salir si no hay comparaciones
             }
 
-            string htmlContent = string.Empty;
-            htmlContent += "<html> <body>";
+            StringBuilder HTML = new StringBuilder();
 
-            // Agregar contenido al PDF
-            htmlContent += $"<h1>Reporte de Plagio<h1>";
-            htmlContent += $"<h2>Fecha y Hora de Generación: { DateTime.Now.ToString("dd/MM/yyyy HH:mm")} <h2>";
+            //
+            HTML.Append("<!DOCTYPE html>");
+            HTML.Append("<html lang=\"es\">");
+            HTML.Append("<head>");
+            HTML.Append("<meta charset=\"UTF-8\">");
+            HTML.Append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
+            HTML.Append($"<style>{ Resources.HtmlStyle }</style>");
+            HTML.Append("</head>");
+            
+            HTML.Append("<body>");
+            HTML.Append("<div class=\"container\">");
+            HTML.Append("<h1>Reporte de Plagio</h1>");
+
+            HTML.Append("<div class=\"header\">");
+            HTML.Append($"<p><strong>Fecha y Hora de Generación:</strong> { DateTime.Now.ToString("dd/MM/yyyy HH:mm") }</p>");
+            HTML.Append("</div>");
 
             foreach (var comparacion in comparaciones)
             {
@@ -54,18 +67,38 @@ namespace PlagiTracker.Services.FileServices
                 double similitudSemantica = (double)comparacion["semantica"];
 
                 // Agregar los datos al PDF
+                HTML.Append("<div class=\"comparison\">");
+                HTML.Append("<h2>Comparación entre Alumnos</h2>");
+                HTML.Append($"<p><strong>Alumno 1:</strong> { nombre1 } vs <strong>Alumno 2:</strong> { nombre2 }</p>");
+                HTML.Append("<table>");
 
-                htmlContent += $"<p>Estudiante 1: {nombre1} (ID: {usuarioId1}) vs Estudiante 2: {nombre2} (ID: {usuarioId2})</p>";
-                htmlContent += $"<p>Coincidencias: {coincidencias}</p>";
-                htmlContent += $"<p>Similitud Jaccard: {similitudJaccard:F2}%</p>";
-                htmlContent += $"<p>Similitud Levenshtein: {similitudLevenshtein:F2}</p>";
-                htmlContent += $"<p>Similitud Semántica: {similitudSemantica:F2}%</p>";
-                htmlContent += "<br>"; // Espacio en blanco
+                HTML.Append("<tr>");
+                HTML.Append("<th>Archivos Comparados</th>");
+                HTML.Append("<th>Coincidencias</th>");
+                HTML.Append("<th>Similitud Jaccard (%)</th>");
+                HTML.Append("<th>Similitud Levenshtein (%)</th>");
+                HTML.Append("<th>Similitud Semántica (%)</th>");
+                HTML.Append("</tr>");
+
+                HTML.Append("<tr>");
+                HTML.Append($"<td>{ nombre1 } vs { nombre2 }</td>");
+                HTML.Append($"<td class=\"highlight\">{ coincidencias }</td>");
+                HTML.Append($"<td class=\"percentage\">{ similitudJaccard }%</td>");
+                HTML.Append($"<td class=\"percentage\">{ similitudLevenshtein }%</td>");
+                HTML.Append($"<td class=\"percentage\">{ similitudSemantica }%</td>");
+                HTML.Append("</tr>");
+
+                HTML.Append("</table>");
+                HTML.Append("</div>");
             }
+
+            HTML.Append("</div>");
+            HTML.Append("</body>");
+            HTML.Append("</html>");
 
             document.Close();
 
-            document = PdfGenerator.GeneratePdf(htmlContent, PdfSharpCore.PageSize.A4);
+            document = PdfGenerator.GeneratePdf(HTML.ToString(), PdfSharpCore.PageSize.A3);
 
             return document;
         }
