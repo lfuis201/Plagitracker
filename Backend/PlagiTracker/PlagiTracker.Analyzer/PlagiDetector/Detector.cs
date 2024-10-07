@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PlagiTracker.Analyzer.PlaginDetector
+namespace PlagiTracker.Analyzer.PlagiDetector
 {
     public class Detector
     {
