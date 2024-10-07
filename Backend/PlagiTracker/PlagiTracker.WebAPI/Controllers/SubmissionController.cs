@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Entities;
 using PlagiTracker.Data.Requests;
+using PlagiTracker.Services.SeleniumServices;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
@@ -30,6 +31,18 @@ namespace PlagiTracker.WebAPI.Controllers
                 {
                     return NotFound();
                 }
+                else if (string.IsNullOrEmpty(submissionRequest.Url))
+                {
+                    return BadRequest("The URL is required");
+                }
+                else if(!WebScraping.IsCodivaUrl(submissionRequest.Url))
+                {
+                    return BadRequest("The URL is not from Codiva");
+                }
+                else if(!await WebScraping.UrlExists(submissionRequest.Url))
+                {
+                    return BadRequest("The URL does not exist");
+                }
                 else
                 {
                     if (assignment.SubmissionDate.ToUniversalTime() < submissionRequest.SubmissionDate.ToUniversalTime())
@@ -41,6 +54,7 @@ namespace PlagiTracker.WebAPI.Controllers
                     {
                         Id = Guid.NewGuid(),
                         Url = submissionRequest.Url,
+                        SubmissionDate = submissionRequest.SubmissionDate,
                         StudentId = submissionRequest.StudentId,
                         AssignmentId = submissionRequest.AssignmentId
                     });

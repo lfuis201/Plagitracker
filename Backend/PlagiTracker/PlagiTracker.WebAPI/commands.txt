@@ -9,9 +9,37 @@ Update-Database -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 }
 
 {
-  "firstName": "Pablo",
-  "lastName": "Marmol",
-  "email": "mmarmol@gmail.com",
+  "firstName": "Ben",
+  "lastName": "Tennyson",
+  "email": "btennyson@gmail.com",
+  "passwordHash": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg="
+}
+
+{
+  "firstName": "Khvicha",
+  "lastName": "Kvaratskhelia",
+  "email": "kkvaratskhelia@gmail.com",
+  "passwordHash": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg="
+}
+
+{
+  "firstName": "Khabib ",
+  "lastName": "Nurmagomedov",
+  "email": "knurmagomedov@gmail.com",
+  "passwordHash": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg="
+}
+
+{
+  "firstName": "Ramzan",
+  "lastName": "Kadyrov",
+  "email": "rkadyrov@gmail.com",
+  "passwordHash": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg="
+}
+
+{
+  "firstName": "August",
+  "lastName": "von Kageneck",
+  "email": "avonkageneck@gmail.com",
   "passwordHash": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg="
 }
 
@@ -26,3 +54,92 @@ modelBuilder.Entity<User>(builder =>
     builder.HasIndex(user => new { user.FirstName, user.LastName }).IsUnique();
 });
 
+LINKS, FILES, COMP:
+	https://www.codiva.io/p/0dc699a0-6033-4bb6-b46c-15d238277749, 1, 11
+	https://www.codiva.io/p/9f4e0e63-82d0-4241-b0bf-e12ae7a9b700, 3, 27
+	https://www.codiva.io/p/2e48c734-df91-4d02-b9d5-470c9302b6ee, 2, 20
+	https://www.codiva.io/p/e0f1785e-40a2-4174-a00d-e76fbcfc95f8, 2, 20
+	https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3, 6 (4), 32
+	
+{
+  "url": "https://localhost:7132/swagger/index.html",
+  "studentId": "e7c43279-2bcc-4c09-9165-b824041166fc",
+  "assignmentId": "ac85b4e5-33ea-4d2c-a281-f7ec41da15f7",
+  "submissionDate": "2024-10-07T15:35:31.051Z"
+}
+{
+  "url": "https://www.codiva.io/p/0dc699a0-6033-4bb6-b46c-15d238277749",
+  "studentId": "1979d2a7-de35-4d83-9aa9-857171cba7fa",
+  "assignmentId": "ac85b4e5-33ea-4d2c-a281-f7ec41da15f7",
+  "submissionDate": "2024-10-07T15:35:31.051Z"
+}
+{
+  "url": "https://www.codiva.io/p/9f4e0e63-82d0-4241-b0bf-e12ae7a9b700",
+  "studentId": "12bedd1a-d7c6-4b54-aeb5-507ef12d4f83",
+  "assignmentId": "ac85b4e5-33ea-4d2c-a281-f7ec41da15f7",
+  "submissionDate": "2024-10-07T15:35:31.051Z"
+}
+{
+  "url": "https://www.codiva.io/p/2e48c734-df91-4d02-b9d5-470c9302b6ee",
+  "studentId": "239e66d0-16c3-4ce4-b321-058b64269f5e",
+  "assignmentId": "ac85b4e5-33ea-4d2c-a281-f7ec41da15f7",
+  "submissionDate": "2024-10-07T15:35:31.051Z"
+}
+{
+  "url": "https://www.codiva.io/p/e0f1785e-40a2-4174-a00d-e76fbcfc95f8",
+  "studentId": "9b934e06-3abd-4b8d-b45f-7e2106b4bc74",
+  "assignmentId": "ac85b4e5-33ea-4d2c-a281-f7ec41da15f7",
+  "submissionDate": "2024-10-07T15:35:31.051Z"
+}
+{
+  "url": "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
+  "studentId": "af2eff91-54b0-43b4-91c4-57b7e2d62f15",
+  "assignmentId": "ac85b4e5-33ea-4d2c-a281-f7ec41da15f7",
+  "submissionDate": "2024-10-07T15:35:31.051Z"
+}
+	
+	
+
+⡈⠐⠀⠂⠐⠀⠄⢀⠠⠀⠄⠂⡁⠐⡀⠂⠄⠡⠈⣠⣵⠢⢑⠎⠦⣄⠡⠈⠄⡈⠐⠠⠐⠀⠂⢁⠈⡐⠂⠄⠁⡀⠀⡀⠀
+⠠⠁⠌⠠⠁⡀⠂⠠⠀⠂⠐⠠⠠⢁⠄⢡⣈⣔⠟⠁⠀⠀⠀⠀⠀⠀⠡⠉⠒⠤⢅⠂⠈⠀⠐⠀⠀⠀⠐⢂⠐⠀⢀⠀⠀
+⠠⠁⠌⠐⠠⠐⠀⢁⠠⠁⠠⠁⡐⢠⠒⡫⢰⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠐⠈⠀⠉⠔⣀⠀⠀⠀⠀⠀⠀⠠⠈⠀⠀⠀
+⠀⠠⠈⠠⠁⠌⢀⠂⠠⠀⠁⣀⠔⢡⠉⠴⠁⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⠡⠀⠀⠀⠐⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠄⢁⠠⠈⠀⠄⠁⠂⣵⡉⢁⠁⡊⠀⠀⣀⠀⠄⡀⠀⠁⠈⠀⠠⠈⠀⠀⠀⠀⢠⠀⠀⠀⠘⡀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠐⠠⠀⠀⠄⠂⠈⣼⣍⠐⠆⠠⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⢀⠀⠴⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⢀⠂⠄⠁⠀⡐⢸⣷⡁⠞⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⠀⠐⡇⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠈⠄⠂⠁⡐⠽⠓⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢡⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⢠⡁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠑⡀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⡐⠀⠐⢈⠌⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠂⠀⡀⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⣟⢲⣤⠀⠀⠀⣠⣠⣐⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀
+⠀⠁⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣿⠍⠀⠩⡕⠢⣢⡽⠑⢻⣿⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡄⠠⡜⠁⠀⠀⠀⣇⠎⡼⠀⠀⠀⠹⡇⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⠴⠛⠀⠀⠀⠀⠀⡟⠀⡃⠀⠀⠀⠀⠱⠀⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠐⠀
+⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⠛⠁⠀⠀⠀⠀⠀⠀⣬⣼⢦⠖⠀⠀⠀⠀⠀⠙⢦⡀⠀⢂⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀
+⡠⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⡅⠀⠀⠀⠀⠀⠀⠠⣪⣦⣆⣿⡰⢃⠀⠀⠀⠀⠀⠀⠙⢷⣄⠀⠀⠀⠀⠀⠀⠂⠐⡀⢂
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⢧⣄⡀⠀⣀⡠⠄⠠⣾⣽⣿⣿⣇⠀⠀⡀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠁⢆⢸⣽
+⠂⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠉⠁⠀⠀⢰⠏⠋⠈⠉⠻⣧⡀⠀⠱⣦⣤⡀⣠⡾⠃⠀⠀⠀⠀⠀⠀⢁⠂⠈⠁
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠁⠀⠈⠀⠉⠋⠁⠀⠀⠀⠀⠀⡀⠀⠀⠀⠀⠢⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣄⣢⢰⣶⣶⣶⡷⣿⢦⡄⡂⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣧⠀⠀⠀⠆⠊⠀
+⡥⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠐⠁⣾⠾⠋⠛⠛⠛⠙⠿⣧⡐⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⡆⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢺⡕⠀⠀⠀⠀⠀⠀⠀⠀⠥⠀⠀⠀⠀⠀⠀⠀⠀⢠⣿⣿⡇⠀⠀⠀⠀⠀
+⠤⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⢀⡾⣿⣿⡏⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠠⡀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⠀⣾⢟⣿⣿⠇⠀⠀⠀⠀⠠
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣇⠀⠀⠀⠀⠀⠀⠀⠀⡄⠀⠀⠀⠀⠀⠀⣼⢏⣾⡿⡟⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⠀⠀⢀⠁⠀⠀⠀⠀⠀⢀⡏⣸⣿⣿⠇⠀⠀⠀⠶⠀⢶
+⠯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⡇⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⢈⡌⠀⠾⣿⡃⠀⠀⠀⠀⠀⠀⠭
+⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢧⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠄⡌⢦⠂⠀⠀⠀⠀⠀⠀⠀⠡
+⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⢰⠀⠀⠀⠀⢀⠃⠠⠄⡞⢠⠀⠀⠀⠀⠀⠀⠀⠀⣆
+⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⣸⠀⠀⠀⠀⠂⠀⠀⠄⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠆
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⡆⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢣⡀⠀⠀⡼⠁⠀⠀⠀⠀⠀⠀⠘⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠒⠋⠀⠀⠀⠀⠀⠀⠀⠠⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠄⠀⠀⢀⠣⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠎⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠰⡌⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠠⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠀⠢⢄⡀⠠⢀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠲⣤⡀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡐⠈⠋⠝⠲⠤⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠐⢄⠀⠀⠀⠀⠐⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀

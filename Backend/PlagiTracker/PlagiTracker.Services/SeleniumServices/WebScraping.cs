@@ -1,8 +1,12 @@
-﻿using OpenQA.Selenium;
+﻿// Ignore Spelling: Codiva
+
+using OpenQA.Selenium;
 using PlagiTracker.Analyzer;
 using Newtonsoft.Json;
 using PlagiTracker.Services.FileServices;
 using OpenQA.Selenium.Firefox;
+using PlagiTracker.Analyzer.PlagiDetector;
+using PlagiTracker.Data.Entities;
 
 
 namespace PlagiTracker.Services.SeleniumServices
@@ -25,11 +29,11 @@ namespace PlagiTracker.Services.SeleniumServices
             driver = new FirefoxDriver(options);
         }
 
-        public async Task<bool> UrlExists(string url)
+        public static async Task<bool> UrlExists(string url)
         {
             try
             {
-                using (HttpClient client = new HttpClient())
+                using (HttpClient client = new())
                 {
                     HttpResponseMessage response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
                     return response.IsSuccessStatusCode;
@@ -41,46 +45,57 @@ namespace PlagiTracker.Services.SeleniumServices
             }
         }
 
-        public bool IsCodivaUrl(string url)
+        /// <summary>
+        /// true si la URL es de Codiva,
+        /// false en caso contrario
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public static bool IsCodivaUrl(string url)
         {
             return url.Contains("codiva.io");
         }
 
-        public async Task<PdfSharpCore.Pdf.PdfDocument> StartScraping(List<string> urls)
+        public async Task<PdfSharpCore.Pdf.PdfDocument> StartScraping(List<(Student, Submission)> studentsSubmissions)
         {
 
             PdfSharpCore.Pdf.PdfDocument document = null;
             var jsonData = new Dictionary<string, List<Dictionary<string, string>>>();
-            var allResults = new List<(int coincidencias, string nombre1, string nombre2, string usuarioId1, string usuarioId2, double jaccard, double levenshtein, double semantica)>();
+            var allResults = new PlagiaPythonResult();
 
             var ignorePatterns = new List<string>
             {
                 "System.out.println(\"Hello Codiva\");"
             };
 
+            List<(Student, UrlState)> unanalyzedStudents = new();
+
+            Dictionary<string, Student> analyzedAtudents = new();
+
             try
             {
-                foreach (var url in urls)
+                foreach (var studentsSubmission in studentsSubmissions)
                 {
-                    if (!IsCodivaUrl(url))
+                    if(string.IsNullOrEmpty(studentsSubmission.Item2.Url))
                     {
-                        Console.WriteLine($"La URL {url} no es de Codiva y se omitirá.");
+                        unanalyzedStudents.Add((studentsSubmission.Item1, UrlState.NullOrEmpty));
+                        continue;
+                    }
+                    else if (!IsCodivaUrl(studentsSubmission.Item2.Url))
+                    {
+                        unanalyzedStudents.Add((studentsSubmission.Item1, UrlState.NotCodiva));
+                        continue;
+                    }
+                    else if (!await UrlExists(studentsSubmission.Item2.Url))
+                    {
+                        unanalyzedStudents.Add((studentsSubmission.Item1, UrlState.Invalid));
                         continue;
                     }
 
-                    bool urlValida = await UrlExists(url);
-
-                    if (!urlValida)
-                    {
-                        Console.WriteLine($"La URL {url} no es válida. Se omitirá.");
-                        continue;
-                    }
-
-                    driver.Navigate().GoToUrl(url);
+                    driver.Navigate().GoToUrl(studentsSubmission.Item2.Url);
                     Thread.Sleep(1000);
 
                     var labels = driver.FindElements(By.XPath("//label[starts-with(@for, 'tab-java-')]"));
-                    string studentId = Guid.NewGuid().ToString();
 
                     var studentFiles = new List<Dictionary<string, string>>();
 
@@ -109,59 +124,22 @@ namespace PlagiTracker.Services.SeleniumServices
                         };
 
                         studentFiles.Add(fileData);
-                        Console.WriteLine($"Scraping terminado para {className}");
                     }
 
                     if (studentFiles.Count > 0)
                     {
-                        jsonData[studentId] = studentFiles;
-                        Console.WriteLine($"Scraping completo para la URL: {url}");
-
-                        // Procesar los resultados
-                        Consumidor consumidor = new Consumidor();
-                        var resultados = await consumidor.Ejecutar(jsonData);
-
-                        // Agregar los resultados a la lista
-                        allResults.AddRange(resultados);
+                        analyzedAtudents.Add(studentsSubmission.Item1.Id.ToString(), studentsSubmission.Item1);
+                        jsonData[studentsSubmission.Item1.Id.ToString()] = studentFiles;
                     }
                 }
+                
+                Consumidor consumidor = new Consumidor();
+                allResults = await consumidor.Ejecutar(jsonData);
 
                 // Ahora procesamos todos los resultados
-                if (allResults.Count > 0)
+                if (allResults.Comparaciones_Entre_Ids.Count > 0)
                 {
-                    foreach (var resultado in allResults)
-                    {
-                        // Imprimir los resultados individualmente
-                        Console.WriteLine($"Respuesta del servidor:");
-                        Console.WriteLine($"Coincidencias: {resultado.coincidencias}");
-                        Console.WriteLine($"Estudiante 1: {resultado.nombre1}");
-                        Console.WriteLine($"Estudiante 2: {resultado.nombre2}");
-                        Console.WriteLine($"Usuario ID 1: {resultado.usuarioId1}");
-                        Console.WriteLine($"Usuario ID 2: {resultado.usuarioId2}");
-                        Console.WriteLine($"Similitud Jaccard: {resultado.jaccard}%");
-                        Console.WriteLine($"Similitud Levenshtein: {resultado.levenshtein}");
-                        Console.WriteLine($"Similitud Semántica: {resultado.semantica}%");
-                    }
-
-                    var reportData = new
-                    {
-                        comparaciones_entre_ids = allResults.Select(r => new
-                        {
-                            r.usuarioId1,
-                            r.usuarioId2,
-                            r.coincidencias,
-                            r.jaccard,
-                            r.levenshtein,
-                            r.semantica,
-                            r.nombre1,
-                            r.nombre2
-                        }).ToArray()
-                    };
-
-                    string jsonResponse = JsonConvert.SerializeObject(reportData);
-                    Console.WriteLine("JSON Generado: " + jsonResponse); // Imprimir el JSON para revisar la estructura
-
-                    document = ReportGenerator.GenerateReport(jsonResponse); // Llamada para generar el PDF
+                    document = ReportGenerator.GenerateReport(analyzedAtudents, unanalyzedStudents, allResults.Comparaciones_Entre_Ids); // Llamada para generar el PDF
                 }
                 else
                 {
@@ -179,30 +157,22 @@ namespace PlagiTracker.Services.SeleniumServices
             
             return document!;
         }
-    }
 
-    internal class Program
-    {
-        static async Task Main(string[] args)
+        public enum UrlState
         {
-            WebScraping scraper = new WebScraping();
-            List<string> urls = new List<string>
+            NullOrEmpty,
+            Invalid,
+            NotCodiva
+        }
+        public static string UrlStateToString(UrlState urlState)
+        {
+            return urlState switch
             {
-                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-                "https://www.codiva.io/p/valid-url",
-                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
+                UrlState.NullOrEmpty => "The URL is null or empty",
+                UrlState.Invalid => "The URL does not exist",
+                UrlState.NotCodiva => "The URL is not from Codiva",
+                _ => "Unknown"
             };
-
-            await scraper.StartScraping(urls); // Llama al método sin asignar a una variable
-            Console.WriteLine("Resultado del análisis:");
-
-            // Generar el reporte
-            ReportGenerator reportGenerator = new ReportGenerator();
-
-            Console.WriteLine("Scraping completado y reporte generado.");
-            // Aquí puedes manejar los resultados de la tupla si es necesario
         }
     }
 }

@@ -119,43 +119,11 @@
   </resheader>
   <data name="HtmlStyle" xml:space="preserve">
     <value>body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f0f4f8;
+            font-family: Arial, sans-serif;
+            margin: 20px;
         }
-        .container {
-            margin: 0 auto;
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            color: #333;
-        }
-        h1 {
-            text-align: center;
+        h1, h2, h3 {
             color: #2c3e50;
-            font-size: 28px;
-            margin-bottom: 20px;
-        }
-        .header {
-            margin-bottom: 40px;
-            text-align: center;
-        }
-        .header p {
-            font-size: 16px;
-            color: #7f8c8d;
-            line-height: 1.6;
-        }
-        .comparison {
-            margin-bottom: 40px;
-        }
-        .comparison h2 {
-            font-size: 20px;
-            margin-bottom: 10px;
-            color: #34495e;
-            border-bottom: 2px solid #bdc3c7;
-            padding-bottom: 5px;
         }
         table {
             width: 100%;
@@ -164,39 +132,17 @@
             page-break-inside: avoid;
         }
         table, th, td {
-            border: 1px solid #ecf0f1;
+            border: 1px solid #bdc3c7;
         }
-        th {
-            background-color: #3498db;
-            color: white;
-            padding: 12px;
-            font-size: 14px;
-            text-transform: uppercase;
-        }
-        td {
-            padding: 12px;
-            text-align: center;
-            font-size: 15px;
-        }
-        td:first-child {
+        th, td {
+            padding: 10px;
             text-align: left;
         }
-        .highlight {
-            color: #e74c3c;
-            font-weight: bold;
+        th {
+            background-color: #ecf0f1;
         }
-        .footer {
-            text-align: center;
-            font-size: 14px;
-            color: #95a5a6;
-            margin-top: 40px;
-        }
-        .footer p {
-            margin: 0;
-        }
-        .percentage {
-            color: #2980b9;
-            font-weight: bold;
+        .student-section {
+            margin-bottom: 40px;
         }</value>
   </data>
 </root>

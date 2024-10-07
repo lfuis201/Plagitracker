@@ -62,23 +62,27 @@ namespace PlagiTracker.Services {
         
         /// <summary>
         ///   Looks up a localized string similar to body {
-        ///            font-family: &apos;Helvetica Neue&apos;, Helvetica, Arial, sans-serif;
-        ///            margin: 0;
-        ///            padding: 20px;
-        ///            background-color: #f0f4f8;
+        ///            font-family: Arial, sans-serif;
+        ///            margin: 20px;
         ///        }
-        ///        .container {
-        ///            margin: 0 auto;
-        ///            background-color: white;
-        ///            padding: 30px;
-        ///            border-radius: 8px;
-        ///            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        ///            color: #333;
-        ///        }
-        ///        h1 {
-        ///            text-align: center;
+        ///        h1, h2, h3 {
         ///            color: #2c3e50;
-        ///         [rest of string was truncated]&quot;;.
+        ///        }
+        ///        table {
+        ///            width: 100%;
+        ///            border-collapse: collapse;
+        ///            margin-bottom: 20px;
+        ///            page-break-inside: avoid;
+        ///        }
+        ///        table, th, td {
+        ///            border: 1px solid #bdc3c7;
+        ///        }
+        ///        th, td {
+        ///            padding: 10px;
+        ///            text-align: left;
+        ///        }
+        ///        th {
+        ///            ba [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string HtmlStyle {
             get {

@@ -1,10 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using PdfSharpCore.Pdf;
 using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Entities;
 using PlagiTracker.Data.Requests;
 using PlagiTracker.Services.SeleniumServices;
+using static System.Net.WebRequestMethods;
+using System.Linq;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
@@ -23,6 +26,11 @@ namespace PlagiTracker.WebAPI.Controllers
         [Route("Create")]
         public async Task<ActionResult> Create(AssignmentRequest assignmentRequest)
         {
+            if(assignmentRequest.SubmissionDate.ToUniversalTime() < DateTime.UtcNow)
+            {
+                return BadRequest("The submission date must be greater than the current date.");
+            }
+
             var id = Guid.NewGuid();
             await _context!.Assignments!.AddAsync(new Assignment()
             {
@@ -30,7 +38,7 @@ namespace PlagiTracker.WebAPI.Controllers
                 Description = assignmentRequest.Description,
                 Title = assignmentRequest.Title,
                 //Tiempo universal coordinado (UTC)
-                SubmissionDate = DateTime.UtcNow,
+                SubmissionDate = assignmentRequest.SubmissionDate,
                 CourseId = assignmentRequest.CourseId
             });
 
@@ -40,35 +48,32 @@ namespace PlagiTracker.WebAPI.Controllers
 
         [HttpPost]
         [Route("Analyze")]
-        public async Task<ActionResult> Analyze(List<string> urls)
+        public async Task<ActionResult> Analyze(Guid assignmentId)
         {
-            WebScraping scraper = new();
+            var assignment = await _context!.Assignments!.FindAsync(assignmentId);
 
-            
-            List<string> urls2 = new List<string>
+            if (assignment == null)
             {
-                /*
-                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-                "https://www.invalid-url.com",
-                "https://www.youtube.com/watch?v=TpNDSyDnUwc",
-                "https://www.codiva.io/p/valid-url",
-                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-                "https://classroom.google.com/c/NzA0MDM0NzM0MzYy",
-                */
-                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-                "https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3",
-                "https://chatgpt.com/c/66e8b455-d26c-8005-90e1-7fbb273e3801",
-                "https://classroom.google.com/c/NzA0MDM0NzM0MzYy",
-                "https://www.fundeu.es/recomendacion/colaboracion-posible-alternativa-a-featuring/",
-            };
-            
-            urls = urls2;
+                return NotFound("The assignment not exist.");
+            }
 
+            var studentsSubmissions = (await _context!.Submissions!
+            .Where(submission => submission.AssignmentId == assignmentId)
+            .Join(
+                _context.Students!,
+                submission => submission.StudentId,
+                student => student.Id,
+                (submission, student) => new { Student = student, Submission = submission }
+            ).ToListAsync())
+            .Select(data => (data.Student, data.Submission))
+            .ToList();
+
+            if (studentsSubmissions == null || studentsSubmissions.Count < 2)
+            {
+                return BadRequest("There are not enough submissions to analyze.");
+            }
+
+            WebScraping scraper = new();
             /*
             BackgroundJob.Schedule(() => 
                 new HangFire.HangFireServices().SavePlagiarismReport(urls2), 
@@ -76,7 +81,7 @@ namespace PlagiTracker.WebAPI.Controllers
             );
             */
 
-            var data = await scraper.StartScraping(urls);
+            var data = await scraper.StartScraping(studentsSubmissions);
 
             if(data == null)
             {
@@ -89,7 +94,7 @@ namespace PlagiTracker.WebAPI.Controllers
                 data.Save(memoryStream);
                 var pdfBytes = memoryStream.ToArray();
 
-                return File(pdfBytes, "application/pdf", "ScrapingResults.pdf");
+                return File(pdfBytes, "application/pdf", $"PlagiarismReport-{Guid.NewGuid()}.pdf");
             }
         }
 

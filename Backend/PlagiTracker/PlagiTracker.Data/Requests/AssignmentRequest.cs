@@ -7,5 +7,7 @@
         public string? Title { get; set; }
 
         public Guid CourseId { get; set; }
+
+        public DateTime SubmissionDate { get; set; }
     }
 }
