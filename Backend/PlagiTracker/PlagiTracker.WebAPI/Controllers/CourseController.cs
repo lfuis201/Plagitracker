@@ -135,28 +135,5 @@ namespace PlagiTracker.WebAPI.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
-
-        [HttpGet]
-        [Route("GetAllCourses")]
-        public async Task<ActionResult<List<Course>>> GetAllCourses()
-        {
-            // Verificar si _context.Courses es nulo antes de usarlo
-            if (_context.Courses == null)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Database not initialized.");
-            }
-
-            // Obtener todos los cursos de la base de datos
-            var courses = await _context.Courses.ToListAsync();
-
-            // Verificar si no hay cursos disponibles
-            if (courses.Count == 0)
-            {
-                return NotFound("No courses found.");
-            }
-
-            return Ok(courses);
-        }
-
     }
 }

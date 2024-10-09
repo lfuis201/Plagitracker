@@ -160,27 +160,5 @@ namespace PlagiTracker.WebAPI.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
-
-        [HttpGet]
-        [Route("GetById")]
-        public async Task<ActionResult> GetById(Guid id)
-        {
-            var assignment = await _context!.Assignments!.FindAsync(id);
-
-            if (assignment == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(new Assignment()
-            {
-                Id = assignment.Id,
-                Title = assignment.Title,
-                Description = assignment.Description,
-                SubmissionDate = assignment.SubmissionDate,
-                CourseId = assignment.CourseId
-            });
-        }
-
     }
 }
