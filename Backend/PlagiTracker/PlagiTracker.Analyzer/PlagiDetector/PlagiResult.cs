@@ -4,22 +4,22 @@ namespace PlagiTracker.Analyzer.PlagiDetector
 {
     public class PlagiResult
     {
-        public int Coincidencias { private get; set; }
+        public int Coincidencias { get; set; }
         public int Coincidences { get => Coincidencias; }
 
-        public string Nombre1 { private get; set; }
+        public string Nombre1 { get; set; }
         public string FileName1 { get => Nombre1; }
 
-        public string Nombre2 { private get; set; }
+        public string Nombre2 { get; set; }
         public string FileName2 { get => Nombre2; }
 
-        public string Usuario_Id1 { private get; set; }
+        public string Usuario_Id1 { get; set; }
         public string UserId1 { get => Usuario_Id1; }
 
         public string Usuario_Id2 { get; set; }
         public string UserId2 { get => Usuario_Id2; }
 
-        public double Similitud_Jaccard { private get; set; }
+        public double Similitud_Jaccard { get; set; }
         public double JaccardSimilitude { get =>  Math.Round(Similitud_Jaccard * 100, 2); }
 
         public double Similitud_Levenshtein { get; set; }

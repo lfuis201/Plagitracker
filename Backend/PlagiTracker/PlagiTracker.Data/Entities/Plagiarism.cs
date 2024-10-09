@@ -13,23 +13,42 @@ namespace PlagiTracker.Data.Entities
         public Guid Id { get; set; }
 
         /// <summary>
+        /// Porcentaje de similitud entre los códigos, de 0 a 100
+        /// </summary>
+        [Range(100.00, 0.00)]
+        public double Similarity { get; set; } = 0.00;
+
+        /// <summary>
+        /// Número de coincidencias encontradas, sólo para el algoritmo de COINCIDENCIAS
+        /// </summary>
+        public int Coincidences { get; set; } = 0;
+
+        /// <summary>
+        /// Código al que pertenece el fragmento
+        /// </summary>
+        public string? CodeSnippet { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Id del código al que pertenece el análisis de plagio
+        /// </summary>
+        [Required]
+        public Guid CodeId { get; set; }
+
+        [ForeignKey(nameof(CodeId))]
+        public virtual Code? Code { get; set; }
+
+        /// <summary>
         /// Algoritmo de detección de plagio utilizado
         /// </summary>
         [Required]
-        public PlagiarismDetector Detector { get; set; }
+        public AlgorithmType Algorithm { get; set; }
 
-        /// <summary>
-        /// Porcentaje de similitud entre los códigos, de 0 a 100
-        /// </summary>
-        [Required]
-        [Range(100.00, 0.00)]
-        public double Similarity { get; set; }
-
-        public enum PlagiarismDetector
+        public enum AlgorithmType
         {
             Jaccard,
             Levenshtein,
-            Semantica
+            Semantic,
+            Coincidences
         }
     }
 }

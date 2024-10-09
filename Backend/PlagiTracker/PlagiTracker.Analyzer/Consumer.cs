@@ -5,9 +5,9 @@ using PlagiTracker.Analyzer.PlagiDetector;
 
 namespace PlagiTracker.Analyzer
 {
-    public class Consumidor
+    public class Consumer
     {
-        public async Task<PlagiaPythonResult> Ejecutar(Dictionary<string, List<Dictionary<string, string>>> studentFiles)
+        public static async Task<PlagiaPythonResult> Execute(Dictionary<string, List<Dictionary<string, string>>> studentFiles)
         {
             using (HttpClient client = new HttpClient())
             {

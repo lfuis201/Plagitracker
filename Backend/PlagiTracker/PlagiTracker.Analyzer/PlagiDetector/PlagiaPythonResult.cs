@@ -1,4 +1,4 @@
-﻿// Ignore Spelling: Comparaciones Entre
+﻿// Ignore Spelling: Comparaciones Entre Plagia
 
 namespace PlagiTracker.Analyzer.PlagiDetector
 {

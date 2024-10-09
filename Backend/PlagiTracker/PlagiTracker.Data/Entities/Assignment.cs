@@ -26,6 +26,13 @@ namespace PlagiTracker.Data.Entities
         [Required]
         public DateTime SubmissionDate { get; set; }
 
+        /// <summary>
+        /// Fecha y hora de la realización del análisis de plagio
+        /// </summary>
+        public DateTime AnalysisDate { get; set; } = DateTime.MinValue;
+
+        public bool IsAnalyzed { get; set; } = false;
+
         [Required]
         public Guid CourseId { get; set; }
 

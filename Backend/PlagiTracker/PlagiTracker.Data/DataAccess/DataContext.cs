@@ -14,7 +14,6 @@ namespace PlagiTracker.Data.DataAccess
         public DbSet<Submission>? Submissions { get; set; }
         public DbSet<Plagiarism>? Plagiarisms { get; set; }
         public DbSet<Code>? Codes { get; set; }
-        public DbSet<PlagiarismCode>? PlagiarismCodes { get; set; }
 
         /// <summary>
         /// Configuraciones adicionales para la base de datos como columnas únicas
@@ -46,7 +45,11 @@ namespace PlagiTracker.Data.DataAccess
             //Inscripción
             modelBuilder.Entity<Enrollment>(builder =>
             {
-                builder.HasKey(enrollment => new { enrollment.StudentId, enrollment.CourseId });
+                builder.HasKey(enrollment => new 
+                { 
+                    enrollment.StudentId, 
+                    enrollment.CourseId 
+                });
 
                 // Configura la columna como decimal con 2 valores enteros y con 2 decimales
                 builder.Property(enrollment => enrollment.Grade).HasColumnType("decimal(4, 2)");
@@ -58,27 +61,46 @@ namespace PlagiTracker.Data.DataAccess
             //Entrega
             modelBuilder.Entity<Submission>(builder =>
             {
+                // Configura la concatenación del Id del Estudiante y el Id de la Asignación como única
+                builder.HasIndex(s => new 
+                {
+                    s.StudentId, 
+                    s.AssignmentId 
+                }).IsUnique();
+
+                // Configura la Url como única 
                 builder.HasIndex(s => s.Url).IsUnique();
+                
                 // Configura la columna como decimal con 2 valores enteros y con 2 decimales
                 builder.Property(s => s.Grade).HasColumnType("decimal(4, 2)");
+            });
+            
+            //Código
+            modelBuilder.Entity<Code>(builder =>
+            {
+                // Configura la concatenación del Id de la Entrega y el Nombre del Archivo como única
+                builder.HasIndex(code => new
+                {
+                    code.SubmissionId,
+                    code.FileName
+                }).IsUnique();
             });
 
             //Plagio
             modelBuilder.Entity<Plagiarism>(builder =>
             {
+                // Configura la concatenación del Id del Estudiante y el Id de la Asignación como única
+                builder.HasIndex(plagiarism => new 
+                { 
+                    plagiarism.CodeId, 
+                    plagiarism.Algorithm 
+                }).IsUnique();
+
                 // Configura la columna como decimal con 3 valores enteros y con 2 decimales
                 builder.Property(p => p.Similarity).HasColumnType("decimal(5, 2)");
             });
 
-            //Códgio Plagiado
-            modelBuilder.Entity<PlagiarismCode>(builder =>
-            {
-                builder.HasKey(plagiarismCode => new
-                {
-                    plagiarismCode.PlagiarismId,
-                    plagiarismCode.CodeId
-                });
-            });
+            
         }
     }
 }
