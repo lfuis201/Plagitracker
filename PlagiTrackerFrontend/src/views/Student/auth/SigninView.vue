@@ -6,6 +6,7 @@ import { ref } from 'vue'
 import { encrypt } from '@/utils/cryptoUtils'
 import router from '@/router'
 import { useUserStore } from '@/stores/userStore' // Usamos el store general
+import { z } from 'zod'
 
 const email = ref<string>('')
 const password = ref<string>('')

@@ -2,15 +2,28 @@
 import type { Course } from '@/types/Course'
 import CourseService from '@/services/CourseService'
 import { useCoursesStore } from '@/stores/coursesStore';
+import EditCourseModal from './EditCourseModal.vue'; // Import your modal component
 
 import Swal from 'sweetalert2' // Importa SweetAlert2
+import { ref } from 'vue';
 
 const props = defineProps<{
   course: Course
 }>()
 
-const coursesStore = useCoursesStore();
+const modalOpen = ref(false); // State to control modal visibility
 
+
+const coursesStore = useCoursesStore();
+// Function to open the modal
+const openModal = () => {
+  modalOpen.value = true;
+}
+
+// Function to close the modal
+const closeModal = () => {
+  modalOpen.value = false;
+}
 
 // Función para manejar la eliminación del curso
 const handleDelete = async (courseId: string) => {
@@ -95,5 +108,9 @@ const handleDelete = async (courseId: string) => {
       </div>
     </div>
   </div>
+
+
+  <EditCourseModal :modalOpen="modalOpen" :course="props.course" @close="closeModal" />
+
   <!-- Card Item End -->
 </template>
