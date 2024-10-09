@@ -1,31 +1,22 @@
-﻿using System;
-using System.IO;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using HtmlRendererCore.PdfSharp;
-using System.Net.Http;
-using System.Security.Cryptography;
+﻿using HtmlRendererCore.PdfSharp;
 using System.Text;
-using PlagiTracker.Analyzer.PlagiDetector;
-using PlagiTracker.Data.Entities;
-using static PlagiTracker.Services.SeleniumServices.WebScraping;
 using PlagiTracker.Services.SeleniumServices;
+using PdfSharpCore.Pdf;
 
 namespace PlagiTracker.Services.FileServices
 {
     public class ReportGenerator
     {
-        public static PdfSharpCore.Pdf.PdfDocument GenerateReport(Dictionary<string, Student> analyzedStudents, List<(Student, UrlState)> unanalyzedStudents, List<PlagiResult> plagiResults)
+        public static PdfDocument GenerateReport(Dictionary<Guid, StudentSubmission> analysisResult)
         {
-            PdfSharpCore.Pdf.PdfDocument document = new();
+            PdfDocument document = new();
+            StringBuilder HTML = new();
 
-            var groupedResults = PlagiResultGrouper.GroupByUserId1(plagiResults);
+            if (analysisResult == null && analysisResult!.Count <= 2)
+            {
+                return document;
+            }
 
-
-            StringBuilder HTML = new StringBuilder();
-
-            //HTML.Append(Resources.HtmlStyle);
-            
             HTML.Append("<html lang=\"en\">");
 
             HTML.Append("<head>");
@@ -40,15 +31,15 @@ namespace PlagiTracker.Services.FileServices
             HTML.Append($"<h2><strong>Date and Time:</strong> {DateTime.Now.ToString("dd/MM/yyyy HH:mm")}</h2>");
 
             // Incluir las URLs que tuvieron errores
-            if (unanalyzedStudents != null && unanalyzedStudents.Count != 0)
+            if (analysisResult.Any(studentSubmission => studentSubmission.Value.State != StudentSubmission.UrlState.Ok))
             {
                 HTML.Append("<div class=\"errores\">");
                 HTML.Append("<h2>Unanalyzed Students</h2>");
 
                 HTML.Append("<ul>");
-                foreach (var unanalyzedAtudent in unanalyzedStudents)
+                foreach (var studentSubmission in analysisResult.Values)
                 {
-                    HTML.Append($"<li>{unanalyzedAtudent.Item1.FirstName} {unanalyzedAtudent.Item1.LastName}: {WebScraping.UrlStateToString(unanalyzedAtudent.Item2)}</li>");
+                    HTML.Append($"<li>{studentSubmission.FirstName} {studentSubmission.LastName}: {StudentSubmission.UrlStateToString(studentSubmission.State)}</li>");
                 }
                 HTML.Append("</ul>");
                 HTML.Append("</div>");
@@ -56,16 +47,18 @@ namespace PlagiTracker.Services.FileServices
 
             int student = 1;
 
-            foreach (var groupResult in groupedResults.Values)
+            foreach (var studentSubmission in analysisResult.Values)
             {
+                if(studentSubmission.Codes.Count <= 0 && studentSubmission.State != StudentSubmission.UrlState.Ok)
+                {                     
+                    continue;
+                }
+
                 HTML.Append($"<div class=\"student-section\">");
-
-
-                var id = groupResult.Values.ToList()[0].UserId1;
-                HTML.Append($"<h2>Student: {analyzedStudents[id].FirstName} {analyzedStudents[id].LastName}</h2>");
+                HTML.Append($"<h2>Student: {studentSubmission.FirstName} {studentSubmission.LastName}</h2>");
 
                 int row = 1;
-                var groupByFile = groupResult.Values.OrderBy(plagiResult => plagiResult.FileName1).ToList();
+                var groupByFile = studentSubmission.PlagiResults.OrderBy(plagiResult => plagiResult.FileName1).ToList();
                 string currentFile = string.Empty;
 
                 foreach(var plagiResult in groupByFile)
@@ -100,7 +93,7 @@ namespace PlagiTracker.Services.FileServices
 
                     HTML.Append("<tr>");
                     HTML.Append($"<td>{row++}</td>");
-                    HTML.Append($"<td>{analyzedStudents[plagiResult.Usuario_Id2].FirstName} {analyzedStudents[plagiResult.Usuario_Id2].LastName}</td>");
+                    HTML.Append($"<td>{analysisResult[Guid.Parse(plagiResult.Usuario_Id2)].FirstName} {analysisResult[Guid.Parse(plagiResult.Usuario_Id2)].LastName}</td>");
                     HTML.Append($"<td>{plagiResult.FileName2}</td>");
                     HTML.Append($"<td>{plagiResult.Coincidences}</td>");
                     HTML.Append($"<td>{plagiResult.JaccardSimilitude}%</td>");

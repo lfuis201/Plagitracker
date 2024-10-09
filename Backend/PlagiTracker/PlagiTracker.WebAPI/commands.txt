@@ -1,4 +1,4 @@
-Add-Migration UpdatePlagiarismAndSubmission -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
+Add-Migration AnalysisDateIsAnalyzedAddedAssignment -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 Update-Database -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 
 {
@@ -54,12 +54,13 @@ modelBuilder.Entity<User>(builder =>
     builder.HasIndex(user => new { user.FirstName, user.LastName }).IsUnique();
 });
 
-LINKS, FILES, COMP:
-	https://www.codiva.io/p/0dc699a0-6033-4bb6-b46c-15d238277749, 1, 11
-	https://www.codiva.io/p/9f4e0e63-82d0-4241-b0bf-e12ae7a9b700, 3, 27
-	https://www.codiva.io/p/2e48c734-df91-4d02-b9d5-470c9302b6ee, 2, 20
-	https://www.codiva.io/p/e0f1785e-40a2-4174-a00d-e76fbcfc95f8, 2, 20
-	https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3, 6 (4), 32
+LINKS, FILES, COMP: 14, 110, 88
+	https://www.codiva.io/p/0dc699a0-6033-4bb6-b46c-15d238277749, 1, 11, No usado
+	
+	https://www.codiva.io/p/9f4e0e63-82d0-4241-b0bf-e12ae7a9b700, 3, 27, Ben 24
+	https://www.codiva.io/p/2e48c734-df91-4d02-b9d5-470c9302b6ee, 2, 20, Khvicha 18
+	https://www.codiva.io/p/e0f1785e-40a2-4174-a00d-e76fbcfc95f8, 2, 20, Numagomedov 18
+	https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3, 6 (4), 32, Kadyrov 28
 	
 {
   "url": "https://localhost:7132/swagger/index.html",
@@ -97,49 +98,24 @@ LINKS, FILES, COMP:
   "assignmentId": "ac85b4e5-33ea-4d2c-a281-f7ec41da15f7",
   "submissionDate": "2024-10-07T15:35:31.051Z"
 }
-	
-	
 
-⡈⠐⠀⠂⠐⠀⠄⢀⠠⠀⠄⠂⡁⠐⡀⠂⠄⠡⠈⣠⣵⠢⢑⠎⠦⣄⠡⠈⠄⡈⠐⠠⠐⠀⠂⢁⠈⡐⠂⠄⠁⡀⠀⡀⠀
-⠠⠁⠌⠠⠁⡀⠂⠠⠀⠂⠐⠠⠠⢁⠄⢡⣈⣔⠟⠁⠀⠀⠀⠀⠀⠀⠡⠉⠒⠤⢅⠂⠈⠀⠐⠀⠀⠀⠐⢂⠐⠀⢀⠀⠀
-⠠⠁⠌⠐⠠⠐⠀⢁⠠⠁⠠⠁⡐⢠⠒⡫⢰⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠐⠈⠀⠉⠔⣀⠀⠀⠀⠀⠀⠀⠠⠈⠀⠀⠀
-⠀⠠⠈⠠⠁⠌⢀⠂⠠⠀⠁⣀⠔⢡⠉⠴⠁⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⠡⠀⠀⠀⠐⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠄⢁⠠⠈⠀⠄⠁⠂⣵⡉⢁⠁⡊⠀⠀⣀⠀⠄⡀⠀⠁⠈⠀⠠⠈⠀⠀⠀⠀⢠⠀⠀⠀⠘⡀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠐⠠⠀⠀⠄⠂⠈⣼⣍⠐⠆⠠⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⢀⠀⠴⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⢀⠂⠄⠁⠀⡐⢸⣷⡁⠞⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⠀⠐⡇⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠈⠄⠂⠁⡐⠽⠓⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢡⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⢠⡁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠑⡀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⡐⠀⠐⢈⠌⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠂⠀⡀⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⣟⢲⣤⠀⠀⠀⣠⣠⣐⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀
-⠀⠁⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣿⠍⠀⠩⡕⠢⣢⡽⠑⢻⣿⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡄⠠⡜⠁⠀⠀⠀⣇⠎⡼⠀⠀⠀⠹⡇⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⠴⠛⠀⠀⠀⠀⠀⡟⠀⡃⠀⠀⠀⠀⠱⠀⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠐⠀
-⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⠛⠁⠀⠀⠀⠀⠀⠀⣬⣼⢦⠖⠀⠀⠀⠀⠀⠙⢦⡀⠀⢂⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀
-⡠⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⡅⠀⠀⠀⠀⠀⠀⠠⣪⣦⣆⣿⡰⢃⠀⠀⠀⠀⠀⠀⠙⢷⣄⠀⠀⠀⠀⠀⠀⠂⠐⡀⢂
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⢧⣄⡀⠀⣀⡠⠄⠠⣾⣽⣿⣿⣇⠀⠀⡀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠁⢆⢸⣽
-⠂⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠉⠁⠀⠀⢰⠏⠋⠈⠉⠻⣧⡀⠀⠱⣦⣤⡀⣠⡾⠃⠀⠀⠀⠀⠀⠀⢁⠂⠈⠁
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠁⠀⠈⠀⠉⠋⠁⠀⠀⠀⠀⠀⡀⠀⠀⠀⠀⠢⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣄⣢⢰⣶⣶⣶⡷⣿⢦⡄⡂⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣧⠀⠀⠀⠆⠊⠀
-⡥⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠐⠁⣾⠾⠋⠛⠛⠛⠙⠿⣧⡐⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⡆⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢺⡕⠀⠀⠀⠀⠀⠀⠀⠀⠥⠀⠀⠀⠀⠀⠀⠀⠀⢠⣿⣿⡇⠀⠀⠀⠀⠀
-⠤⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⢀⡾⣿⣿⡏⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠠⡀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⠀⣾⢟⣿⣿⠇⠀⠀⠀⠀⠠
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣇⠀⠀⠀⠀⠀⠀⠀⠀⡄⠀⠀⠀⠀⠀⠀⣼⢏⣾⡿⡟⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⠀⠀⢀⠁⠀⠀⠀⠀⠀⢀⡏⣸⣿⣿⠇⠀⠀⠀⠶⠀⢶
-⠯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⡇⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⢈⡌⠀⠾⣿⡃⠀⠀⠀⠀⠀⠀⠭
-⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢧⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠄⡌⢦⠂⠀⠀⠀⠀⠀⠀⠀⠡
-⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⢰⠀⠀⠀⠀⢀⠃⠠⠄⡞⢠⠀⠀⠀⠀⠀⠀⠀⠀⣆
-⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⣸⠀⠀⠀⠀⠂⠀⠀⠄⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠆
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⡆⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢣⡀⠀⠀⡼⠁⠀⠀⠀⠀⠀⠀⠘⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠒⠋⠀⠀⠀⠀⠀⠀⠀⠠⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠄⠀⠀⢀⠣⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠎⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠰⡌⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠠⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠀⠢⢄⡀⠠⢀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠲⣤⡀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡐⠈⠋⠝⠲⠤⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠐⢄⠀⠀⠀⠀⠐⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+
+
+INSERT INTO public."Submissions"
+("Id", "Url", "SubmissionDate", "StudentId", "AssignmentId", "Grade")
+VALUES('6e701991-2a14-4493-a170-f4fe910e9c4a'::uuid, 'https://www.codiva.io/p/9f4e0e63-82d0-4241-b0bf-e12ae7a9b700', '2024-10-07 10:35:31.051', '12bedd1a-d7c6-4b54-aeb5-507ef12d4f83'::uuid, 'ac85b4e5-33ea-4d2c-a281-f7ec41da15f7'::uuid, 0.00);
+INSERT INTO public."Submissions"
+("Id", "Url", "SubmissionDate", "StudentId", "AssignmentId", "Grade")
+VALUES('31edb16a-feb4-4cab-812c-e8a4bdb6ad45'::uuid, 'https://www.codiva.io/p/2e48c734-df91-4d02-b9d5-470c9302b6ee', '2024-10-07 10:35:31.051', '239e66d0-16c3-4ce4-b321-058b64269f5e'::uuid, 'ac85b4e5-33ea-4d2c-a281-f7ec41da15f7'::uuid, 0.00);
+INSERT INTO public."Submissions"
+("Id", "Url", "SubmissionDate", "StudentId", "AssignmentId", "Grade")
+VALUES('e0d30fd2-1027-4af3-be3b-238a579dacb8'::uuid, 'https://www.codiva.io/p/e0f1785e-40a2-4174-a00d-e76fbcfc95f8', '2024-10-07 10:35:31.051', '9b934e06-3abd-4b8d-b45f-7e2106b4bc74'::uuid, 'ac85b4e5-33ea-4d2c-a281-f7ec41da15f7'::uuid, 0.00);
+INSERT INTO public."Submissions"
+("Id", "Url", "SubmissionDate", "StudentId", "AssignmentId", "Grade")
+VALUES('b6c2d5e1-33c4-4048-820b-03d25fe674b9'::uuid, 'https://www.codiva.io/p/dbc162b6-5afe-46bf-b4b3-ee42f11c37c3', '2024-10-07 10:35:31.051', 'af2eff91-54b0-43b4-91c4-57b7e2d62f15'::uuid, 'ac85b4e5-33ea-4d2c-a281-f7ec41da15f7'::uuid, 0.00);
+INSERT INTO public."Submissions"
+("Id", "Url", "SubmissionDate", "StudentId", "AssignmentId", "Grade")
+VALUES('6252ac2f-e197-4ec3-821f-56ef3dffc72c'::uuid, 'https://www.codiva.io/p/0dc6fsdf99a0-6033-4bb6-b46c-15d238277749', '2024-10-07 10:35:31.051', 'e7c43279-2bcc-4c09-9165-b824041166fc'::uuid, 'ac85b4e5-33ea-4d2c-a281-f7ec41da15f7'::uuid, 0.00);
+INSERT INTO public."Submissions"
+("Id", "Url", "SubmissionDate", "StudentId", "AssignmentId", "Grade")
+VALUES('bd755547-68fc-4094-8f87-8b65797d668e'::uuid, 'https://www.covid.io/p/0dc699a0-6033-4bb6-b46c-15d238277749', '2024-10-07 10:35:31.051', '1979d2a7-de35-4d83-9aa9-857171cba7fa'::uuid, 'ac85b4e5-33ea-4d2c-a281-f7ec41da15f7'::uuid, 0.00);

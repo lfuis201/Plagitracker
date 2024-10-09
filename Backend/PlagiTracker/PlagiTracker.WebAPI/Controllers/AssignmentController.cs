@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Hangfire;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
-using PdfSharpCore.Pdf;
+using Newtonsoft.Json;
 using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Entities;
 using PlagiTracker.Data.Requests;
+using PlagiTracker.Services.FileServices;
 using PlagiTracker.Services.SeleniumServices;
-using static System.Net.WebRequestMethods;
-using System.Linq;
+using PlagiTracker.WebAPI.HangFire;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
@@ -57,44 +57,61 @@ namespace PlagiTracker.WebAPI.Controllers
                 return NotFound("The assignment not exist.");
             }
 
-            var studentsSubmissions = (await _context!.Submissions!
-            .Where(submission => submission.AssignmentId == assignmentId)
-            .Join(
-                _context.Students!,
-                submission => submission.StudentId,
-                student => student.Id,
-                (submission, student) => new { Student = student, Submission = submission }
-            ).ToListAsync())
-            .Select(data => (data.Student, data.Submission))
-            .ToList();
-
+            var studentsSubmissions = await _context!.Submissions!
+                .Where(submission => submission.AssignmentId == assignmentId)
+                .Include(submission => submission.Student)
+                .Select(submission => new Submission
+                {
+                    Id = submission.Id,
+                    Url = submission.Url,
+                    SubmissionDate = submission.SubmissionDate,
+                    StudentId = submission.StudentId,
+                    Student = new Student { 
+                        FirstName = submission.Student!.FirstName,
+                        LastName = submission.Student!.LastName
+                    },
+                })
+                .ToListAsync();
+            
+            // Verificar que haya al menos 2 entregas
             if (studentsSubmissions == null || studentsSubmissions.Count < 2)
             {
                 return BadRequest("There are not enough submissions to analyze.");
             }
 
-            WebScraping scraper = new();
-            /*
-            BackgroundJob.Schedule(() => 
-                new HangFire.HangFireServices().SavePlagiarismReport(urls2), 
-                new DateTimeOffset(DateTime.UtcNow.AddMinutes(1))
-            );
-            */
-
-            var data = await scraper.StartScraping(studentsSubmissions);
-
-            if(data == null)
+            // Verificar que todos los Student no sean nulos
+            if (studentsSubmissions.Any(submission => submission.Student == null))
             {
-                return BadRequest();
+                return BadRequest("Error in DataBase");
+            }
+            
+            WebScraping scraper = new();
+
+            Dictionary<Guid, StudentSubmission> analysisResult = await scraper.StartScraping(studentsSubmissions);
+            
+            if(analysisResult == null || analysisResult.Count <= 0)
+            {
+                return BadRequest("Error in scraping");
             }
 
+            string analysisResultJson = JsonConvert.SerializeObject(analysisResult);
+
+            BackgroundJob.Schedule(() =>
+                HttpContext.RequestServices
+                    .GetRequiredService<HangFireServices>()
+                    .SavePlagiarismReport(assignmentId, new string(analysisResultJson), new Dictionary<Guid, StudentSubmission>(analysisResult)),
+                new DateTimeOffset(DateTime.UtcNow)
+            );
+
+            var document = ReportGenerator.GenerateReport(analysisResult);
+            
             // Convertir el PDF a un array de bytes
             using (var memoryStream = new MemoryStream())
             {
-                data.Save(memoryStream);
+                document.Save(memoryStream);
                 var pdfBytes = memoryStream.ToArray();
 
-                return File(pdfBytes, "application/pdf", $"PlagiarismReport-{Guid.NewGuid()}.pdf");
+                return File(pdfBytes, "application/pdf", $"PlagiarismReport-{assignmentId}.pdf");
             }
         }
 

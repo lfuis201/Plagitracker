@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PlagiTracker.Data.DataAccess;
@@ -11,9 +12,11 @@ using PlagiTracker.Data.DataAccess;
 namespace PlagiTracker.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20241009005920_AnalysisDateIsAnalyzedAddedAssignment")]
+    partial class AnalysisDateIsAnalyzedAddedAssignment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -79,8 +82,7 @@ namespace PlagiTracker.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SubmissionId", "FileName")
-                        .IsUnique();
+                    b.HasIndex("SubmissionId");
 
                     b.ToTable("Codes");
                 });
@@ -130,16 +132,7 @@ namespace PlagiTracker.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Algorithm")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("CodeId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("CodeSnippet")
-                        .HasColumnType("text");
-
-                    b.Property<int>("Coincidences")
+                    b.Property<int>("Detector")
                         .HasColumnType("integer");
 
                     b.Property<double>("Similarity")
@@ -147,10 +140,25 @@ namespace PlagiTracker.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CodeId", "Algorithm")
-                        .IsUnique();
-
                     b.ToTable("Plagiarisms");
+                });
+
+            modelBuilder.Entity("PlagiTracker.Data.Entities.PlagiarismCode", b =>
+                {
+                    b.Property<Guid>("PlagiarismId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CodeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CodeSnippet")
+                        .HasColumnType("text");
+
+                    b.HasKey("PlagiarismId", "CodeId");
+
+                    b.HasIndex("CodeId");
+
+                    b.ToTable("PlagiarismCodes");
                 });
 
             modelBuilder.Entity("PlagiTracker.Data.Entities.Submission", b =>
@@ -179,10 +187,9 @@ namespace PlagiTracker.Data.Migrations
 
                     b.HasIndex("AssignmentId");
 
-                    b.HasIndex("Url")
-                        .IsUnique();
+                    b.HasIndex("StudentId");
 
-                    b.HasIndex("StudentId", "AssignmentId")
+                    b.HasIndex("Url")
                         .IsUnique();
 
                     b.ToTable("Submissions");
@@ -298,7 +305,7 @@ namespace PlagiTracker.Data.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("PlagiTracker.Data.Entities.Plagiarism", b =>
+            modelBuilder.Entity("PlagiTracker.Data.Entities.PlagiarismCode", b =>
                 {
                     b.HasOne("PlagiTracker.Data.Entities.Code", "Code")
                         .WithMany()
@@ -306,7 +313,15 @@ namespace PlagiTracker.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("PlagiTracker.Data.Entities.Plagiarism", "Plagiarism")
+                        .WithMany()
+                        .HasForeignKey("PlagiarismId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Code");
+
+                    b.Navigation("Plagiarism");
                 });
 
             modelBuilder.Entity("PlagiTracker.Data.Entities.Submission", b =>
