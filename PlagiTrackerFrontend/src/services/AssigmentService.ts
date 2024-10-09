@@ -75,6 +75,63 @@ class AssignmentService {
       throw error
     }
   }
+
+   /**
+   * Obtiene una asignación por su ID.
+   *
+   * @param {string} assignmentId - El ID de la asignación que se va a obtener.
+   * @returns {Promise<Assignment>} - La asignación obtenida del servidor.
+   * @throws {Error} - Lanza un error si ocurre algún problema al obtener la asignación.
+   */
+   static async getAssignmentById(assignmentId: string): Promise<Assignment> {
+    try {
+      const response = await axiosInstance.get(`${API_ENDPOINT}/GetById`, {
+        params: { id: assignmentId }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error getting assignment by ID:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Analiza una asignación en el sistema y descarga el reporte en formato PDF.
+   *
+   * @param {string} assignmentId - El ID de la asignación a analizar.
+   * @returns {Promise<void>} - Descarga el archivo PDF del análisis.
+   * @throws {Error} - Lanza un error si ocurre algún problema al analizar la asignación.
+   */
+  static async analyzeAssignment(assignmentId: string): Promise<void> {
+    try {
+      // Configuramos Axios para manejar una respuesta binaria (el PDF)
+      const response = await axiosInstance.post(
+        `${API_ENDPOINT}/Analyze?assignmentId=${assignmentId}`,
+        {},
+        {
+          responseType: 'blob', // Indica que esperamos un archivo binario (PDF)
+        }
+      );
+
+      // Creamos un Blob con los datos del PDF
+      const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+
+      // Creamos una URL para el Blob y forzamos la descarga del archivo
+      const downloadUrl = window.URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `PlagiarismReport-${assignmentId}.pdf`; // Nombre del archivo
+      document.body.appendChild(link);
+      link.click();
+
+      // Limpiar el DOM después de la descarga
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Error analyzing assignment:', error);
+      throw error;
+    }
+  }
 }
 
 export default AssignmentService

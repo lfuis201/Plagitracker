@@ -21,6 +21,8 @@ const confirmPassword = ref<string>('')
 const errors = ref<{ [key: string]: string }>({}) // Objeto para manejar errores
 const isLoading = ref<boolean>(false) // Estado para controlar la carga
 
+const backendError = ref<string | null>(null)
+
 const handleSubmit = async (event: Event) => {
   event.preventDefault()
   errors.value = {} // Resetear errores
@@ -49,16 +51,24 @@ const handleSubmit = async (event: Event) => {
     router.push('/teacher/auth/signin')
   } catch (error) {
     if (error instanceof z.ZodError) {
+      // Errores de validación de Zod (errores del frontend)
       error.errors.forEach((err) => {
         errors.value[err.path[0]] = err.message // Guardar el mensaje de error en el objeto
       })
-      isLoading.value = false // Detener el spinner
-
+    } else if (error.response) {
+      // Manejo de errores específicos del backend (sin usar errors.value)
+      if (error.response.status === 409) {
+        if (error.response.data.message === 'Email already used.') {
+          backendError.value = 'This email is already in use. Please choose another.' // Error del backend para email duplicado
+        } else if (error.response.data.message === 'Name already used.') {
+          backendError.value = 'This name is already in use. Please choose another.' // Error del backend para nombre duplicado
+        }
+      }
     } else {
-      alert('Error registering teacher. Please try again.')
-      isLoading.value = false // Detener el spinner
-
+      // Otros errores generales
+      backendError.value = 'Error registering teacher. Please try again.'
     }
+    isLoading.value = false // Detener el spinner
   }
 }
 </script>
@@ -203,6 +213,7 @@ const handleSubmit = async (event: Event) => {
         <div v-if="errors.passwordHash" class="text-red mb-2">{{ errors.passwordHash }}</div>
 
         <div v-if="password !== confirmPassword" class="text-red mb-2">Passwords do not match!</div>
+        <div v-if="backendError" class="text-red mb-2">{{ backendError }}</div>
 
         <div class="mb-5 mt-6">
           <button
@@ -251,7 +262,6 @@ const handleSubmit = async (event: Event) => {
             <router-link to="/teacher/auth/signin" class="text-primary">Sign in</router-link>
           </p>
         </div>
-
       </form>
     </DefaultAuthCard>
   </FullScreenLayout>

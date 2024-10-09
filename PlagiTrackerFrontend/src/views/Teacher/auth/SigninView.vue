@@ -1,50 +1,75 @@
 <script setup lang="ts">
-import DefaultAuthCard from '@/components/Auths/DefaultAuthCard.vue';
-import InputGroup from '@/components/Auths/InputGroup.vue';
-import FullScreenLayout from '@/layouts/FullScreenLayout.vue';
-import { ref } from 'vue';
-import { encrypt } from '@/utils/cryptoUtils';
-import router from '@/router';
-import { useUserStore } from '@/stores/userStore';
+import DefaultAuthCard from '@/components/Auths/DefaultAuthCard.vue'
+import InputGroup from '@/components/Auths/InputGroup.vue'
+import FullScreenLayout from '@/layouts/FullScreenLayout.vue'
+import { ref } from 'vue'
+import { encrypt } from '@/utils/cryptoUtils'
+import router from '@/router'
+import { useUserStore } from '@/stores/userStore'
 
-const email = ref<string>('');
-const password = ref<string>('');
-const errorMessage = ref<string>(''); // Variable para el mensaje de error
-  const isLoading = ref<boolean>(false) // Estado para controlar la carga
+const email = ref<string>('')
+const password = ref<string>('')
+const errorMessage = ref<string>('') // Variable para el mensaje de error
+const isLoading = ref<boolean>(false) // Estado para controlar la carga
+const remainingAttempts = ref<number | null>(null) // Intentos restantes de inicio de sesión
+  const unlockDate = ref<Date | null>(null); // Fecha en la que la cuenta será desbloqueada
 
-const userStore = useUserStore(); // Usar el store generalizado
+const userStore = useUserStore() // Usar el store generalizado
 
 // Manejo del formulario
 const handleSubmit = async (event: Event) => {
-  event.preventDefault(); // Evitar que el formulario recargue la página
-  errorMessage.value = ''; // Limpiar cualquier mensaje de error previo
+  event.preventDefault() // Evitar que el formulario recargue la página
+  errorMessage.value = '' // Limpiar cualquier mensaje de error previo
   isLoading.value = true
 
   try {
     // Encripta la contraseña antes de enviarla
-    const encryptedPassword = encrypt(password.value);
-    
+    const encryptedPassword = encrypt(password.value)
+
     // Llama al método login del store
-    await userStore.login(email.value, encryptedPassword, 'teacher');
-    
+    await userStore.login(email.value, encryptedPassword, 'teacher')
+
     // Si el login es exitoso, redirigir al dashboard
-    console.log('Login successful:', userStore.getUser);
+    console.log('Login successful:', userStore.getUser)
     //alert('Login successful:');
 
     // Redirigir al dashboard
-    router.push('/profile');
-  } catch (error) {
-    console.error('Error logging in:', error);
-    errorMessage.value = 'Error logging in, please try again.';
-    isLoading.value = false // Detener el spinner
+    router.push('/profile')
+  } catch (error: any) {
+    console.error('Error logging in:', error)
 
+    // Verificar si el error es una respuesta del servidor con el código 404
+    if (error.response && error.response.status === 404) {
+      if (error.response.data && error.response.data.message === 'Account not found.') {
+        errorMessage.value = 'Account not found. Please check your email and password.'
+      }
+      
+      else {
+        errorMessage.value = 'Endpoint not found. Please contact support.' // Caso genérico de 404
+      }
+    } // Verificar si el error es 401 Unauthorized con "Invalid password"
+    else if (error.response && error.response.status === 401) {
+      if (error.response.data && error.response.data.message === 'Invalid password.') {
+        errorMessage.value = `Invalid password. Please try again.`
+        remainingAttempts.value = error.response.data.remainingLogInAttempts
+      } if (error.response.data && error.response.data.message === 'Account is locked.') {
+        errorMessage.value = 'Your account is locked.';
+        unlockDate.value = new Date(error.response.data.unlockDate); // Parsear la fecha de desbloqueo
+      }else {
+        errorMessage.value = 'Unauthorized. Please check your credentials.'
+      }
+    } else {
+      // Otro tipo de error (como problemas de conexión)
+      errorMessage.value = 'Error logging in, please try again.'
+    }
+
+    isLoading.value = false // Detener el spinner
   }
-};
+}
 </script>
 
 <template>
   <FullScreenLayout>
-    
     <DefaultAuthCard subtitle="Welcome teacher" title="Sign In to PlagiTracker">
       <form @submit="handleSubmit">
         <InputGroup v-model="email" label="Email" type="email" placeholder="Enter your email">
@@ -65,7 +90,12 @@ const handleSubmit = async (event: Event) => {
           </svg>
         </InputGroup>
 
-        <InputGroup v-model="password" label="Password" type="password" placeholder="Enter your password">
+        <InputGroup
+          v-model="password"
+          label="Password"
+          type="password"
+          placeholder="Enter your password"
+        >
           <svg
             class="fill-current"
             width="22"
@@ -87,12 +117,19 @@ const handleSubmit = async (event: Event) => {
           </svg>
         </InputGroup>
 
+        <!-- Mensaje de error (solo se mostrará si existe un error) -->
+        <p v-if="errorMessage" class="text-red mt-2">{{ errorMessage }}</p>
+        <!-- Mostrar intentos restantes si existen -->
+        <div v-if="remainingAttempts !== null" class="text-yellow-500 mb-4">
+          {{ remainingAttempts }} login attempts remaining.
+        </div>
 
-           <!-- Mensaje de error (solo se mostrará si existe un error) -->
-           <p v-if="errorMessage" class="text-red mt-2">{{ errorMessage }}</p>
+            <!-- Mostrar mensaje si la cuenta está bloqueada -->
+            <div v-if="unlockDate !== null" class="text-yellow-500 mb-4">
+          Your account is locked. It will be unlocked on {{ unlockDate.toLocaleString() }}.
+        </div>
 
-
-           <div class="mb-5 mt-6">
+        <div class="mb-5 mt-6">
           <button
             type="submit"
             :disabled="isLoading"
@@ -132,7 +169,6 @@ const handleSubmit = async (event: Event) => {
             </svg>
           </button>
         </div>
-
 
         <div class="mt-6 text-center">
           <p class="font-medium">

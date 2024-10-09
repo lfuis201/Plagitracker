@@ -98,12 +98,7 @@ const sidebarStore = useSidebarStore()
 
       <div class="flex items-center gap-3 2xsm:gap-7">
         <ul class="flex items-center gap-2 2xsm:gap-4">
-          <li>
-            <!-- Dark Mode Toggler -->
-            <DarkModeSwitcher />
-            <!-- Dark Mode Toggler -->
-          </li>
-
+       
           <!-- Notification Menu Area -->
           <DropdownNotification />
           <!-- Notification Menu Area -->

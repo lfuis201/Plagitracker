@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import AssigmentCard from './AssigmentCard.vue';
-import AssignmentService from '@/services/AssigmentService';
-import type { Assignment } from '@/types/Assigment';
+import { useAssignmentStore } from '@/stores/assigmentStore';
 
 // Definir la prop para recibir el ID del curso
 const props = defineProps({
@@ -12,43 +11,34 @@ const props = defineProps({
   }
 });
 
-// Definir el estado para almacenar las asignaciones
-const assignments = ref<Assignment[]>([]);
-const isLoading = ref(false);
-const errorMessage = ref('');
+// Obtener el store de asignaciones
+const assignmentStore = useAssignmentStore();
 
-// Función para obtener las asignaciones del curso usando el servicio
+// Función para obtener las asignaciones del curso usando el store
 const fetchAssignments = async () => {
-  try {
-    isLoading.value = true;
-    assignments.value = await AssignmentService.getAssignmentsByCourse(props.courseId);
-    console.log(assignments.value);
-  } catch (error) {
-    console.error('Error fetching assignments:', error);
-    errorMessage.value = 'Failed to load assignments';
-  } finally {
-    isLoading.value = false;
-  }
+  console.log(`Fetching assignments for course: ${props.courseId}`);
+  await assignmentStore.fetchAssignmentsByCourse(props.courseId);
 };
 
 // Ejecutar la función cuando el componente se monte
 onMounted(() => {
   fetchAssignments();
 });
+
+// Observar cambios en courseId y volver a cargar las asignaciones si cambia
+watch(() => props.courseId, (newCourseId) => {
+  console.log(`Course changed to: ${newCourseId}`);
+  fetchAssignments(); // Cargar las nuevas asignaciones si el curso cambia
+});
 </script>
 
 <template>
   <div class="grid grid-cols-1 gap-4 my-4">
-    <!-- Mostrar un mensaje de carga mientras se obtienen los datos -->
-    <div v-if="isLoading">Loading assignments...</div>
-
-    <!-- Mostrar un mensaje de error si ocurre algún problema -->
-    <div v-if="errorMessage">{{ errorMessage }}</div>
-
-    <!-- Iteramos sobre la lista de asignaciones y mostramos una tarjeta para cada una -->
+    <div v-if="assignmentStore.isLoading">Loading assignments...</div>
+    <div v-if="assignmentStore.errorMessage">{{ assignmentStore.errorMessage }}</div>
     <AssigmentCard
-      v-for="(assignment, index) in assignments"
-      :key="index"
+      v-for="(assignment, index) in assignmentStore.assignments"
+      :key="assignment.id"
       :assignment="assignment"
     />
   </div>

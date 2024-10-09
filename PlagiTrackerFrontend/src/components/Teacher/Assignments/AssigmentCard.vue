@@ -1,13 +1,21 @@
 <script setup lang="ts">
 import type { Assignment } from '@/types/Assigment'
+import { ref } from 'vue';
 import { useRouter } from 'vue-router'
-
+import EditAssigment from './EditAssigment .vue';
 // Define una prop que recibe un objeto de tipo Assignment
 const props = defineProps<{
   assignment: Assignment
 }>()
 
 const router = useRouter()
+
+const isEditing = ref(false); // Estado para controlar la visibilidad del modal
+
+const editAssignment = () => {
+  isEditing.value = true; // Abre el modal de edición
+};
+
 
 const navigateToTask = () => {
   router.push({ name: 'teacherSubmissions', params: { id: props.assignment.id } }) // Navega usando el ID de la asignación
@@ -16,7 +24,7 @@ const navigateToTask = () => {
 
 <template>
   <div
-    class="flex items-center p-4 border rounded-lg bg-white shadow-md dark:bg-card cursor-pointer"
+    class="flex items-center p-4 bg-white shadow-md dark:bg-card cursor-pointer"
   >
     <!-- Icono -->
     <div class="flex-shrink-0">
@@ -87,6 +95,14 @@ const navigateToTask = () => {
       </button>
     </div>
   </div>
+
+  <EditAssigment
+      v-if="isEditing"
+      :modalOpen="isEditing"
+      :assignment="assignment"
+      @close="isEditing = false"
+    />
+
 </template>
 
 <style scoped>

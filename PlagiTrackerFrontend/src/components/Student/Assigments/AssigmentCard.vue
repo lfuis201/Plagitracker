@@ -16,7 +16,7 @@ const navigateToTask = () => {
 
 <template>
   <div
-    class="flex items-center p-4 border rounded-lg bg-white shadow-md dark:bg-card cursor-pointer"
+    class="flex items-center p-4 bg-white shadow-md dark:bg-card cursor-pointer"
   >
     <!-- Icono -->
     <div class="flex-shrink-0">

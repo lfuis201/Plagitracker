@@ -43,7 +43,7 @@ const handleDelete = async (courseId: string) => {
           {{ props.course.name }}
         </h2>
         <p class="text-sm text-muted-foreground">ING-VII</p>
-        <p class="text-sm text-muted-foreground">Soporte Informático</p>
+        <p class="text-sm text-muted-foreground">{{ props.course.id }}</p>
       </div>
     </router-link>
 

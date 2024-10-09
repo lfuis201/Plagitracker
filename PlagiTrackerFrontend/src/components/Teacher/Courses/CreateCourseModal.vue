@@ -33,6 +33,7 @@ import { ref, defineEmits, defineProps } from 'vue'
 import ModalLayout from '@/layouts/ModalLayout.vue'
 import { useUserStore } from '@/stores/userStore' // Importa el store
 import CourseService from '@/services/CourseService' // Asegúrate de importar el servicio
+import { useCoursesStore } from '@/stores/coursesStore';
 // Definir las propiedades que el componente recibe del padre
 const props = defineProps({
   modalOpen: Boolean
@@ -48,6 +49,8 @@ const course = ref({
   teacherId: '' // Este se llenará con el ID del usuario
 })
 
+// Usar el store de cursos
+const coursesStore = useCoursesStore();
 // Inicializa el store
 const userStore = useUserStore()
 const user = userStore.getUser // Obtiene el usuario del store
@@ -68,6 +71,8 @@ const handleSubmit = async () => {
     // Crea el curso usando el servicio
     const createdCourse = await CourseService.createCourse(course.value)
     console.log('Course Created:', createdCourse)
+    await coursesStore.fetchCoursesByTeacher();
+
  
   } catch (error) {
     console.error('Error creating course:', error)
