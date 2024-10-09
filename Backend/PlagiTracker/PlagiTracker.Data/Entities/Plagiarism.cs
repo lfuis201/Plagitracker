@@ -27,7 +27,7 @@ namespace PlagiTracker.Data.Entities
         /// Código al que pertenece el fragmento
         /// </summary>
         public string? CodeSnippet { get; set; } = string.Empty;
-
+        
         /// <summary>
         /// Id del código al que pertenece el análisis de plagio
         /// </summary>

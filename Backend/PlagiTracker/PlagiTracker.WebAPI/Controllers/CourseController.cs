@@ -36,20 +36,60 @@ namespace PlagiTracker.WebAPI.Controllers
         [Route("GetById")]
         public async Task<ActionResult> GetById(Guid id)
         {
-            var course = await _context!.Courses!.FindAsync(id);
+            var assignment = await _context!.Assignments!.FindAsync(id);
 
-            if (course == null)
+            if (assignment == null)
             {
                 return NotFound();
             }
 
-            return Ok(new Course()
+            return Ok(new Assignment()
             {
-                Id = course.Id,
-                Name = course.Name,
-                TeacherId = course.TeacherId
+                Id = assignment.Id,
+                Title = assignment.Title,
+                Description = assignment.Description,
+                SubmissionDate = assignment.SubmissionDate,
+                CourseId = assignment.CourseId
             });
         }
+
+        [HttpGet]
+        [Route("GetAllByAssignment")]
+        public async Task<ActionResult> GetAllByAssignment(Guid assignmentId)
+        {
+            // Verificar si la asignación existe
+            var assignment = await _context!.Assignments!.FindAsync(assignmentId);
+            if (assignment == null)
+            {
+                return NotFound("Assignment not found.");
+            }
+
+            // Obtener todas las entregas asociadas a la asignación, incluyendo la información del estudiante
+            var submissions = await _context!.Submissions!
+                .Include(s => s.Student) // Incluir información del estudiante
+                .Where(s => s.AssignmentId == assignmentId)
+                .ToListAsync();
+
+            // Verificar si hay entregas
+            if (submissions == null || submissions.Count == 0)
+            {
+                return NotFound("No submissions found for this assignment.");
+            }
+
+            // Retornar las entregas junto con la información del estudiante
+            return Ok(submissions.Select(s => new
+            {
+                SubmissionId = s.Id,
+                Url = s.Url,
+                SubmissionDate = s.SubmissionDate,
+                Grade = s.Grade,
+                StudentId = s.StudentId,
+                StudentFirstName = s.Student.FirstName,
+                StudentLastName = s.Student.LastName,
+                StudentEmail = s.Student.Email
+            }));
+        }
+
 
         [HttpGet]
         [Route("GetByName")]
@@ -109,6 +149,28 @@ namespace PlagiTracker.WebAPI.Controllers
             if (courses == null || courses.Count < 1)
             {
                 return NotFound();
+            }
+
+            return Ok(courses);
+        }
+
+        [HttpGet]
+        [Route("GetAllCourses")]
+        public async Task<ActionResult<List<Course>>> GetAllCourses()
+        {
+            // Verificar si _context.Courses es nulo antes de usarlo
+            if (_context.Courses == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Database not initialized.");
+            }
+
+            // Obtener todos los cursos de la base de datos
+            var courses = await _context.Courses.ToListAsync();
+
+            // Verificar si no hay cursos disponibles
+            if (courses.Count == 0)
+            {
+                return NotFound("No courses found.");
             }
 
             return Ok(courses);

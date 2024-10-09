@@ -1,28 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace PlagiTracker.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class AllEntitiesCreated : Migration
+    public partial class UpgradeDataBasev3 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "Plagiarisms",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Detector = table.Column<int>(type: "integer", nullable: false),
-                    Similarity = table.Column<double>(type: "numeric(5,2)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Plagiarisms", x => x.Id);
-                });
-
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
@@ -81,9 +69,7 @@ namespace PlagiTracker.Data.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: false),
-                    TeacherId = table.Column<Guid>(type: "uuid", nullable: false),
-                    TeacherId1 = table.Column<Guid>(type: "uuid", nullable: true),
-                    TeacherId2 = table.Column<Guid>(type: "uuid", nullable: false)
+                    TeacherId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -94,11 +80,6 @@ namespace PlagiTracker.Data.Migrations
                         principalTable: "Teachers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Courses_Teachers_TeacherId1",
-                        column: x => x.TeacherId1,
-                        principalTable: "Teachers",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -109,6 +90,8 @@ namespace PlagiTracker.Data.Migrations
                     Description = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: true),
                     Title = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     SubmissionDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    AnalysisDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsAnalyzed = table.Column<bool>(type: "boolean", nullable: false),
                     CourseId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
@@ -154,6 +137,7 @@ namespace PlagiTracker.Data.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Url = table.Column<string>(type: "text", nullable: false),
                     SubmissionDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Grade = table.Column<double>(type: "numeric(4,2)", nullable: false),
                     StudentId = table.Column<Guid>(type: "uuid", nullable: false),
                     AssignmentId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
@@ -195,26 +179,23 @@ namespace PlagiTracker.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PlagiarismCodes",
+                name: "Plagiarisms",
                 columns: table => new
                 {
-                    PlagiarismId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Similarity = table.Column<double>(type: "numeric(5,2)", nullable: false),
+                    Coincidences = table.Column<int>(type: "integer", nullable: false),
+                    CodeSnippet = table.Column<string>(type: "text", nullable: true),
                     CodeId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CodeSnippet = table.Column<string>(type: "text", nullable: true)
+                    Algorithm = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlagiarismCodes", x => new { x.PlagiarismId, x.CodeId });
+                    table.PrimaryKey("PK_Plagiarisms", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PlagiarismCodes_Codes_CodeId",
+                        name: "FK_Plagiarisms_Codes_CodeId",
                         column: x => x.CodeId,
                         principalTable: "Codes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PlagiarismCodes_Plagiarisms_PlagiarismId",
-                        column: x => x.PlagiarismId,
-                        principalTable: "Plagiarisms",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -231,9 +212,10 @@ namespace PlagiTracker.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Codes_SubmissionId",
+                name: "IX_Codes_SubmissionId_FileName",
                 table: "Codes",
-                column: "SubmissionId");
+                columns: new[] { "SubmissionId", "FileName" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Courses_TeacherId",
@@ -241,19 +223,15 @@ namespace PlagiTracker.Data.Migrations
                 column: "TeacherId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Courses_TeacherId1",
-                table: "Courses",
-                column: "TeacherId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Enrollments_CourseId",
                 table: "Enrollments",
                 column: "CourseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlagiarismCodes_CodeId",
-                table: "PlagiarismCodes",
-                column: "CodeId");
+                name: "IX_Plagiarisms_CodeId_Algorithm",
+                table: "Plagiarisms",
+                columns: new[] { "CodeId", "Algorithm" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Submissions_AssignmentId",
@@ -261,9 +239,10 @@ namespace PlagiTracker.Data.Migrations
                 column: "AssignmentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Submissions_StudentId",
+                name: "IX_Submissions_StudentId_AssignmentId",
                 table: "Submissions",
-                column: "StudentId");
+                columns: new[] { "StudentId", "AssignmentId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Submissions_Url",
@@ -285,13 +264,10 @@ namespace PlagiTracker.Data.Migrations
                 name: "Enrollments");
 
             migrationBuilder.DropTable(
-                name: "PlagiarismCodes");
+                name: "Plagiarisms");
 
             migrationBuilder.DropTable(
                 name: "Codes");
-
-            migrationBuilder.DropTable(
-                name: "Plagiarisms");
 
             migrationBuilder.DropTable(
                 name: "Submissions");
