@@ -11,6 +11,13 @@ const email = ref<string>('')
 const password = ref<string>('')
 const errorMessage = ref<string>('') // Variable para el mensaje de error
 const isLoading = ref<boolean>(false) // Estado para controlar la carga
+const remainingAttempts = ref<number | null>(null) // Intentos restantes de inicio de sesión
+const unlockDate = ref<Date | null>(null) // Fecha en la que la cuenta será desbloqueada
+const showPassword = ref<boolean>(false) // Estado para mostrar/ocultar la contraseña
+
+const emailError = ref<string>('') // Variable para el error específico de email
+const passwordError = ref<string>('') // Variable para el error específico de password
+
 
 const userStore = useUserStore() // Usar el store generalizado
 
@@ -24,20 +31,49 @@ const handleSubmit = async (event: Event) => {
     // Encripta la contraseña antes de enviarla
     const encryptedPassword = encrypt(password.value)
 
-    // Llama al método login del store, pasando 'student' como el tipo de usuario
+    // Llama al método login del store
     await userStore.login(email.value, encryptedPassword, 'student')
 
-    // Si el login es exitoso, redirigir al dashboard del estudiante
+    // Si el login es exitoso, redirigir al dashboard
     console.log('Login successful:', userStore.getUser)
-    //alert('Login successful:')
+    //alert('Login successful:');
 
-    // Redirigir al dashboard del estudiante
+    // Redirigir al dashboard
     router.push('/profile')
-  } catch (error) {
-    console.error('Error logging in:', error)
-    errorMessage.value = 'Error logging in, please try again.'
-    isLoading.value = false // Detener el spinner
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      // Si el error es de validación, mostrar los errores correspondientes
+      emailError.value = error.errors.find((err) => err.path[0] === 'email')?.message || null
+      passwordError.value = error.errors.find((err) => err.path[0] === 'password')?.message || null
+    } else {
+      console.error('Error logging in:', error)
 
+      // Verificar si el error es una respuesta del servidor con el código 404
+      if (error.response && error.response.status === 404) {
+        if (error.response.data && error.response.data.message === 'Account not found.') {
+          errorMessage.value = 'Account not found. Please check your email and password.'
+        } else {
+          errorMessage.value = 'Endpoint not found. Please contact support.' // Caso genérico de 404
+        }
+      } // Verificar si el error es 401 Unauthorized con "Invalid password"
+      else if (error.response && error.response.status === 401) {
+        if (error.response.data && error.response.data.message === 'Invalid password.') {
+          errorMessage.value = `Invalid password. Please try again.`
+          remainingAttempts.value = error.response.data.remainingLogInAttempts
+        }
+        if (error.response.data && error.response.data.message === 'Account is locked.') {
+          errorMessage.value = 'Your account is locked.'
+          unlockDate.value = new Date(error.response.data.unlockDate) // Parsear la fecha de desbloqueo
+        } else {
+          errorMessage.value = 'Unauthorized. Please check your credentials.'
+        }
+      } else {
+        // Otro tipo de error (como problemas de conexión)
+        errorMessage.value = 'Error logging in, please try again.'
+      }
+    }
+
+    isLoading.value = false // Detener el spinner
   }
 }
 </script>
@@ -63,6 +99,7 @@ const handleSubmit = async (event: Event) => {
             </g>
           </svg>
         </InputGroup>
+        <p v-if="emailError" class="text-red mb-2">{{ emailError }}</p>
 
         <InputGroup
           v-model="password"
@@ -70,28 +107,51 @@ const handleSubmit = async (event: Event) => {
           type="password"
           placeholder="Enter your password"
         >
-          <svg
-            class="fill-current"
-            width="22"
-            height="22"
-            viewBox="0 0 22 22"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <g opacity="0.5">
+          <button type="button" @click="showPassword = !showPassword">
+            <svg
+              v-if="showPassword"
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              class="fill-current"
+              fill="none"
+              viewBox="0 0 256 256"
+            >
               <path
-                d="M16.1547 6.80626V5.91251C16.1547 3.16251 14.0922 0.825009 11.4797 0.618759C10.0359 0.481259 8.59219 0.996884 7.52656 1.95938C6.46094 2.92188 5.84219 4.29688 5.84219 5.70626V6.80626C3.84844 7.18438 2.33594 8.93751 2.33594 11.0688V17.2906C2.33594 19.5594 4.19219 21.3813 6.42656 21.3813H15.5016C17.7703 21.3813 19.6266 19.525 19.6266 17.2563V11C19.6609 8.93751 18.1484 7.21876 16.1547 6.80626ZM8.55781 3.09376C9.31406 2.40626 10.3109 2.06251 11.3422 2.16563C13.1641 2.33751 14.6078 3.98751 14.6078 5.91251V6.70313H7.38906V5.67188C7.38906 4.70938 7.80156 3.78126 8.55781 3.09376ZM18.1141 17.2906C18.1141 18.7 16.9453 19.8688 15.5359 19.8688H6.46094C5.05156 19.8688 3.91719 18.7344 3.91719 17.325V11.0688C3.91719 9.52189 5.15469 8.28438 6.70156 8.28438H15.2953C16.8422 8.28438 18.1141 9.52188 18.1141 11V17.2906Z"
-                fill=""
+                fill="currentColor"
+                d="M247.31 124.76c-.35-.79-8.82-19.58-27.65-38.41C194.57 61.26 162.88 48 128 48S61.43 61.26 36.34 86.35C17.51 105.18 9 124 8.69 124.76a8 8 0 0 0 0 6.5c.35.79 8.82 19.57 27.65 38.4C61.43 194.74 93.12 208 128 208s66.57-13.26 91.66-38.34c18.83-18.83 27.3-37.61 27.65-38.4a8 8 0 0 0 0-6.5M128 192c-30.78 0-57.67-11.19-79.93-33.25A133.5 133.5 0 0 1 25 128a133.3 133.3 0 0 1 23.07-30.75C70.33 75.19 97.22 64 128 64s57.67 11.19 79.93 33.25A133.5 133.5 0 0 1 231.05 128c-7.21 13.46-38.62 64-103.05 64m0-112a48 48 0 1 0 48 48a48.05 48.05 0 0 0-48-48m0 80a32 32 0 1 1 32-32a32 32 0 0 1-32 32"
               />
+            </svg>
+
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              viewBox="0 0 256 256"
+              fill="none"
+            >
               <path
-                d="M10.9977 11.8594C10.5852 11.8594 10.207 12.2031 10.207 12.65V16.2594C10.207 16.6719 10.5508 17.05 10.9977 17.05C11.4102 17.05 11.7883 16.7063 11.7883 16.2594V12.6156C11.7883 12.2031 11.4102 11.8594 10.9977 11.8594Z"
-                fill=""
+                fill="currentColor"
+                d="M228 175a8 8 0 0 1-10.92-3l-19-33.2A123.2 123.2 0 0 1 162 155.46l5.87 35.22a8 8 0 0 1-6.58 9.21a8.4 8.4 0 0 1-1.29.11a8 8 0 0 1-7.88-6.69l-5.77-34.58a133 133 0 0 1-36.68 0l-5.77 34.58A8 8 0 0 1 96 200a8.4 8.4 0 0 1-1.32-.11a8 8 0 0 1-6.58-9.21l5.9-35.22a123.2 123.2 0 0 1-36.06-16.69L39 172a8 8 0 1 1-13.94-8l20-35a153.5 153.5 0 0 1-19.3-20a8 8 0 1 1 12.46-10c16.6 20.54 45.64 45 89.78 45s73.18-24.49 89.78-45a8 8 0 1 1 12.44 10a153.5 153.5 0 0 1-19.3 20l20 35a8 8 0 0 1-2.92 11"
               />
-            </g>
-          </svg>
+            </svg>
+          </button>
         </InputGroup>
+
+        <p v-if="passwordError" class="text-red mb-2">{{ passwordError }}</p>
+
         <!-- Mensaje de error (solo se mostrará si existe un error) -->
         <p v-if="errorMessage" class="text-red mt-2">{{ errorMessage }}</p>
+        <!-- Mostrar intentos restantes solo si la cuenta no está bloqueada -->
+        <div v-if="remainingAttempts !== null && unlockDate === null" class="text-yellow-500 mb-4">
+          {{ remainingAttempts }} login attempts remaining.
+        </div>
+
+        <!-- Mostrar mensaje si la cuenta está bloqueada -->
+        <div v-if="unlockDate !== null" class="text-yellow-500 mb-4">
+          Your account is locked. It will be unlocked on {{ unlockDate.toLocaleString() }}.
+        </div>
         <div class="mb-5 mt-6">
           <button
             type="submit"

@@ -38,6 +38,7 @@
               id="submissionDate"
               v-model="assignment.submissionDate"
               :min="minDate"
+              :max="maxDate"
               class="border rounded w-full px-3 py-2"
               required
             />
@@ -73,6 +74,12 @@ const emit = defineEmits(['close'])
 // Calcula la fecha mínima para el campo de entrada
 const minDate = computed(() => {
   const now = new Date()
+  return now.toISOString().slice(0, 16) // Formato 'YYYY-MM-DDTHH:MM'
+})
+
+const maxDate = computed(() => {
+  const now = new Date()
+  now.setFullYear(now.getFullYear() + 2) // Sumar 2 años a la fecha actual
   return now.toISOString().slice(0, 16) // Formato 'YYYY-MM-DDTHH:MM'
 })
 // Inicializa el store

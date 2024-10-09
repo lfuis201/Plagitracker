@@ -18,6 +18,8 @@
 
           <button
             type="submit"
+            :disabled="isSubmitting"
+
             class="mt-4 block w-full rounded bg-blue-500 p-3 text-white hover:bg-blue-600"
           >
             Create Course
@@ -48,6 +50,7 @@ const course = ref({
   name: '',
   teacherId: '' // Este se llenará con el ID del usuario
 })
+const isSubmitting = ref(false); // Inicialmente no está enviando
 
 // Usar el store de cursos
 const coursesStore = useCoursesStore();
@@ -72,10 +75,15 @@ const handleSubmit = async () => {
     const createdCourse = await CourseService.createCourse(course.value)
     console.log('Course Created:', createdCourse)
     await coursesStore.fetchCoursesByTeacher();
+    
+    handleClose(); // Cierra el modal aquí
+    isSubmitting.value = false; // Restablece el estado de envío independientemente del resultado
 
  
   } catch (error) {
     console.error('Error creating course:', error)
+  }finally {
+    isSubmitting.value = false; // Restablece el estado de envío independientemente del resultado
   }
 }
 </script>

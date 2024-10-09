@@ -6,6 +6,8 @@ import UnauthorizedView from '@/views/UnauthorizedView.vue'
 import HomeView from '@/views/HomeView.vue'
 import ProfileView from '@/views/ProfileView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
+import ServerErrorView from '@/views/ServerErrorView.vue'
+
 import { useUserStore } from '@/stores/userStore'
 
 const routes = [
@@ -46,7 +48,16 @@ const routes = [
     name: 'profile',
     component: ProfileView,
     meta: {
-      title: 'Profile'
+      title: 'Profile',
+      requiresAuth: true,
+    }
+  },
+  {
+    path: '/serverError', // Nueva ruta para errores de servidor
+    name: 'ServerError',
+    component: ServerErrorView,
+    meta: {
+      title: 'Server Error'
     }
   },
 
@@ -84,7 +95,7 @@ router.beforeEach((to, from, next) => {
   if (requiresAuth && !isAuthenticated) {
     // Redirect to the login page if not authenticated
     console.log('Redirecting to login: Not authenticated')
-    next({ name: 'Login' }) // Adjust this to your actual login route name
+    next({ name: 'home' }) // Adjust this to your actual login route name
   } else if (requiresAuth && allowedRoles && !allowedRoles.includes(userRole)) {
     // Redirect if the user's role is not allowed for this route
     console.log('Redirecting to unauthorized: Role not allowed')

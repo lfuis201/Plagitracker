@@ -3,14 +3,37 @@ import type { Assignment } from '@/types/Assigment'
 import { ref } from 'vue';
 import { useRouter } from 'vue-router'
 import EditAssigment from './EditAssigment .vue';
+import { useAssignmentStore } from '@/stores/assigmentStore'
+import AssignmentService from '@/services/AssigmentService';
+
+
 // Define una prop que recibe un objeto de tipo Assignment
 const props = defineProps<{
   assignment: Assignment
 }>()
 
+// Inicializa el store
+const assignmentStore = useAssignmentStore()
+
 const router = useRouter()
 
 const isEditing = ref(false); // Estado para controlar la visibilidad del modal
+
+// Función para eliminar la asignación
+const deleteAssignment = async () => {
+  try {
+    // Elimina la asignación usando el servicio
+    await AssignmentService.deleteAssignment(props.assignment.id)
+
+    // Recarga las asignaciones del store
+    await assignmentStore.fetchAssignmentsByCourse(props.assignment.courseId)
+    
+    console.log('Assignment deleted successfully')
+  } catch (error) {
+    console.error('Error deleting assignment:', error)
+  }
+}
+
 
 const editAssignment = () => {
   isEditing.value = true; // Abre el modal de edición
@@ -63,9 +86,8 @@ const navigateToTask = () => {
     <div class="flex items-center space-x-2">
       <!-- Botón de borrar -->
       <button
-        @click="deleteAssignment"
         aria-label="Delete Assignment"
-        @click.stop
+        @click="deleteAssignment"
         class="text-muted hover:text-red transition-colors duration-200"
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
@@ -94,14 +116,16 @@ const navigateToTask = () => {
         </svg>
       </button>
     </div>
-  </div>
 
-  <EditAssigment
-      v-if="isEditing"
+    <EditAssigment
       :modalOpen="isEditing"
       :assignment="assignment"
       @close="isEditing = false"
     />
+
+
+  </div>
+
 
 </template>
 

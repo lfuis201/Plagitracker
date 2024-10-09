@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import type { Course } from '@/types/Course'
 import CourseService from '@/services/CourseService'
+import { useCoursesStore } from '@/stores/coursesStore';
+
 import Swal from 'sweetalert2' // Importa SweetAlert2
 
 const props = defineProps<{
   course: Course
 }>()
+
+const coursesStore = useCoursesStore();
+
 
 // Función para manejar la eliminación del curso
 const handleDelete = async (courseId: string) => {
@@ -25,6 +30,8 @@ const handleDelete = async (courseId: string) => {
       await CourseService.deleteCourse(courseId)
       Swal.fire('Deleted!', 'Your course has been deleted.', 'success')
       console.log('Course deleted:', courseId)
+      await coursesStore.fetchCoursesByTeacher();
+
       // Opcional: redirige o actualiza la vista después de eliminar
     } catch (error) {
       console.error('Error deleting course:', error)

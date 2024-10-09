@@ -7,9 +7,23 @@
     >
       <div
         @click.stop
-        class="w-full max-w-142.5 rounded-lg bg-white px-8 py-12  dark:bg-boxdark md:px-17.5 md:py-15"
+        class="relative w-full max-w-142.5 rounded-lg bg-white px-8 py-12 dark:bg-boxdark md:px-17.5 md:py-15"
       >
-        <slot></slot>
+        <!-- Botón de cerrar (X) -->
+        <button
+          @click="emitClose"
+          class="absolute top-4 right-4 text-black hover:text-gray-800 focus:outline-none"
+          aria-label="Close modal"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+            <path
+              fill="#333333"
+              d="M6.4 19L5 17.6l5.6-5.6L5 6.4L6.4 5l5.6 5.6L17.6 5L19 6.4L13.4 12l5.6 5.6l-1.4 1.4l-5.6-5.6z"
+            />
+          </svg>
+        </button>
+
+        <slot> </slot>
       </div>
     </div>
   </transition>

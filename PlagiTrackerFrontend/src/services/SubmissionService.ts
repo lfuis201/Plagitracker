@@ -98,6 +98,26 @@ class SubmissionService {
       throw error
     }
   }
+
+   /**
+   * Obtiene todas las entregas asociadas a una asignación específica.
+   *
+   * @param {string} assignmentId - El ID de la asignación cuyas entregas se quieren obtener.
+   * @returns {Promise<Submission[]>} - Una lista de entregas asociadas a la asignación.
+   * @throws {Error} - Lanza un error si ocurre algún problema al obtener las entregas.
+   */
+   static async getAllByAssignment(assignmentId: string): Promise<any[]> {
+    try {
+      const response = await axiosInstance.get(`${API_ENDPOINT}/GetAllByAssignment`, {
+        params: { assignmentId } // Envía el assignmentId como parámetro de consulta
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error getting submissions by assignment:', error)
+      throw error
+    }
+  }
+  
 }
 
 export default SubmissionService

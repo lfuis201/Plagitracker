@@ -47,13 +47,14 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import SubmissionService from '@/services/SubmissionService'
 import AssignmentService from '@/services/AssigmentService'
 
 import type { Submission } from '@/types/Submission'
 import ItemNotFoundView from '@/views/ItemNotFoundView.vue'
+import type { Assignment } from '@/types/Assigment'
 // Using the store to get the current user
 const userStore = useUserStore()
 const user = computed(() => userStore.getUser)

@@ -14,10 +14,18 @@ const router = useRouter()
 
 // Función para hacer logout del usuario
 const logout = () => {
-  userStore.clearUser() // Limpiar el estado del usuario
-  router.push('/student/auth/signin') // Redirigir a la página de login
-}
 
+  // Redirigir según el rol
+  if (role.value === 'teacher') {
+    router.push('/teacher/auth/signin') // Redirigir a la página de login de teacher
+  } else if (role.value === 'student') {
+    router.push('/student/auth/signin') // Redirigir a la página de login de student
+  }
+
+  userStore.clearUser() // Limpiar el estado del usuario
+  
+  
+}
 onClickOutside(target, () => {
   dropdownOpen.value = false
 })
