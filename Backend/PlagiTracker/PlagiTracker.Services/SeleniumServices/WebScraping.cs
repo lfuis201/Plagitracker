@@ -13,6 +13,14 @@ using OpenQA.Selenium.DevTools;
 
 namespace PlagiTracker.Services.SeleniumServices
 {
+    public class SaveReport
+    {
+        public Dictionary<Guid, StudentSubmission> AnalysisResult
+        {
+            get; set;
+        }
+    }
+
     public class StudentSubmission    
     {
         public Guid Id { get; set; }

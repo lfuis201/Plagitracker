@@ -1,4 +1,4 @@
-Add-Migration AnalysisDateIsAnalyzedAddedAssignment -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
+Add-Migration ChangeIdTypePlagiarism -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 Update-Database -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 
 {

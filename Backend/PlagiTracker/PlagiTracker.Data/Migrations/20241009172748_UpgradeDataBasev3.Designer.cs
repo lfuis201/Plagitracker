@@ -12,8 +12,8 @@ using PlagiTracker.Data.DataAccess;
 namespace PlagiTracker.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241009030137_CoincidencesAddedPlagiarism")]
-    partial class CoincidencesAddedPlagiarism
+    [Migration("20241009172748_UpgradeDataBasev3")]
+    partial class UpgradeDataBasev3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -82,7 +82,8 @@ namespace PlagiTracker.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SubmissionId");
+                    b.HasIndex("SubmissionId", "FileName")
+                        .IsUnique();
 
                     b.ToTable("Codes");
                 });
@@ -132,24 +133,8 @@ namespace PlagiTracker.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Coincidences")
+                    b.Property<int>("Algorithm")
                         .HasColumnType("integer");
-
-                    b.Property<int>("Detector")
-                        .HasColumnType("integer");
-
-                    b.Property<double>("Similarity")
-                        .HasColumnType("decimal(5, 2)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Plagiarisms");
-                });
-
-            modelBuilder.Entity("PlagiTracker.Data.Entities.PlagiarismCode", b =>
-                {
-                    b.Property<Guid>("PlagiarismId")
-                        .HasColumnType("uuid");
 
                     b.Property<Guid>("CodeId")
                         .HasColumnType("uuid");
@@ -157,11 +142,18 @@ namespace PlagiTracker.Data.Migrations
                     b.Property<string>("CodeSnippet")
                         .HasColumnType("text");
 
-                    b.HasKey("PlagiarismId", "CodeId");
+                    b.Property<int>("Coincidences")
+                        .HasColumnType("integer");
 
-                    b.HasIndex("CodeId");
+                    b.Property<double>("Similarity")
+                        .HasColumnType("decimal(5, 2)");
 
-                    b.ToTable("PlagiarismCodes");
+                    b.HasKey("Id");
+
+                    b.HasIndex("CodeId", "Algorithm")
+                        .IsUnique();
+
+                    b.ToTable("Plagiarisms");
                 });
 
             modelBuilder.Entity("PlagiTracker.Data.Entities.Submission", b =>
@@ -190,9 +182,10 @@ namespace PlagiTracker.Data.Migrations
 
                     b.HasIndex("AssignmentId");
 
-                    b.HasIndex("StudentId");
-
                     b.HasIndex("Url")
+                        .IsUnique();
+
+                    b.HasIndex("StudentId", "AssignmentId")
                         .IsUnique();
 
                     b.ToTable("Submissions");
@@ -308,7 +301,7 @@ namespace PlagiTracker.Data.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("PlagiTracker.Data.Entities.PlagiarismCode", b =>
+            modelBuilder.Entity("PlagiTracker.Data.Entities.Plagiarism", b =>
                 {
                     b.HasOne("PlagiTracker.Data.Entities.Code", "Code")
                         .WithMany()
@@ -316,15 +309,7 @@ namespace PlagiTracker.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlagiTracker.Data.Entities.Plagiarism", "Plagiarism")
-                        .WithMany()
-                        .HasForeignKey("PlagiarismId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Code");
-
-                    b.Navigation("Plagiarism");
                 });
 
             modelBuilder.Entity("PlagiTracker.Data.Entities.Submission", b =>
