@@ -4,12 +4,12 @@
       <div class="flex space-x-4">
         <router-link to="/student/auth/signin">
           <button class="bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-700 transition ease-in-out duration-300">
-            Try Pragitacker as a Student
+            Try PlagiTracker as a Student
           </button>
         </router-link>
         <router-link to="/teacher/auth/signin">
           <button class="bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-700 transition ease-in-out duration-300">
-            Try Pragitacker as a Teacher
+            Try PlagiTracker as a Teacher
           </button>
         </router-link>
       </div>
