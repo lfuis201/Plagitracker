@@ -36,22 +36,22 @@ namespace PlagiTracker.WebAPI.Controllers
         [Route("GetById")]
         public async Task<ActionResult> GetById(Guid id)
         {
-            var assignment = await _context!.Assignments!.FindAsync(id);
+            var course = await _context!.Courses!
+                .FirstOrDefaultAsync(c => c.Id == id);
 
-            if (assignment == null)
+            if (course == null)
             {
                 return NotFound();
             }
 
-            return Ok(new Assignment()
+            return Ok(new Course
             {
-                Id = assignment.Id,
-                Title = assignment.Title,
-                Description = assignment.Description,
-                SubmissionDate = assignment.SubmissionDate,
-                CourseId = assignment.CourseId
+                Id = course.Id,
+                Name = course.Name,
+                TeacherId = course.TeacherId
             });
         }
+
 
         [HttpGet]
         [Route("GetAllByAssignment")]

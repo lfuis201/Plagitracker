@@ -341,12 +341,20 @@ namespace PlagiTracker.WebAPI.Controllers
         public async Task<ActionResult> Update(AssignmentUpdateRequest assignmentUpdateRequest)
         {
             var assignment = await _context!.Assignments!.FindAsync(assignmentUpdateRequest.Id);
-            assignment!.Description = assignmentUpdateRequest.Description;
-            assignment!.Title = assignmentUpdateRequest.Title;
+
+            if (assignment == null)
+            {
+                return NotFound();
+            }
+
+            assignment.Description = assignmentUpdateRequest.Description;
+            assignment.Title = assignmentUpdateRequest.Title;
+            assignment.SubmissionDate = assignmentUpdateRequest.SubmissionDate;
 
             await _context.SaveChangesAsync();
             return Ok();
         }
+
 
         [HttpDelete]
         [Route("Delete")]
@@ -358,5 +366,26 @@ namespace PlagiTracker.WebAPI.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
+        [HttpGet]
+        [Route("GetById")]
+        public async Task<ActionResult> GetById(Guid id)
+        {
+            var assignment = await _context!.Assignments!.FindAsync(id);
+
+            if (assignment == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(new Assignment()
+            {
+                Id = assignment.Id,
+                Title = assignment.Title,
+                Description = assignment.Description,
+                SubmissionDate = assignment.SubmissionDate,
+                CourseId = assignment.CourseId
+            });
+        }
+
     }
 }
