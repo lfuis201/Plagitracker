@@ -76,7 +76,7 @@ namespace PlagiTracker.WebAPI.HangFire
                             Content = code.Value 
                         });
 
-                        data2.Append($"\n{CodeId} | {studentSubmission.SubmissionId} | {code.Key} | {code.Value}");
+                        data2.Append($"\n{CodeId} | {studentSubmission.SubmissionId} | {code.Key}");
 
                         GuidsForCodes.Add(code.Key, CodeId);
                     } 
