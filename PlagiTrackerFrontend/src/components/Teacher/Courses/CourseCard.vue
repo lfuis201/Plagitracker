@@ -108,10 +108,13 @@ const handleDelete = async (courseId: string) => {
         </button>
       </div>
     </div>
+
+    <EditCourseModal :modalOpen="modalOpen" :course="props.course" @close="closeModal" />
+
+
   </div>
 
 
-  <EditCourseModal :modalOpen="modalOpen" :course="props.course" @close="closeModal" />
 
   <!-- Card Item End -->
 </template>

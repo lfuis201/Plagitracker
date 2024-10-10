@@ -5,6 +5,8 @@ import CourseCard from './CourseCard.vue'
 import CourseService from '@/services/CourseService'
 import type { Course } from '@/types/Course'
 import EnrollmentService from '@/services/EnrollmentService'
+import Swal from 'sweetalert2' // Import SweetAlert2
+import router from '@/router'
 
 // Estado reactivo para almacenar los cursos
 const courses = ref<Course[]>([])
@@ -45,11 +47,27 @@ const enrollInCourse = async () => {
     // Llamar al servicio de inscripción usando courseId.value
     const response = await EnrollmentService.createEnrollment(courseId.value, studentId)
     console.log('Inscripción exitosa:', response)
-    alert('Te has inscrito exitosamente al curso.')
+    // Mostrar un mensaje de éxito con SweetAlert2
+    await Swal.fire({
+      title: 'Enrollment Successful',
+      text: 'You have successfully enrolled in the course.',
+      icon: 'success',
+      confirmButtonText: 'OK'
+    })
+
+    router.push('/student/courses'); // Cambia '/courses' a la ruta que desees
+
+
   } catch (error) {
     console.error('Error al inscribirse:', error)
-    alert('Ocurrió un error al intentar inscribirte.')
-  }
+
+    // Mostrar un mensaje de error con SweetAlert2
+    await Swal.fire({
+      title: 'Enrollment Failed',
+      text: 'An error occurred while trying to enroll.',
+      icon: 'error',
+      confirmButtonText: 'Try Again'
+    });  }
 }
 // Llama a fetchCourses al montar el componente
 onMounted(() => {

@@ -39,9 +39,9 @@ const handleModalClose = () => {
         </svg>
       </span>
     </ButtonEvent>
+    <CoursesList/>
 
     <!-- Componente ModalExample con control del estado desde el padre -->
     <CreateCourseModal :modalOpen="isModalOpen" @close="handleModalClose" />
-    <CoursesList/>
   </DefaultLayout>
 </template>

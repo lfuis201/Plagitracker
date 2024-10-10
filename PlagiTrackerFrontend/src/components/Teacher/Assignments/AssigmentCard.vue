@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import EditAssigment from './EditAssigment .vue';
 import { useAssignmentStore } from '@/stores/assigmentStore'
 import AssignmentService from '@/services/AssigmentService';
+import Swal from 'sweetalert2' // Importa SweetAlert2
 
 
 // Define una prop que recibe un objeto de tipo Assignment
@@ -19,21 +20,44 @@ const router = useRouter()
 
 const isEditing = ref(false); // Estado para controlar la visibilidad del modal
 
-// Función para eliminar la asignación
 const deleteAssignment = async () => {
-  try {
-    // Elimina la asignación usando el servicio
-    await AssignmentService.deleteAssignment(props.assignment.id)
+  const result = await Swal.fire({
+    title: 'Are you sure?',
+    text: "You won't be able to revert this!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes, delete it!',
+    cancelButtonText: 'No, cancel'
+  });
 
-    // Recarga las asignaciones del store
-    await assignmentStore.fetchAssignmentsByCourse(props.assignment.courseId)
-    
-    console.log('Assignment deleted successfully')
-  } catch (error) {
-    console.error('Error deleting assignment:', error)
+  if (result.isConfirmed) {
+    try {
+      // Delete the assignment using the service
+      await AssignmentService.deleteAssignment(props.assignment.id);
+
+      // Reload the assignments from the store
+      await assignmentStore.fetchAssignmentsByCourse(props.assignment.courseId);
+      
+      console.log('Assignment deleted successfully');
+
+      // Show success message
+      await Swal.fire(
+        'Deleted!',
+        'The assignment has been deleted.',
+        'success'
+      );
+    } catch (error) {
+      console.error('Error deleting the assignment:', error);
+      await Swal.fire(
+        'Oops!',
+        'Something went wrong while deleting the assignment.',
+        'error'
+      );
+    }
   }
-}
-
+};
 
 const editAssignment = () => {
   isEditing.value = true; // Abre el modal de edición

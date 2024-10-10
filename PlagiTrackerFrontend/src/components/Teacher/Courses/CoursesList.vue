@@ -25,7 +25,7 @@ onMounted(() => {
   </div>
 
   <!-- Lista de cursos -->
-  <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
     <!-- Iteramos sobre la lista de cursos y mostramos un CourseCard para cada uno -->
     <CourseCard
       v-for="course in coursesStore.courses"
