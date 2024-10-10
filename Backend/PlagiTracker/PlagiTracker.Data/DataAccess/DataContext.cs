@@ -92,6 +92,7 @@ namespace PlagiTracker.Data.DataAccess
                 // Configura la concatenación del Id del Estudiante y el Id de la Asignación como única
                 builder.HasIndex(plagiarism => new 
                 { 
+                    plagiarism.Id,
                     plagiarism.CodeId, 
                     plagiarism.Algorithm 
                 }).IsUnique();

@@ -4,24 +4,17 @@ using OpenQA.Selenium;
 using PlagiTracker.Analyzer;
 using Newtonsoft.Json;
 using PlagiTracker.Services.FileServices;
+using OpenQA.Selenium.Edge;
+using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
 using PlagiTracker.Analyzer.PlagiDetector;
 using PlagiTracker.Data.Entities;
 using System.Collections.Generic;
 using OpenQA.Selenium.DevTools;
 
-
 namespace PlagiTracker.Services.SeleniumServices
 {
-    public class SaveReport
-    {
-        public Dictionary<Guid, StudentSubmission> AnalysisResult
-        {
-            get; set;
-        }
-    }
-
-    public class StudentSubmission    
+    public class StudentSubmission
     {
         public Guid Id { get; set; }
         public string? FirstName { get; set; }
@@ -78,20 +71,88 @@ namespace PlagiTracker.Services.SeleniumServices
 
     public class WebScraping
     {
-        private IWebDriver driver;
+        private IWebDriver? Driver;
 
         public WebScraping()
         {
-            var options = new FirefoxOptions();
+            bool isCreated = CreateChromeDriver();
 
-            options.AddArgument("--disable-usb");
-            options.AddArgument("--headless");
+            if (!isCreated)
+            {
+                isCreated = CreateEdgeDriver();
 
-            options.AddArgument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
-            //options.AddExcludedArgument("enable-automation");
-            options.AddAdditionalOption("useAutomationExtension", false);
+                if (!isCreated)
+                {
+                    isCreated = CreateChromeDriver();
 
-            driver = new FirefoxDriver(options);
+                    if (!isCreated)
+                    {
+                        Console.WriteLine("Error: No se pudo crear el driver");
+                    }
+                }
+            }
+        }
+
+        private bool CreateFireFoxDriver()
+        {
+            bool result;
+            try
+            {
+                var options = new FirefoxOptions();
+                options.AddArgument("--headless");
+
+                Driver = new FirefoxDriver(options);
+                result = true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                result = false;
+            }
+
+            return result;
+        }
+
+        private bool CreateEdgeDriver()
+        {
+            bool result;
+            try
+            {
+                var options = new EdgeOptions();
+                options.AddArgument("--headless");
+
+                Driver = new EdgeDriver(options);
+                result = true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                result = false;
+            }
+
+            return result;
+        }
+
+        private bool CreateChromeDriver()
+        {
+            bool result;
+            try
+            {
+                var options = new ChromeOptions();
+                options.AddArgument("--headless");
+                options.AddArgument("--disable-gpu");
+                options.AddArgument("--window-size=1920,1080");
+
+                Driver = new ChromeDriver(options);
+                result = true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                result = false;
+            }
+
+            return result;
         }
 
         public static async Task<bool> UrlExists(string url)
@@ -120,6 +181,12 @@ namespace PlagiTracker.Services.SeleniumServices
 
         public async Task<Dictionary<Guid, StudentSubmission>> StartScraping(List<Submission> studentsSubmissions)
         {
+            if (Driver == null)
+            {
+                Console.WriteLine("Error: Driver is NULL");
+                return new();
+            }
+
             Dictionary<Guid, StudentSubmission> StudentSubmissionResults = []; 
             PlagiaPythonResult analysis = new();
             var jsonData = new Dictionary<string, List<Dictionary<string, string>>>();
@@ -158,22 +225,22 @@ namespace PlagiTracker.Services.SeleniumServices
                         StudentSubmissionResults[studentsSubmission.StudentId].State = StudentSubmission.UrlState.Ok;
                     }
 
-                    driver.Navigate().GoToUrl(studentsSubmission.Url);
+                    Driver.Navigate().GoToUrl(studentsSubmission.Url);
                     Thread.Sleep(1000);
 
-                    var labels = driver.FindElements(By.XPath("//label[starts-with(@for, 'tab-java-')]"));
+                    var labels = Driver.FindElements(By.XPath("//label[starts-with(@for, 'tab-java-')]"));
 
                     var studentFiles = new List<Dictionary<string, string>>();
 
                     foreach (var label in labels)
                     {
                         string className = label.GetAttribute("title");
-                        var tabElement = driver.FindElement(By.XPath($"//label[@title='{className}']"));
+                        var tabElement = Driver.FindElement(By.XPath($"//label[@title='{className}']"));
                         tabElement.Click();
 
                         Thread.Sleep(1000);
 
-                        var codeElements = driver.FindElements(By.XPath("//div[contains(@class,'CodeMirror-code')]//pre"));
+                        var codeElements = Driver.FindElements(By.XPath("//div[contains(@class,'CodeMirror-code')]//pre"));
                         string codeContent = string.Join("\n", codeElements.Select(e => e.Text).Select(c => c.Trim()));
                         
                         StudentSubmissionResults[studentsSubmission.StudentId].Codes.TryAdd(className, codeContent);
@@ -211,7 +278,7 @@ namespace PlagiTracker.Services.SeleniumServices
             }
             finally
             {
-                driver.Quit();
+                Driver.Quit();
             }
             
             if(analysis != null && analysis.Comparaciones_Entre_Ids != null && analysis.Comparaciones_Entre_Ids.Count > 2)

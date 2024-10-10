@@ -30,16 +30,18 @@ namespace PlagiTracker.Services.FileServices
             HTML.Append("<h1>Plagiarism Report</h1>");
             HTML.Append($"<h2><strong>Date and Time:</strong> {DateTime.Now.ToString("dd/MM/yyyy HH:mm")}</h2>");
 
+            var unanalyzedStudents = analysisResult.Values.Where(studentSubmission => studentSubmission.State != StudentSubmission.UrlState.Ok).ToList();
+
             // Incluir las URLs que tuvieron errores
-            if (analysisResult.Any(studentSubmission => studentSubmission.Value.State != StudentSubmission.UrlState.Ok))
+            if (unanalyzedStudents.Count > 0)
             {
                 HTML.Append("<div class=\"errores\">");
                 HTML.Append("<h2>Unanalyzed Students</h2>");
 
                 HTML.Append("<ul>");
-                foreach (var studentSubmission in analysisResult.Values)
+                foreach (var unanalyzedStudent in unanalyzedStudents)
                 {
-                    HTML.Append($"<li>{studentSubmission.FirstName} {studentSubmission.LastName}: {StudentSubmission.UrlStateToString(studentSubmission.State)}</li>");
+                    HTML.Append($"<li>{unanalyzedStudent.FirstName} {unanalyzedStudent.LastName}: {StudentSubmission.UrlStateToString(unanalyzedStudent.State)}</li>");
                 }
                 HTML.Append("</ul>");
                 HTML.Append("</div>");
