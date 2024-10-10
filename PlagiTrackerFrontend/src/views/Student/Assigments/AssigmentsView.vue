@@ -19,7 +19,7 @@ const errorMessage = ref('');
 const loadCourse = async () => {
   try {
     await CourseService.getCourseById(courseId);
-  } catch (error) {
+  } catch (error: any) {
     // Comprobar si el error tiene respuesta y un código de estado
     if (error.response && error.response.status === 400) {
       console.error('Bad Request - Course not found:', error);

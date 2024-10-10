@@ -45,8 +45,14 @@ onMounted(() => {
       <table class="w-full table-auto">
         <thead>
           <tr class="bg-gray-2 text-left dark:bg-meta-4">
+
             <th class="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-              Student
+              Student Name
+            </th>
+
+
+            <th class="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
+              Student Email
             </th>
 
             <th class="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
@@ -60,7 +66,17 @@ onMounted(() => {
           </tr>
         </thead>
         <tbody>
+          <tr v-if="submissionsList.length === 0">
+            <td colspan="3" class="py-5 px-4 text-center text-gray-500">
+              No submissions have been made.
+            </td>
+          </tr>
           <tr v-for="(item, index) in submissionsList" :key="index">
+
+            <td class="py-5 px-4 pl-9 xl:pl-11">
+              <h5 class="font-medium text-black dark:text-white">{{ item.studentFirstName }} {{ item.studentLastName }}</h5>
+            </td>
+
             <td class="py-5 px-4 pl-9 xl:pl-11">
               <h5 class="font-medium text-black dark:text-white">{{ item.studentEmail }}</h5>
             </td>

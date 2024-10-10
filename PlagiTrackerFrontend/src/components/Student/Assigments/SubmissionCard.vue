@@ -29,18 +29,26 @@
           id="url-input"
           type="url"
           v-model="submissionUrl"
-          placeholder="https://yourwork.com"
+          :disabled="isSubmissionClosed"
+          placeholder="https://www.codiva.io/"
           class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
       <div class="flex items-center mt-4">
         <button
           @click="submitLink"
-          class="bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-md ml-2"
+          :disabled="isSubmissionClosed"
+          :class="isSubmissionClosed ? 'bg-blue-300 text-white cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600'"
+          class="px-4 py-2 rounded-md"
         >
           Mark as Completed
         </button>
       </div>
+
+      <!-- Display message if submission is closed -->
+      <p v-if="isSubmissionClosed" class="text-red mt-2">
+        Submission deadline has passed. You cannot submit the link.
+      </p>
     </div>
   </div>
 </template>
@@ -55,24 +63,28 @@ import AssignmentService from '@/services/AssigmentService'
 import type { Submission } from '@/types/Submission'
 import ItemNotFoundView from '@/views/ItemNotFoundView.vue'
 import type { Assignment } from '@/types/Assigment'
-// Using the store to get the current user
+
+// Store references
 const userStore = useUserStore()
 const user = computed(() => userStore.getUser)
 
-// Using the route to extract the assignment ID
 const route = useRoute()
-const assignmentId = route.params.id as string // Extract the ID from the route params
+const assignmentId = route.params.id as string
 
-// Input binding for the URL
+// Input for submission URL
 const submissionUrl = ref('')
-// Variables to hold assignment details
+
+// Assignment details
 const assignmentTitle = ref<string>('')
 const assignmentDescription = ref<string>('')
 const assignmentSubmissionDate = ref<string>('')
 
-// Error states
-const error = ref<boolean>(false) // Track whether there's an error fetching the assignment
-const assignmentNotFound = ref<boolean>(false) // Track whether the assignment is not found
+// Track whether the assignment submission date has passed
+const isSubmissionClosed = ref(false)
+
+// Error tracking
+const error = ref<boolean>(false)
+const assignmentNotFound = ref<boolean>(false)
 
 // Function to load assignment details
 const loadAssignmentDetails = async () => {
@@ -80,7 +92,9 @@ const loadAssignmentDetails = async () => {
     const assignment: Assignment = await AssignmentService.getAssignmentById(assignmentId)
     assignmentTitle.value = assignment.title
     assignmentDescription.value = assignment.description
-    assignmentSubmissionDate.value = new Date(assignment.submissionDate).toLocaleString('en-US', {
+
+    const submissionDate = new Date(assignment.submissionDate)
+    assignmentSubmissionDate.value = submissionDate.toLocaleString('en-US', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
@@ -89,20 +103,25 @@ const loadAssignmentDetails = async () => {
       second: '2-digit',
       hour12: false
     })
-    error.value = false // Reset error state if assignment is found
-    assignmentNotFound.value = false // Reset not found state if assignment is found
-  } catch (err) {
+
+    // Check if the submission date has passed
+    if (new Date() > submissionDate) {
+      isSubmissionClosed.value = true
+    }
+
+    error.value = false
+    assignmentNotFound.value = false
+  } catch (err: any) {
     if (err.response && err.response.data && err.response.data.errors.id) {
-      // Check for specific validation error regarding the ID
-      assignmentNotFound.value = true // Set not found state
+      assignmentNotFound.value = true
     } else {
-      error.value = true // Set error state if general error occurs
+      error.value = true
     }
     console.error('Error fetching assignment details:', err)
   }
 }
 
-// Function to handle the submission
+// Function to handle submission
 const submitLink = async () => {
   if (!submissionUrl.value) {
     alert('Please enter a valid URL.')
@@ -110,16 +129,12 @@ const submitLink = async () => {
   }
 
   try {
-    // Create the submission payload using the Submission type
     const submission: Omit<Submission, 'id'> = {
       url: submissionUrl.value,
       studentId: user.value.id,
       assignmentId: assignmentId,
       submissionDate: new Date()
     }
-
-    // Call the submission service to create a submission
-    console.log(submission)
 
     await SubmissionService.createSubmission(submission)
     alert('Submission uploaded successfully!')

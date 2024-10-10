@@ -26,7 +26,7 @@ const assigmentsRoutes = [
     name: 'AssigmentsStudent',
     component: AssigmenstView,
     meta: {
-      title: 'My Assigements',
+      title: 'My Assignments',
     },
   },
   {

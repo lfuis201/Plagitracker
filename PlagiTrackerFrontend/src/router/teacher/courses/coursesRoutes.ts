@@ -18,7 +18,7 @@ const coursesRoutes = [
     name: 'teacherAssigments',
     component: AssigmentView,
     meta: {
-      title: 'Assigments',
+      title: 'Assignments',
       requiresAuth: true,
       allowedRoles: ['teacher']
     },

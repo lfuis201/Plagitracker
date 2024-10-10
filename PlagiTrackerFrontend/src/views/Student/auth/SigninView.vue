@@ -19,7 +19,6 @@ const showPassword = ref<boolean>(false) // Estado para mostrar/ocultar la contr
 const emailError = ref<string>('') // Variable para el error específico de email
 const passwordError = ref<string>('') // Variable para el error específico de password
 
-
 const userStore = useUserStore() // Usar el store generalizado
 
 // Manejo del formulario
@@ -105,7 +104,7 @@ const handleSubmit = async (event: Event) => {
         <InputGroup
           v-model="password"
           label="Password"
-          type="password"
+          :type="showPassword ? 'text' : 'password'"
           placeholder="Enter your password"
         >
           <button type="button" @click="showPassword = !showPassword">

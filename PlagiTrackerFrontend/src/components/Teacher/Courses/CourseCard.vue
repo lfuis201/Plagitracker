@@ -95,6 +95,7 @@ const handleDelete = async (courseId: string) => {
 
         <!-- Botón de Editar -->
         <button
+        @click="openModal" 
           aria-label="Edit Course"
           class="text-muted hover:text-blue-500 transition-colors duration-200"
         >

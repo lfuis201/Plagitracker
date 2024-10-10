@@ -73,9 +73,11 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 // Calcula la fecha mínima para el campo de entrada
 const minDate = computed(() => {
-  const now = new Date()
-  return now.toISOString().slice(0, 16) // Formato 'YYYY-MM-DDTHH:MM'
-})
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // Ajustar para la zona horaria
+  return now.toISOString().slice(0, 16); // Devuelve la fecha y hora en el formato correcto
+});
+
 
 const maxDate = computed(() => {
   const now = new Date()
