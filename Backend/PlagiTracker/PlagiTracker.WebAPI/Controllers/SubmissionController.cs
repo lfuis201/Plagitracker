@@ -145,5 +145,42 @@ namespace PlagiTracker.WebAPI.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
+
+        [HttpGet]
+        [Route("GetAllByAssignment")]
+        public async Task<ActionResult> GetAllByAssignment(Guid assignmentId)
+        {
+            // Verificar si la asignación existe
+            var assignment = await _context!.Assignments!.FindAsync(assignmentId);
+            if (assignment == null)
+            {
+                return NotFound("Assignment not found.");
+            }
+
+            // Obtener todas las entregas asociadas a la asignación, incluyendo la información del estudiante
+            var submissions = await _context!.Submissions!
+                .Include(s => s.Student) // Incluir información del estudiante
+                .Where(s => s.AssignmentId == assignmentId)
+                .ToListAsync();
+
+            // Verificar si hay entregas
+            if (submissions == null || submissions.Count == 0)
+            {
+                return NotFound("No submissions found for this assignment.");
+            }
+
+            // Retornar las entregas junto con la información del estudiante
+            return Ok(submissions.Select(s => new
+            {
+                SubmissionId = s.Id,
+                Url = s.Url,
+                SubmissionDate = s.SubmissionDate,
+                Grade = s.Grade,
+                StudentId = s.StudentId,
+                StudentFirstName = s.Student.FirstName,
+                StudentLastName = s.Student.LastName,
+                StudentEmail = s.Student.Email
+            }));
+        }
     }
 }

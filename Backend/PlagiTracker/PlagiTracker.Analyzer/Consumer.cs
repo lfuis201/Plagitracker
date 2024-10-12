@@ -25,7 +25,7 @@ namespace PlagiTracker.Analyzer
                 StringContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
 
                 // Enviar la solicitud POST
-                HttpResponseMessage response = await client.PostAsync("http://127.0.0.1:9500/comparar", content);
+                HttpResponseMessage response = await client.PostAsync("http://127.0.0.1:5005/comparar", content);
 
                 // Procesar la respuesta
                 if (response.IsSuccessStatusCode)
