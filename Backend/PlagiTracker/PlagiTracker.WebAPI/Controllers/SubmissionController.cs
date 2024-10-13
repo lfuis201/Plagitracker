@@ -11,6 +11,14 @@ namespace PlagiTracker.WebAPI.Controllers
     [ApiController]
     public class SubmissionController : ControllerBase
     {
+        /*
+Message = "23505: duplicate key value violates unique constraint \"IX_Submissions_StudentId_AssignmentId\"\r\n\r\nDETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information."
+
+*/
+
+        const string URL_ALREADY_USED_EXCEPTION_MESSAGE_1 = "23505: duplicate key value violates unique constraint";
+        const string URL_ALREADY_USED_EXCEPTION_MESSAGE_2 = "IX_Submissions_Url";
+
         private readonly DataContext _context;
 
         public SubmissionController(DataContext context)
@@ -66,8 +74,16 @@ namespace PlagiTracker.WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
-                return NotFound();
+                if (
+                    ex.InnerException != null
+                    && ex.InnerException.Message.Contains(URL_ALREADY_USED_EXCEPTION_MESSAGE_1)
+                    && ex.InnerException.Message.Contains(URL_ALREADY_USED_EXCEPTION_MESSAGE_2)
+                )
+                {
+                    return Conflict(new { message = "URL already used." });
+                }
+
+                return BadRequest(ex.ToString());
             }
         }
 
@@ -107,32 +123,49 @@ namespace PlagiTracker.WebAPI.Controllers
 
         [HttpPut]
         [Route("Update")]
-        public async Task<ActionResult> Update(Submission newSubmission, DateTime dateTime)
+        public async Task<ActionResult> Update(SubmissionRequest submissionRequest)
         {
-            var assignment = await _context!.Assignments!.FindAsync(newSubmission.AssignmentId);
+            try
+            {
+                var submission = await _context!.Submissions!.Where(submission => 
+                    submission.AssignmentId == submissionRequest.AssignmentId
+                    && submission.StudentId == submissionRequest.StudentId
+                ).FirstOrDefaultAsync();
 
-            if (assignment == null)
-            {
-                return NotFound();
-            }
-            else
-            {
-                if (assignment.SubmissionDate.ToUniversalTime() < dateTime.ToUniversalTime())
+                if (submission == null)
                 {
-                    return UnprocessableEntity("The submit time has ended");
+                    return NotFound();
                 }
+
+                var assignment = await _context!.Assignments!.FindAsync(submissionRequest.AssignmentId);
+
+                if (assignment == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    if (assignment.SubmissionDate.ToUniversalTime() < submissionRequest.SubmissionDate.ToUniversalTime())
+                    {
+                        return UnprocessableEntity("The submit time has ended");
+                    }
+                }
+                submission!.Url = submissionRequest.Url;
+                await _context.SaveChangesAsync();
+                return Ok();
             }
-
-            var submission = await _context!.Submissions!.FindAsync(newSubmission.Id);
-
-            if (submission == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                if (
+                    ex.InnerException != null
+                    && ex.InnerException.Message.Contains(URL_ALREADY_USED_EXCEPTION_MESSAGE_1)
+                    && ex.InnerException.Message.Contains(URL_ALREADY_USED_EXCEPTION_MESSAGE_2)
+                )
+                {
+                    return Conflict(new { message = "URL already used." });
+                }
+                return BadRequest(ex.ToString());
             }
-
-            submission!.Url = newSubmission.Url;
-            await _context.SaveChangesAsync();
-            return Ok();
         }
 
         [HttpDelete]

@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Hangfire;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Entities;
 using PlagiTracker.Data.Requests;
 using PlagiTracker.Data.Responses;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
@@ -66,6 +68,12 @@ namespace PlagiTracker.WebAPI.Controllers
                 }
                 else
                 {
+
+                    if (logInRequest.PasswordHash == null || logInRequest.PasswordHash.Length == 0)
+                    {
+                        return BadRequest(new { message = "Password is required." });
+                    }
+
                     if (teacher.IsLocked && teacher.UnlockDate.ToUniversalTime() > DateTime.UtcNow)
                     {
                         return Unauthorized(new
