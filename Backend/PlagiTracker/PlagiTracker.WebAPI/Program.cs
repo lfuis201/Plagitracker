@@ -59,9 +59,6 @@ app.UseCors("AllowAllOrigins");
 app.MapHangfireDashboard();
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

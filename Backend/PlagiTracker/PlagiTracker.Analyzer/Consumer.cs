@@ -7,9 +7,11 @@ namespace PlagiTracker.Analyzer
 {
     public class Consumer
     {
+        private const string URL_BASE = "http://127.0.0.1:9500";
+
         public static async Task<PlagiaPythonResult> Execute(Dictionary<string, List<Dictionary<string, string>>> studentFiles)
         {
-            using (HttpClient client = new HttpClient())
+            using (HttpClient client = new())
             {
                 // Convertir los datos de scraping a JSON
                 
@@ -22,10 +24,10 @@ namespace PlagiTracker.Analyzer
                 
                 // Serializar el JSON
                 string jsonData = System.Text.Json.JsonSerializer.Serialize(data);
-                StringContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                StringContent content = new(jsonData, Encoding.UTF8, "application/json");
 
                 // Enviar la solicitud POST
-                HttpResponseMessage response = await client.PostAsync("http://127.0.0.1:5005/comparar", content);
+                HttpResponseMessage response = await client.PostAsync($"{URL_BASE}/comparar", content);
 
                 // Procesar la respuesta
                 if (response.IsSuccessStatusCode)
