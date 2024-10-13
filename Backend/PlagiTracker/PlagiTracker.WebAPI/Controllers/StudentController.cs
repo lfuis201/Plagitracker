@@ -66,6 +66,11 @@ namespace PlagiTracker.WebAPI.Controllers
                 }
                 else
                 {
+                    if (logInRequest.PasswordHash == null || logInRequest.PasswordHash.Length == 0)
+                    {
+                        return BadRequest(new { message = "Password is required." });
+                    }
+
                     if (student.IsLocked && student.UnlockDate.ToUniversalTime() > DateTime.UtcNow)
                     {
                         return Unauthorized(new
