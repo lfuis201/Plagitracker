@@ -75,7 +75,7 @@ namespace PlagiTracker.Services.SeleniumServices
 
         public WebScraping()
         {
-            bool isCreated = CreateChromeDriver();
+            bool isCreated = CreateFireFoxDriver();
 
             if (!isCreated)
             {
@@ -87,7 +87,7 @@ namespace PlagiTracker.Services.SeleniumServices
 
                     if (!isCreated)
                     {
-                        Console.WriteLine("Error: No se pudo crear el driver");
+                        Console.WriteLine("Error: The driver could not be created");
                     }
                 }
             }
@@ -100,6 +100,8 @@ namespace PlagiTracker.Services.SeleniumServices
             {
                 var options = new FirefoxOptions();
                 options.AddArgument("--headless");
+                options.AddArgument("--disable-gpu");
+                options.AddArgument("--enable-javascript");
 
                 Driver = new FirefoxDriver(options);
                 result = true;
@@ -120,6 +122,8 @@ namespace PlagiTracker.Services.SeleniumServices
             {
                 var options = new EdgeOptions();
                 options.AddArgument("--headless");
+                options.AddArgument("--disable-gpu");
+                options.AddArgument("--enable-javascript");
 
                 Driver = new EdgeDriver(options);
                 result = true;
@@ -141,7 +145,8 @@ namespace PlagiTracker.Services.SeleniumServices
                 var options = new ChromeOptions();
                 options.AddArgument("--headless");
                 options.AddArgument("--disable-gpu");
-                options.AddArgument("--window-size=1920,1080");
+                options.AddArgument("--enable-javascript");
+                //options.AddArgument("--window-size=1920,1080");
 
                 Driver = new ChromeDriver(options);
                 result = true;
@@ -241,6 +246,7 @@ namespace PlagiTracker.Services.SeleniumServices
                         Thread.Sleep(1000);
 
                         var codeElements = Driver.FindElements(By.XPath("//div[contains(@class,'CodeMirror-code')]//pre"));
+
                         string codeContent = string.Join("\n", codeElements.Select(e => e.Text).Select(c => c.Trim()));
                         
                         StudentSubmissionResults[studentsSubmission.StudentId].Codes.TryAdd(className, codeContent);

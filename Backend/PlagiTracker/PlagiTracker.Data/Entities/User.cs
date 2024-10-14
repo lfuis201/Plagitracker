@@ -35,5 +35,12 @@ namespace PlagiTracker.Data.Entities
 
         [Required]
         public DateTime UnlockDate { get; set; }
+
+        [Range(10000000, 99999999)]
+        public int VerificationCode { get; set; } = 0;
+
+        public bool IsVerified { get; set; } = false;
+
+        public DateTime VerificationCodeExpiration { get; set; } = DateTime.MinValue;
     }
 }

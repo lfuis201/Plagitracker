@@ -16,7 +16,6 @@
 	
   <ItemGroup>
     <Folder Include="FileServices\" />
-    <Folder Include="EmailServices\" />
   </ItemGroup>
 	
   <ItemGroup>
