@@ -9,6 +9,7 @@ import StudentService from '@/services/StudentService' // Ensure you have this s
 import { StudentSchema } from '@/schemas/studentSchema' // Create a corresponding schema for Student
 import { z } from 'zod'
 import router from '@/router'
+import Swal from 'sweetalert2' // Import SweetAlert2
 
 const student = ref<Student>({
   firstName: '',
@@ -46,7 +47,14 @@ const handleSubmit = async (event: Event) => {
 
     // Register the student
     await StudentService.registerStudent(student.value) // Ensure this method exists
-    alert('Student registered successfully!')
+
+    // Show SweetAlert for successful registration
+    await Swal.fire({
+      icon: 'success',
+      title: 'Éxito',
+      text: 'Student registered successfully!',
+      confirmButtonText: 'Aceptar'
+    })
     router.push('/student/auth/signin')
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -55,7 +63,12 @@ const handleSubmit = async (event: Event) => {
       })
       isLoading.value = false // Detener el spinner
     } else {
-      alert('Error registering student. Please try again.')
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error registering student. Please try again.',
+        confirmButtonText: 'Aceptar'
+      })
       isLoading.value = false // Detener el spinner
     }
   }
