@@ -19,7 +19,6 @@ const showPassword = ref<boolean>(false) // Estado para mostrar/ocultar la contr
 
 const errors = ref<{ [key: string]: string }>({}) // Object to manage errors
 
-
 const userStore = useUserStore() // Usar el store generalizado
 
 // Manejo del formulario
@@ -28,8 +27,7 @@ const handleSubmit = async (event: Event) => {
   errorMessage.value = '' // Limpiar cualquier mensaje de error previo
   isLoading.value = true
 
-  errors.value = {}; // Limpiar todos los errores previos
-
+  errors.value = {} // Limpiar todos los errores previos
 
   try {
     // Encripta la contraseña antes de enviarla
@@ -53,12 +51,9 @@ const handleSubmit = async (event: Event) => {
   } catch (error: any) {
     console.error('Error logging in:', error)
     if (error instanceof z.ZodError) {
-
       error.errors.forEach((err) => {
         errors.value[err.path[0]] = err.message // Store the error message in the object
       })
-
-
     } else {
       // Verificar si el error es una respuesta del servidor con el código 404
       if (error.response && error.response.status === 404) {
@@ -210,6 +205,15 @@ const handleSubmit = async (event: Event) => {
           <p class="font-medium">
             Don’t have any account?
             <router-link to="/teacher/auth/signup" class="text-primary">Sign up</router-link>
+          </p>
+        </div>
+
+        <div class="mt-6 text-center">
+          <p class="font-medium">
+            Forgot your password?
+            <router-link to="/forgotPassword" class="text-primary"
+              >Recover it here</router-link
+            >
           </p>
         </div>
       </form>

@@ -209,6 +209,16 @@ const handleSubmit = async (event: Event) => {
             <router-link to="/student/auth/signup" class="text-primary">Sign up</router-link>
           </p>
         </div>
+
+        <div class="mt-6 text-center">
+          <p class="font-medium">
+            Forgot your password?
+            <router-link to="/forgotPassword" class="text-primary"
+              >Recover it here</router-link
+            >
+          </p>
+        </div>
+
       </form>
     </DefaultAuthCard>
   </FullScreenLayout>

@@ -7,7 +7,7 @@ import HomeView from '@/views/HomeView.vue'
 import ProfileView from '@/views/ProfileView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import ServerErrorView from '@/views/ServerErrorView.vue'
-
+import ForgotPasswordView from '@/views/Authentication/ForgotPasswordView.vue'
 import { useUserStore } from '@/stores/userStore'
 
 const routes = [
@@ -58,6 +58,15 @@ const routes = [
     component: ServerErrorView,
     meta: {
       title: 'Server Error'
+    }
+  },
+  
+  {
+    path: '/forgotPassword', // Nueva ruta para errores de servidor
+    name: 'forgotPassword',
+    component: ForgotPasswordView,
+    meta: {
+      title: 'Forgot Password'
     }
   },
 
