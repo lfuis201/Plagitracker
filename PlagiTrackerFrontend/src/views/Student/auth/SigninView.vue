@@ -213,7 +213,7 @@ const handleSubmit = async (event: Event) => {
         <div class="mt-6 text-center">
           <p class="font-medium">
             Forgot your password?
-            <router-link to="/forgotPassword" class="text-primary"
+            <router-link to="/student/auth/forgotPassword" class="text-primary"
               >Recover it here</router-link
             >
           </p>

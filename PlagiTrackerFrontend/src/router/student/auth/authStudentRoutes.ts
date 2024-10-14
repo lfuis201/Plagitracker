@@ -1,7 +1,9 @@
 // src/router/authRoutes.ts
 
-import SignupView from "@/views/Student/auth/SignupView.vue";
-import SigninView from "@/views/Student/auth/SigninView.vue";
+import SignupView from '@/views/Student/auth/SignupView.vue'
+import SigninView from '@/views/Student/auth/SigninView.vue'
+import ForgotPasswordView from '@/views/Student/auth/ForgotPasswordView.vue'
+
 const authStudentRoutes = [
   {
     path: '/student/auth/signin',
@@ -11,7 +13,7 @@ const authStudentRoutes = [
       title: 'StudentSignin',
       requiresAuth: false,
       allowedRoles: []
-    },
+    }
   },
   {
     path: '/student/auth/signup',
@@ -21,8 +23,18 @@ const authStudentRoutes = [
       title: 'StudentSignup',
       requiresAuth: false,
       allowedRoles: []
-    },
+    }
   },
-];
+  {
+    path: '/student/auth/forgotPassword',
+    name: 'studentForgotPassword',
+    component: ForgotPasswordView,
+    meta: {
+      title: 'Forgot Password',
+      requiresAuth: false,
+      allowedRoles: []
+    }
+  }
+]
 
-export default authStudentRoutes;
+export default authStudentRoutes
