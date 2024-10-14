@@ -52,6 +52,65 @@ class StudentService {
     }
   }
 
+
+  /**
+   * Envía un email para restablecer la contraseña del estudiante.
+   * 
+   * @param {string} email - El correo electrónico del estudiante.
+   * 
+   * @returns {Promise<any>} - Una promesa que se resuelve con la respuesta del servidor en caso de éxito.
+   * @throws {Error} - Lanza un error si ocurre algún problema al enviar el correo de restablecimiento.
+   */
+  static async sendResetPasswordEmail(email: string): Promise<any> {
+    try {
+      const response = await axiosInstance.post(`${API_ENDPOINT}/SendResetPasswordEmail`, { email });
+      return response.data;
+    } catch (error) {
+      console.error('Error sending reset password email:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Verifica el código de restablecimiento de contraseña.
+   * 
+   * @param {string} email - El correo electrónico del estudiante.
+   * @param {number} code - El código de verificación enviado al correo.
+   * 
+   * @returns {Promise<any>} - Una promesa que se resuelve con la respuesta del servidor en caso de éxito.
+   * @throws {Error} - Lanza un error si ocurre algún problema al verificar el código.
+   */
+  static async resetPasswordVerification(email: string, code: number): Promise<any> {
+    try {
+      const response = await axiosInstance.post(`${API_ENDPOINT}/ResetPasswordVerification`, { email, code });
+      return response.data;
+    } catch (error) {
+      console.error('Error verifying reset password code:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Restablece la contraseña de un estudiante.
+   * 
+   * @param {Object} resetPasswordRequest - Objeto que contiene los detalles para restablecer la contraseña.
+   * @param {string} resetPasswordRequest.email - El correo electrónico del estudiante.
+   * @param {number} resetPasswordRequest.verificationCode - El código de verificación del restablecimiento.
+   * @param {string} resetPasswordRequest.newPasswordHash - El hash de la nueva contraseña.
+   * 
+   * @returns {Promise<any>} - Una promesa que se resuelve con la respuesta del servidor en caso de éxito.
+   * @throws {Error} - Lanza un error si ocurre algún problema al restablecer la contraseña.
+   */
+  static async resetPassword(resetPasswordRequest: { email: string, verificationCode: number, newPasswordHash: string }): Promise<any> {
+    try {
+      const response = await axiosInstance.post(`${API_ENDPOINT}/ResetPassword`, resetPasswordRequest);
+      return response.data;
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      throw error;
+    }
+  }
+
 }
 
 export default StudentService;
