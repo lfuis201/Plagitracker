@@ -9,6 +9,7 @@ import TeacherService from '@/services/TeacherService'
 import { TeacherSchema } from '@/schemas/teacherSchema'
 import { z } from 'zod'
 import router from '@/router'
+import Swal from 'sweetalert2' // Import SweetAlert2
 
 const teacher = ref<Teacher>({
   firstName: '',
@@ -47,7 +48,14 @@ const handleSubmit = async (event: Event) => {
 
     // Registrar al profesor
     await TeacherService.registerTeacher(teacher.value)
-    alert('Teacher registered successfully!')
+    //alert('Teacher registered successfully!')
+    // Show SweetAlert for successful registration
+    await Swal.fire({
+      icon: 'success',
+      title: 'Éxito',
+      text: 'Teacher registered successfully!',
+      confirmButtonText: 'Aceptar'
+    })
     router.push('/teacher/auth/signin')
   } catch (error: any) {
     if (error instanceof z.ZodError) {
@@ -66,7 +74,13 @@ const handleSubmit = async (event: Event) => {
       }
     } else {
       // Otros errores generales
-      backendError.value = 'Error registering teacher. Please try again.'
+      //backendError.value = 'Error registering teacher. Please try again.'
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error registering teacher. Please try again.',
+        confirmButtonText: 'Aceptar'
+      })
     }
     isLoading.value = false // Detener el spinner
   }
