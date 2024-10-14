@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Hangfire;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Entities;
@@ -19,6 +20,8 @@ namespace PlagiTracker.WebAPI.Controllers
             _context = context;
         }
 
+        #region IUserController Implementation
+
         [HttpPost]
         [Route("SignUp")]
         public async Task<ActionResult> SignUp(SignUpRequest signUpRequest)
@@ -35,6 +38,12 @@ namespace PlagiTracker.WebAPI.Controllers
                 });
 
                 await _context.SaveChangesAsync();
+
+                BackgroundJob.Schedule(() =>
+                    Services.EmailServices.EmailAuthenticator.WelcomeStudentEmail(signUpRequest.Email!, $"{signUpRequest.FirstName} {signUpRequest.LastName}"),
+                    new DateTimeOffset(DateTime.UtcNow)
+                );
+
                 return Ok();
             }
             catch (Exception ex)
@@ -139,6 +148,145 @@ namespace PlagiTracker.WebAPI.Controllers
                 return BadRequest(ex.ToString());
             }
         }
+
+        [HttpPost]
+        [Route("SendResetPasswordEmail")]
+        public async Task<ActionResult> SendResetPasswordEmail(string email)
+        {
+            try
+            {
+                var student = await _context!.Students!.FirstOrDefaultAsync(student => student.Email == email);
+
+                if (student == null)
+                {
+                    return NotFound(new { message = "Account not found." });
+                }
+
+                student.VerificationCode = new Random().Next(IUserController.VERIFICATION_MIN_RANGE_VALUE, IUserController.VERIFICATION_MAX_RANGE_VALUE);
+                student.VerificationCodeExpiration = DateTime.UtcNow.AddMinutes(IUserController.VERIFICATION_CODE_EXPIRED_MINUTES);
+                student.IsVerified = false;
+
+                await _context.SaveChangesAsync();
+
+                BackgroundJob.Schedule(() =>
+                    Services.EmailServices.EmailAuthenticator.ResetPasswordEmail(student.Email!, $"{student.FirstName} {student.LastName}", student.VerificationCode),
+                    new DateTimeOffset(DateTime.UtcNow)
+                );
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ToString());
+            }
+        }
+
+        [HttpPost]
+        [Route("ResetPasswordVerification")]
+        public async Task<ActionResult> ResetPasswordVerification(string email, int code)
+        {
+            try
+            {
+                if(code < IUserController.VERIFICATION_MIN_RANGE_VALUE || code > IUserController.VERIFICATION_MAX_RANGE_VALUE)
+                {
+                    return BadRequest(new { message = "Invalid code." });
+                }
+
+                var student = await _context!.Students!.FirstOrDefaultAsync(student => student.Email == email);
+
+                if (student == null)
+                {
+                    return NotFound(new { message = "Account not found." });
+                }
+                else if (student.VerificationCode != code)
+                {
+                    return BadRequest(new { message = "Invalid code." });
+                }
+                else if (student.VerificationCodeExpiration.ToUniversalTime() < DateTime.UtcNow)
+                {
+                    return BadRequest(new { message = "Code expired." });
+                }
+
+                student.IsVerified = true;
+
+                await _context.SaveChangesAsync();
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ToString());
+            }
+        }
+
+        [HttpPost]
+        [Route("ResetPassword")]
+        public async Task<ActionResult> ResetPassword(ResetPasswordRequest resetPasswordRequest)
+        {
+            try
+            {
+                if (resetPasswordRequest.NewPasswordHash == null || resetPasswordRequest.NewPasswordHash.Length == 0)
+                {
+                    return BadRequest(new { message = "New password is required." });
+                }
+                else if (resetPasswordRequest.VerificationCode < IUserController.VERIFICATION_MIN_RANGE_VALUE 
+                    || resetPasswordRequest.VerificationCode > IUserController.VERIFICATION_MAX_RANGE_VALUE)
+                {
+                    return BadRequest(new { message = "Invalid code." });
+                }
+
+                var student = await _context!.Students!.FirstOrDefaultAsync(student => student.Email == resetPasswordRequest.Email);
+
+                if (student == null)
+                {
+                    return NotFound(new { message = "Account not found." });
+                }
+                else if (student.VerificationCode != resetPasswordRequest.VerificationCode)
+                {
+                    return BadRequest(new { message = "Invalid code." });
+                }
+                else if (student.VerificationCodeExpiration.ToUniversalTime() < DateTime.UtcNow)
+                {
+                    return BadRequest(new { message = "Code expired." });
+                }
+                else if (!student.IsVerified)
+                {
+                    return BadRequest(new { message = "Code not verified." });
+                }
+
+                bool isDiferent = false;
+
+                //Comparando bytes de la contraseña actual y la nueva
+                for (int i = 0; i < resetPasswordRequest.NewPasswordHash.Length; i++)
+                {
+                    if (student.PasswordHash![i] != resetPasswordRequest.NewPasswordHash[i])
+                    {
+                        isDiferent = true;
+                        break;
+                    }
+                }
+
+                if(!isDiferent)
+                {
+                    return BadRequest(new { message = "New password is the same as the current password." });
+                }
+
+                student.VerificationCode = IUserController.VERIFICATION_CODE_NULL_VALUE;
+                student.VerificationCodeExpiration = DateTime.MinValue;
+                student.IsVerified = false;
+                student.PasswordHash = resetPasswordRequest.NewPasswordHash;
+
+                await _context.SaveChangesAsync();
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ToString());
+            }
+        }
+
+        #endregion
 
         [HttpGet]
         [Route("Get")]

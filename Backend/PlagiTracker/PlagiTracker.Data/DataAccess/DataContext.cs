@@ -100,8 +100,6 @@ namespace PlagiTracker.Data.DataAccess
                 // Configura la columna como decimal con 3 valores enteros y con 2 decimales
                 builder.Property(p => p.Similarity).HasColumnType("decimal(5, 2)");
             });
-
-            
         }
     }
 }
