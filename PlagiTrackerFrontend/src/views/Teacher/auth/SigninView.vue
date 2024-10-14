@@ -17,8 +17,8 @@ const remainingAttempts = ref<number | null>(null) // Intentos restantes de inic
 const unlockDate = ref<Date | null>(null) // Fecha en la que la cuenta será desbloqueada
 const showPassword = ref<boolean>(false) // Estado para mostrar/ocultar la contraseña
 
-const emailError = ref<string>('') // Variable para el error específico de email
-const passwordError = ref<string>('') // Variable para el error específico de password
+const errors = ref<{ [key: string]: string }>({}) // Object to manage errors
+
 
 const userStore = useUserStore() // Usar el store generalizado
 
@@ -27,6 +27,9 @@ const handleSubmit = async (event: Event) => {
   event.preventDefault() // Evitar que el formulario recargue la página
   errorMessage.value = '' // Limpiar cualquier mensaje de error previo
   isLoading.value = true
+
+  errors.value = {}; // Limpiar todos los errores previos
+
 
   try {
     // Encripta la contraseña antes de enviarla
@@ -42,7 +45,7 @@ const handleSubmit = async (event: Event) => {
     await userStore.login(email.value, encryptedPassword, 'teacher')
 
     // Si el login es exitoso, redirigir al dashboard
-    console.log('Login successful:', userStore.getUser)
+    //console.log('Login successful:', userStore.getUser)
     //alert('Login successful:');
 
     // Redirigir al dashboard
@@ -50,9 +53,12 @@ const handleSubmit = async (event: Event) => {
   } catch (error: any) {
     console.error('Error logging in:', error)
     if (error instanceof z.ZodError) {
-      // Si el error es de validación, mostrar los errores correspondientes
-      emailError.value = error.errors.find((err) => err.path[0] === 'email')?.message || null
-      passwordError.value = error.errors.find((err) => err.path[0] === 'password')?.message || null
+
+      error.errors.forEach((err) => {
+        errors.value[err.path[0]] = err.message // Store the error message in the object
+      })
+
+
     } else {
       // Verificar si el error es una respuesta del servidor con el código 404
       if (error.response && error.response.status === 404) {
@@ -88,7 +94,7 @@ const handleSubmit = async (event: Event) => {
   <FullScreenLayout>
     <DefaultAuthCard subtitle="Welcome teacher" title="Sign In to PlagiTracker">
       <form @submit="handleSubmit">
-        <InputGroup v-model="email" label="Email" type="email" placeholder="Enter your email">
+        <InputGroup v-model="email" label="Email" type="text" placeholder="Enter your email">
           <svg
             class="fill-current"
             width="22"
@@ -106,7 +112,8 @@ const handleSubmit = async (event: Event) => {
           </svg>
         </InputGroup>
         <!-- Error de validación para el email -->
-        <p v-if="emailError" class="text-red mb-2">{{ emailError }}</p>
+        <div v-if="errors.email" class="text-red mb-2">{{ errors.email }}</div>
+
         <InputGroup
           v-model="password"
           label="Password"
@@ -144,7 +151,7 @@ const handleSubmit = async (event: Event) => {
             </svg>
           </button>
         </InputGroup>
-        <p v-if="passwordError" class="text-red mb-2">{{ passwordError }}</p>
+        <div v-if="errors.password" class="text-red mb-2">{{ errors.password }}</div>
 
         <!-- Mensaje de error (solo se mostrará si existe un error) -->
         <p v-if="errorMessage" class="text-red mt-2">{{ errorMessage }}</p>

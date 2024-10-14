@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { Course } from '@/types/Course'
-import CourseService from '@/services/CourseService'
 import Swal from 'sweetalert2' // Importa SweetAlert2
 import EnrollmentService from '@/services/EnrollmentService';
 import { useUserStore } from '@/stores/userStore';
@@ -49,7 +48,6 @@ const handleDelete = async (courseId: string, studentId: string) => {
         <h2 class="text-lg font-bold truncate" style="max-width: 100%">
           {{ props.course.name }}
         </h2>
-        <p class="text-sm text-muted-foreground">ING-VII</p>
         <p class="text-sm text-muted-foreground">Soporte Informático</p>
       </div>
     </router-link>

@@ -7,6 +7,8 @@ import { encrypt } from '@/utils/cryptoUtils'
 import router from '@/router'
 import { useUserStore } from '@/stores/userStore' // Usamos el store general
 import { z } from 'zod'
+import { loginSchema } from '@/schemas/loginSchema'
+
 
 const email = ref<string>('')
 const password = ref<string>('')
@@ -16,8 +18,8 @@ const remainingAttempts = ref<number | null>(null) // Intentos restantes de inic
 const unlockDate = ref<Date | null>(null) // Fecha en la que la cuenta será desbloqueada
 const showPassword = ref<boolean>(false) // Estado para mostrar/ocultar la contraseña
 
-const emailError = ref<string>('') // Variable para el error específico de email
-const passwordError = ref<string>('') // Variable para el error específico de password
+const errors = ref<{ [key: string]: string }>({}) // Object to manage errors
+
 
 const userStore = useUserStore() // Usar el store generalizado
 
@@ -27,7 +29,14 @@ const handleSubmit = async (event: Event) => {
   errorMessage.value = '' // Limpiar cualquier mensaje de error previo
   isLoading.value = true
 
+  errors.value = {}; // Limpiar todos los errores previos
   try {
+
+    loginSchema.parse({
+      email: email.value,
+      password: password.value
+    })
+
     // Encripta la contraseña antes de enviarla
     const encryptedPassword = encrypt(password.value)
 
@@ -43,8 +52,9 @@ const handleSubmit = async (event: Event) => {
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       // Si el error es de validación, mostrar los errores correspondientes
-      emailError.value = error.errors.find((err) => err.path[0] === 'email')?.message || null
-      passwordError.value = error.errors.find((err) => err.path[0] === 'password')?.message || null
+      error.errors.forEach((err) => {
+        errors.value[err.path[0]] = err.message // Store the error message in the object
+      })
     } else {
       console.error('Error logging in:', error)
 
@@ -82,7 +92,7 @@ const handleSubmit = async (event: Event) => {
   <FullScreenLayout>
     <DefaultAuthCard subtitle="Welcome Student" title="Sign In to PlagiTracker">
       <form @submit="handleSubmit">
-        <InputGroup v-model="email" label="Email" type="email" placeholder="Enter your email">
+        <InputGroup v-model="email" label="Email" type="text" placeholder="Enter your email">
           <svg
             class="fill-current"
             width="22"
@@ -99,7 +109,7 @@ const handleSubmit = async (event: Event) => {
             </g>
           </svg>
         </InputGroup>
-        <p v-if="emailError" class="text-red mb-2">{{ emailError }}</p>
+        <div v-if="errors.email" class="text-red mb-2">{{ errors.email }}</div>
 
         <InputGroup
           v-model="password"
@@ -139,7 +149,7 @@ const handleSubmit = async (event: Event) => {
           </button>
         </InputGroup>
 
-        <p v-if="passwordError" class="text-red mb-2">{{ passwordError }}</p>
+        <div v-if="errors.password" class="text-red mb-2">{{ errors.password }}</div>
 
         <!-- Mensaje de error (solo se mostrará si existe un error) -->
         <p v-if="errorMessage" class="text-red mt-2">{{ errorMessage }}</p>

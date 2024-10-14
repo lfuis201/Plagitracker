@@ -1,28 +1,27 @@
 <script setup lang="ts">
 import type { Course } from '@/types/Course'
 import CourseService from '@/services/CourseService'
-import { useCoursesStore } from '@/stores/coursesStore';
-import EditCourseModal from './EditCourseModal.vue'; // Import your modal component
+import { useCoursesStore } from '@/stores/coursesStore'
+import EditCourseModal from './EditCourseModal.vue' // Import your modal component
 
 import Swal from 'sweetalert2' // Importa SweetAlert2
-import { ref } from 'vue';
+import { ref } from 'vue'
 
 const props = defineProps<{
   course: Course
 }>()
 
-const modalOpen = ref(false); // State to control modal visibility
+const modalOpen = ref(false) // State to control modal visibility
 
-
-const coursesStore = useCoursesStore();
+const coursesStore = useCoursesStore()
 // Function to open the modal
 const openModal = () => {
-  modalOpen.value = true;
+  modalOpen.value = true
 }
 
 // Function to close the modal
 const closeModal = () => {
-  modalOpen.value = false;
+  modalOpen.value = false
 }
 
 // Función para manejar la eliminación del curso
@@ -43,13 +42,23 @@ const handleDelete = async (courseId: string) => {
       await CourseService.deleteCourse(courseId)
       Swal.fire('Deleted!', 'Your course has been deleted.', 'success')
       console.log('Course deleted:', courseId)
-      await coursesStore.fetchCoursesByTeacher();
+      await coursesStore.fetchCoursesByTeacher()
 
       // Opcional: redirige o actualiza la vista después de eliminar
     } catch (error) {
       console.error('Error deleting course:', error)
       Swal.fire('Error!', 'There was a problem deleting your course.', 'error')
     }
+  }
+}
+
+const copyLinkToClipboard = async (courseId: string) => {
+  try {
+    await navigator.clipboard.writeText(courseId)
+    Swal.fire('Copied!', 'The course link has been copied to your clipboard.', 'success')
+  } catch (error) {
+    console.error('Error copying link:', error)
+    Swal.fire('Error!', 'Failed to copy the link. Please try again.', 'error')
   }
 }
 </script>
@@ -62,7 +71,6 @@ const handleDelete = async (courseId: string) => {
         <h2 class="text-lg font-bold truncate" style="max-width: 100%">
           {{ props.course.name }}
         </h2>
-        <p class="text-sm text-muted-foreground">ING-VII</p>
         <p class="text-sm text-muted-foreground">{{ props.course.id }}</p>
       </div>
     </router-link>
@@ -95,7 +103,7 @@ const handleDelete = async (courseId: string) => {
 
         <!-- Botón de Editar -->
         <button
-        @click="openModal" 
+          @click="openModal"
           aria-label="Edit Course"
           class="text-muted hover:text-blue-500 transition-colors duration-200"
         >
@@ -106,15 +114,24 @@ const handleDelete = async (courseId: string) => {
             />
           </svg>
         </button>
+
+        <button
+          @click="copyLinkToClipboard(props.course.id)"
+          aria-label="Share Course Link"
+          class="text-muted hover:text-green-500 transition-colors duration-200"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 32 32">
+            <path
+              fill="currentColor"
+              d="M23 20a5 5 0 0 0-3.89 1.89l-7.31-4.57a4.46 4.46 0 0 0 0-2.64l7.31-4.57A5 5 0 1 0 18 7a4.8 4.8 0 0 0 .2 1.32l-7.31 4.57a5 5 0 1 0 0 6.22l7.31 4.57A4.8 4.8 0 0 0 18 25a5 5 0 1 0 5-5m0-16a3 3 0 1 1-3 3a3 3 0 0 1 3-3M7 19a3 3 0 1 1 3-3a3 3 0 0 1-3 3m16 9a3 3 0 1 1 3-3a3 3 0 0 1-3 3"
+            />
+          </svg>
+        </button>
       </div>
     </div>
 
     <EditCourseModal :modalOpen="modalOpen" :course="props.course" @close="closeModal" />
-
-
   </div>
-
-
 
   <!-- Card Item End -->
 </template>

@@ -125,7 +125,7 @@ const handleSubmit = async (event: Event) => {
         <InputGroup
           v-model="student.email"
           label="Email"
-          type="email"
+          type="text"
           placeholder="Enter your email"
         >
           <svg

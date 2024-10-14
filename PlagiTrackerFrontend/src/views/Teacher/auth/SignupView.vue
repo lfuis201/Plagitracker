@@ -49,7 +49,7 @@ const handleSubmit = async (event: Event) => {
     await TeacherService.registerTeacher(teacher.value)
     alert('Teacher registered successfully!')
     router.push('/teacher/auth/signin')
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       // Errores de validación de Zod (errores del frontend)
       error.errors.forEach((err) => {
@@ -136,7 +136,7 @@ const handleSubmit = async (event: Event) => {
         <InputGroup
           v-model="teacher.email"
           label="Email"
-          type="email"
+          type="text"
           placeholder="Enter your email"
         >
           <svg
@@ -161,7 +161,7 @@ const handleSubmit = async (event: Event) => {
           v-model="password"
           label="Password"
           type="password"
-          placeholder="6+ Characters, 1 Capital letter"
+          placeholder="8+ Characters"
         >
           <svg
             class="fill-current"
