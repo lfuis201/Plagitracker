@@ -63,7 +63,7 @@ import AssignmentService from '@/services/AssigmentService'
 import type { Submission } from '@/types/Submission'
 import ItemNotFoundView from '@/views/ItemNotFoundView.vue'
 import type { Assignment } from '@/types/Assigment'
-
+import Swal from 'sweetalert2'
 // Store references
 const userStore = useUserStore()
 const user = computed(() => userStore.getUser)
@@ -91,7 +91,7 @@ const loadAssignmentDetails = async () => {
   try {
     const assignment: Assignment = await AssignmentService.getAssignmentById(assignmentId)
     assignmentTitle.value = assignment.title
-    assignmentDescription.value = assignment.description
+    assignmentDescription.value = assignment.description;
 
     const submissionDate = new Date(assignment.submissionDate)
     assignmentSubmissionDate.value = submissionDate.toLocaleString('en-US', {
@@ -124,7 +124,13 @@ const loadAssignmentDetails = async () => {
 // Function to handle submission
 const submitLink = async () => {
   if (!submissionUrl.value) {
-    alert('Please enter a valid URL.')
+    //alert('Please enter a valid URL.')
+    Swal.fire({
+      title: 'Error!',
+      text: 'Please enter a valid URL.',
+      icon: 'warning',
+      confirmButtonText: 'OK'
+    });
     return
   }
 
@@ -137,10 +143,22 @@ const submitLink = async () => {
     }
 
     await SubmissionService.createSubmission(submission)
-    alert('Submission uploaded successfully!')
+    //alert('Submission uploaded successfully!')
+    Swal.fire({
+      title: 'Success!',
+      text: 'Submission uploaded successfully!',
+      icon: 'success',
+      confirmButtonText: 'OK'
+    });
   } catch (error) {
     console.error('Error submitting link:', error)
-    alert('There was an issue submitting your link.')
+    //alert('There was an issue submitting your link.')
+    Swal.fire({
+      title: 'Error!',
+      text: 'There was an issue submitting your link.',
+      icon: 'warning',
+      confirmButtonText: 'OK'
+    });
   }
 }
 
