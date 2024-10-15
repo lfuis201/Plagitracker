@@ -1,18 +1,42 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import DefaultAuthCard from '@/components/Auths/DefaultAuthCard.vue'
 import InputGroup from '@/components/Auths/InputGroup.vue'
 import FullScreenLayout from '@/layouts/FullScreenLayout.vue'
+import StudentService from '@/services/StudentService'
+// Variables reactivas
+const email = ref('') // Variable reactiva para el email
+const errorMessage = ref('') // Para manejar errores
+const successMessage = ref('') // Para manejar mensajes de éxito
 
+// Manejar el envío del formulario
+const handleSubmit = async () => {
+  try {
+    successMessage.value = ''
+    errorMessage.value = ''
 
+    // Llamar al servicio para enviar el email de restablecimiento
+    const response = await StudentService.sendResetPasswordEmail(email.value)
+    console.log(response)
+    // Mensaje de éxito (dependiendo de la respuesta del servidor)
+    successMessage.value = 'An email has been sent to recover your password.'
+  } catch (error) {
+    // Manejar el error (por ejemplo, si no se pudo enviar el email)
+    errorMessage.value = 'Failed to send recovery email. Please try again.'
+  }
+}
 </script>
 
 <template>
   <FullScreenLayout>
-    
-
     <DefaultAuthCard subtitle="Forgot your password?" title="Recover your Password">
-      <form>
-        <InputGroup label="Email" type="email" placeholder="Enter your registered email">
+      <form @submit.prevent="handleSubmit">
+        <InputGroup
+          v-model="email"
+          label="Email"
+          type="email"
+          placeholder="Enter your registered email"
+        >
           <svg
             class="fill-current"
             width="22"
@@ -29,13 +53,17 @@ import FullScreenLayout from '@/layouts/FullScreenLayout.vue'
             </g>
           </svg>
         </InputGroup>
+        <!-- Mostrar mensaje de éxito o error -->
+        <div v-if="successMessage" class="text-green-600">{{ successMessage }}</div>
+        <div v-if="errorMessage" class="text-red-600">{{ errorMessage }}</div>
 
         <div class="mb-5 mt-6">
-          <input
+          <button
             type="submit"
-            value="Recover Password"
             class="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 font-medium text-white transition hover:bg-opacity-90"
-          />
+          >
+            Recover Password
+          </button>
         </div>
 
         <div class="mt-6 text-center">

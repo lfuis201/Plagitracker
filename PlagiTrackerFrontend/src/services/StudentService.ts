@@ -63,13 +63,15 @@ class StudentService {
    */
   static async sendResetPasswordEmail(email: string): Promise<any> {
     try {
-      const response = await axiosInstance.post(`${API_ENDPOINT}/SendResetPasswordEmail`, { email });
+      // Enviar el email como query parameter
+      const response = await axiosInstance.post(`${API_ENDPOINT}/SendResetPasswordEmail?email=${encodeURIComponent(email)}`);
       return response.data;
     } catch (error) {
       console.error('Error sending reset password email:', error);
       throw error;
     }
   }
+  
 
   /**
    * Verifica el código de restablecimiento de contraseña.
@@ -82,14 +84,23 @@ class StudentService {
    */
   static async resetPasswordVerification(email: string, code: number): Promise<any> {
     try {
-      const response = await axiosInstance.post(`${API_ENDPOINT}/ResetPasswordVerification`, { email, code });
-      return response.data;
+      // Realiza la solicitud POST enviando los parámetros como query
+      const response = await axiosInstance.post(
+        `${API_ENDPOINT}/ResetPasswordVerification`, // URL de la API
+        null, // No se envía un cuerpo en la solicitud
+        {
+          params: {
+            email: email,  // Se envía el email como query parameter
+            code: code      // Se envía el código como query parameter
+          }
+        }
+      );
+      return response.data; // Retorna la respuesta de la API
     } catch (error) {
       console.error('Error verifying reset password code:', error);
-      throw error;
+      throw error; // Lanza el error para manejo posterior
     }
   }
-
   /**
    * Restablece la contraseña de un estudiante.
    * 
