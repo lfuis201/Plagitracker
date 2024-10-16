@@ -52,25 +52,30 @@ const handleSubmit = async (event: Event) => {
     // Show SweetAlert for successful registration
     await Swal.fire({
       icon: 'success',
-      title: 'Éxito',
+      title: 'Success',
       text: 'Teacher registered successfully!',
       confirmButtonText: 'Aceptar'
     })
     router.push('/teacher/auth/signin')
   } catch (error: any) {
+    console.log(error)
+
+
     if (error instanceof z.ZodError) {
       // Errores de validación de Zod (errores del frontend)
       error.errors.forEach((err) => {
         errors.value[err.path[0]] = err.message // Guardar el mensaje de error en el objeto
       })
-    } else if (error.response) {
-      // Manejo de errores específicos del backend (sin usar errors.value)
-      if (error.response.status === 409) {
-        if (error.response.data.message === 'Email already used.') {
-          backendError.value = 'This email is already in use. Please choose another.' // Error del backend para email duplicado
-        } else if (error.response.data.message === 'Name already used.') {
-          backendError.value = 'This name is already in use. Please choose another.' // Error del backend para nombre duplicado
-        }
+    } else if (error.response && error.response.status === 409) {
+      // Manejo específico de errores 409 (conflicto)
+      const backendMessage = error.response.data?.message
+
+      if (backendMessage === 'Email already used.') {
+        backendError.value = 'This email is already in use. Please choose another.' // Error del backend para email duplicado
+      } else if (backendMessage === 'Name already used.') {
+        backendError.value = 'This name is already in use. Please choose another.' // Error del backend para nombre duplicado
+      } else {
+        backendError.value = 'An unknown conflict occurred.' // Otro error no manejado
       }
     } else {
       // Otros errores generales
@@ -171,12 +176,7 @@ const handleSubmit = async (event: Event) => {
         </InputGroup>
         <div v-if="errors.email" class="text-red mb-2">{{ errors.email }}</div>
 
-        <InputGroup
-          v-model="password"
-          label="Password"
-          type="password"
-          placeholder="8+ Characters"
-        >
+        <InputGroup v-model="password" label="Password" type="password" placeholder="8+ Characters">
           <svg
             class="fill-current"
             width="22"

@@ -21,6 +21,7 @@ const password = ref<string>('')
 const confirmPassword = ref<string>('')
 const errors = ref<{ [key: string]: string }>({}) // Object to manage errors
 const isLoading = ref<boolean>(false) // Estado para controlar la carga
+  const backendError = ref<string | null>(null)
 
 const handleSubmit = async (event: Event) => {
   event.preventDefault()
@@ -51,26 +52,39 @@ const handleSubmit = async (event: Event) => {
     // Show SweetAlert for successful registration
     await Swal.fire({
       icon: 'success',
-      title: 'Éxito',
+      title: 'Success',
       text: 'Student registered successfully!',
       confirmButtonText: 'Aceptar'
     })
     router.push('/student/auth/signin')
-  } catch (error) {
+  } catch (error:any) {
     if (error instanceof z.ZodError) {
       error.errors.forEach((err) => {
         errors.value[err.path[0]] = err.message // Store the error message in the object
       })
       isLoading.value = false // Detener el spinner
+    } else if (error.response && error.response.status === 409) {
+      // Manejo específico de errores 409 (conflicto)
+      const backendMessage = error.response.data?.message
+
+      if (backendMessage === 'Email already used.') {
+        backendError.value = 'This email is already in use. Please choose another.' // Error del backend para email duplicado
+      } else if (backendMessage === 'Name already used.') {
+        backendError.value = 'This name is already in use. Please choose another.' // Error del backend para nombre duplicado
+      } else {
+        backendError.value = 'An unknown conflict occurred.' // Otro error no manejado
+      }
     } else {
+      // Otros errores generales
+      //backendError.value = 'Error registering teacher. Please try again.'
       await Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Error registering student. Please try again.',
+        text: 'Error registering teacher. Please try again.',
         confirmButtonText: 'Aceptar'
       })
-      isLoading.value = false // Detener el spinner
     }
+    isLoading.value = false // Detener el spinner
   }
 }
 </script>
@@ -215,6 +229,8 @@ const handleSubmit = async (event: Event) => {
         <div v-if="errors.passwordHash" class="text-red mb-2">{{ errors.passwordHash }}</div>
 
         <div v-if="password !== confirmPassword" class="text-red mb-2">Passwords do not match!</div>
+        <div v-if="backendError" class="text-red mb-2">{{ backendError }}</div>
+
         <div class="mb-5 mt-6">
           <button
             type="submit"
