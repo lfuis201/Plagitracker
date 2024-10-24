@@ -1,9 +1,7 @@
-﻿// Ignore Spelling: Codiva
+﻿// Ignore Spelling: Codiva Replit
 
 using OpenQA.Selenium;
 using PlagiTracker.Analyzer;
-using Newtonsoft.Json;
-using PlagiTracker.Services.FileServices;
 using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
@@ -11,6 +9,12 @@ using PlagiTracker.Analyzer.PlagiDetector;
 using PlagiTracker.Data.Entities;
 using System.Collections.Generic;
 using OpenQA.Selenium.DevTools;
+using System.Reflection.Emit;
+using PlagiTracker.Data;
+using OpenQA.Selenium.Support.UI;
+using SeleniumExtras.WaitHelpers;
+using OpenQA.Selenium.Interactions;
+using System.IO.Compression;
 
 namespace PlagiTracker.Services.SeleniumServices
 {
@@ -71,7 +75,11 @@ namespace PlagiTracker.Services.SeleniumServices
 
     public class WebScraping
     {
-        private IWebDriver? Driver;
+
+        private static readonly string DownloadPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Downloads\");
+
+        //driver.Manage().Window.Size = new System.Drawing.Size(1500, 2000);
+        public IWebDriver? Driver;
 
         public WebScraping()
         {
@@ -79,11 +87,11 @@ namespace PlagiTracker.Services.SeleniumServices
 
             if (!isCreated)
             {
-                isCreated = CreateEdgeDriver();
+                isCreated = CreateChromeDriver();
 
                 if (!isCreated)
                 {
-                    isCreated = CreateChromeDriver();
+                    isCreated = CreateEdgeDriver();
 
                     if (!isCreated)
                     {
@@ -100,8 +108,19 @@ namespace PlagiTracker.Services.SeleniumServices
             {
                 var options = new FirefoxOptions();
                 options.AddArgument("--headless");
-                options.AddArgument("--disable-gpu");
+                //options.AddArgument("--disable-gpu");
                 options.AddArgument("--enable-javascript");
+                options.SetPreference("browser.download.folderList", 2);
+
+                // Obtener la ruta base del proyecto
+                string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+                // Combinar la ruta base con la ruta relativa
+                string downloadPath = Path.Combine(baseDirectory, @"Downloads\");
+
+                options.SetPreference("browser.download.dir", downloadPath);
+                options.SetPreference("browser.helperApps.neverAsk.saveToDisk", "application/zip");
+
 
                 Driver = new FirefoxDriver(options);
                 result = true;
@@ -144,7 +163,7 @@ namespace PlagiTracker.Services.SeleniumServices
             {
                 var options = new ChromeOptions();
                 options.AddArgument("--headless");
-                options.AddArgument("--disable-gpu");
+                //options.AddArgument("--disable-gpu");
                 options.AddArgument("--enable-javascript");
                 //options.AddArgument("--window-size=1920,1080");
 
@@ -299,6 +318,174 @@ namespace PlagiTracker.Services.SeleniumServices
             }
 
             return StudentSubmissionResults;
+        }
+
+        public (Result result, Dictionary<string, string>) ScrapeCodiva(string url)
+        {
+            Result result = new();
+            Dictionary<string, string> codes = [];
+
+            if (Driver == null)
+            {
+                result = new Result(false, "Error: Driver is NULL");
+                return (result, codes);
+            }
+            
+            WebDriverWait webDriverWait = new(Driver, TimeSpan.FromSeconds(10));
+            Driver.Navigate().GoToUrl(url);
+
+            //Thread.Sleep(1000);
+            webDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//label[starts-with(@for, 'tab-java-')]")));
+            var labels = Driver.FindElements(By.XPath("//label[starts-with(@for, 'tab-java-')]"));
+
+            var studentFiles = new List<Dictionary<string, string>>();
+
+            foreach (var label in labels)
+            {
+                string className = label.GetAttribute("title");
+                var tabElement = Driver.FindElement(By.XPath($"//label[@title='{className}']"));
+                tabElement.Click();
+
+                Thread.Sleep(100);
+                webDriverWait.Until(driver => ExpectedConditions.ElementIsVisible(By.XPath("//div[contains(@class,'CodeMirror-code')]//pre")));
+                var codeElements = Driver.FindElements(By.XPath("//div[contains(@class,'CodeMirror-code')]//pre"));
+
+                string codeContent = string.Join("\n", codeElements.Select(e => e.Text).Select(c => c.Trim()));
+
+                codes.TryAdd(className, codeContent);
+
+                // Ignorar archivos que contengan el código por dafult de Codiva
+                /*
+                if (ignorePatterns.Any(pattern => codeContent.Contains(pattern)))
+                {
+                    continue;
+                }
+                */
+                
+                var fileData = new Dictionary<string, string>
+                {
+                    { "nombre", $"{className}" },
+                    { "contenido", codeContent }
+                };
+                
+                studentFiles.Add(fileData);
+            }
+
+            Driver.Quit();
+
+            if (studentFiles.Count <= 0)
+            {
+                result = new Result(false, "Error: No files found");
+            }
+
+            Console.WriteLine($"Code Elements: {studentFiles.Count}");
+            
+            result = new Result(true, "Success");
+
+            return (result, codes);
+        }
+    
+        public Result ScrapeReplit(string url)
+        {
+            Result result = new();
+
+            if (Driver == null)
+            {
+                result = new Result(false, "Error: Driver is NULL");
+                return result;
+            }
+
+            WebDriverWait webDriverWait = new(Driver, TimeSpan.FromSeconds(10));
+            Driver.Navigate().GoToUrl("https://replit.com");
+
+            try
+            {
+                webDriverWait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector(".css-12xd7j0")));
+            }
+            catch (WebDriverTimeoutException)
+            {
+                // Si el elemento no es visible, proceder con el inicio de sesión
+                Driver.Navigate().GoToUrl("https://replit.com/login");
+
+                try
+                {
+                    webDriverWait.Until(ExpectedConditions.ElementIsVisible(By.Id("username-:r0:")));
+                }
+                catch (WebDriverTimeoutException)
+                {
+                    // Continuar incluso si el elemento no aparece
+                }
+
+                Driver.FindElement(By.Id("username-:r0:")).SendKeys("plagitracker@protonmail.com");
+                Driver.FindElement(By.Id("password-:r6:")).SendKeys("7SasF6B^X99db(VH");
+                Driver.FindElement(By.CssSelector(".css-evt1a8")).Click();
+
+                try
+                {
+                    webDriverWait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector(".css-12xd7j0")));
+                }
+                catch (WebDriverTimeoutException)
+                {
+                    // Continuar incluso si el elemento no aparece
+                }
+
+                string userName = Driver.FindElement(By.CssSelector(".css-12xd7j0")).Text;
+
+                if (userName != "plagitracker")
+                {
+                    result = new Result(false, "Error: LogIn failed");
+                    return result;
+                }
+            }
+
+            Console.WriteLine("Logged in");
+
+            // Navegar a la URL de descarga con un CancellationToken
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5)); // Ajusta el tiempo según sea necesario
+            var navigateTask = Task.Run(() => Driver.Navigate().GoToUrl(url), cts.Token);
+
+            try
+            {
+                do
+                {
+                    navigateTask.Wait(cts.Token);
+                }
+                while (!IsFileDownloaded(DownloadPath));
+            }
+            catch (OperationCanceledException)
+            {
+                result = new Result(false, "Error: Navigation to URL timed out");
+                Driver.Quit();
+            }
+            finally
+            {
+                Driver.Dispose();
+                if (IsFileDownloaded(DownloadPath))
+                {
+                    ExtractZipFile(DownloadPath, DownloadPath);
+                    result = new Result(true, "File downloaded and extracted successfully");
+                }
+                else
+                {
+                    result = new Result(false, "File not found after download attempt");
+                }
+            }
+            return result;
+        }
+
+        public static bool IsFileDownloaded(string filePath)
+        {
+            return File.Exists(filePath);
+        }
+
+        public static void ExtractZipFile(string zipFilePath, string extractPath)
+        {
+            if (!Directory.Exists(extractPath))
+            {
+                Directory.CreateDirectory(extractPath);
+            }
+
+            ZipFile.ExtractToDirectory(zipFilePath, extractPath);
         }
     }
 }

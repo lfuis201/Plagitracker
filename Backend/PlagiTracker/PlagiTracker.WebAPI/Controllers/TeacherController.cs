@@ -112,7 +112,7 @@ namespace PlagiTracker.WebAPI.Controllers
                                 if (teacher.LogInAttempts == IUserController.MAX_LOGIN_ATTEMPTS)
                                 {
                                     teacher.IsLocked = true;
-                                    teacher.UnlockDate = DateTime.UtcNow.AddMinutes(IUserController.UNLOCK_MINUTES);
+                                    teacher.UnlockDate = DateTime.UtcNow.AddMinutes(IUserController.LOG_IN_UNLOCK_MINUTES);
 
                                     await _context.SaveChangesAsync();
 
