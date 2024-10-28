@@ -87,7 +87,11 @@ const handleSubmit = async (event: Event) => {
 
 <template>
   <FullScreenLayout>
-    <DefaultAuthCard subtitle="Welcome Student" title="Sign In to PlagiTracker">
+    <DefaultAuthCard
+      banner="Try as a Student"
+      subtitle="Welcome Student"
+      title="Login to PlagiTracker"
+    >
       <form @submit="handleSubmit">
         <InputGroup v-model="email" label="Email" type="text" placeholder="Enter your email">
           <svg

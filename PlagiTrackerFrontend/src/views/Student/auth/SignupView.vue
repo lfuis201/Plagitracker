@@ -21,7 +21,7 @@ const password = ref<string>('')
 const confirmPassword = ref<string>('')
 const errors = ref<{ [key: string]: string }>({}) // Object to manage errors
 const isLoading = ref<boolean>(false) // Estado para controlar la carga
-  const backendError = ref<string | null>(null)
+const backendError = ref<string | null>(null)
 
 const handleSubmit = async (event: Event) => {
   event.preventDefault()
@@ -56,8 +56,8 @@ const handleSubmit = async (event: Event) => {
       text: 'Student registered successfully!',
       confirmButtonText: 'Aceptar'
     })
-    router.push('/student/auth/signin')
-  } catch (error:any) {
+    router.push('/student/auth/login')
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       error.errors.forEach((err) => {
         errors.value[err.path[0]] = err.message // Store the error message in the object
@@ -91,7 +91,11 @@ const handleSubmit = async (event: Event) => {
 
 <template>
   <FullScreenLayout>
-    <DefaultAuthCard subtitle="Start for free" title="Sign Up to PlagiTracker">
+    <DefaultAuthCard
+      banner="Try as a Student"
+      subtitle="Start for free"
+      title="Sign Up to PlagiTracker"
+    >
       <form @submit="handleSubmit">
         <InputGroup
           v-model="student.firstName"
@@ -275,7 +279,7 @@ const handleSubmit = async (event: Event) => {
         <div class="mt-6 text-center">
           <p class="font-medium">
             Already have an account?
-            <router-link to="/student/auth/signin" class="text-primary">Sign in</router-link>
+            <router-link to="/student/auth/login" class="text-primary">Sign in</router-link>
           </p>
         </div>
       </form>

@@ -7,11 +7,11 @@ import ResetPasswordView from '@/views/Student/auth/ResetPasswordView.vue'
 
 const authStudentRoutes = [
   {
-    path: '/student/auth/signin',
+    path: '/student/auth/login',
     name: 'studentsignin',
     component: SigninView,
     meta: {
-      title: 'StudentSignin',
+      title: 'Student Login',
       requiresAuth: false,
       allowedRoles: []
     }

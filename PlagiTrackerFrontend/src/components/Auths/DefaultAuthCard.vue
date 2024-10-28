@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const props = defineProps(['subtitle', 'title', 'customClasses'])
+const props = defineProps(['banner','subtitle', 'title', 'customClasses'])
 </script>
 
 <template>
@@ -13,8 +13,8 @@ const props = defineProps(['subtitle', 'title', 'customClasses'])
           <router-link class="mb-5.5  flex items-center justify-center" to="/">
             <span class="text-xl font-bold dark:text-white">PlagiTracker</span>
           </router-link>
-          <p class="font-medium 2xl:px-20">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit suspendisse.
+          <p class="font-medium 2xl:px-20 text-blue-500">
+            {{ props.banner }}
           </p>
 
           <span class="mt-15 inline-block">

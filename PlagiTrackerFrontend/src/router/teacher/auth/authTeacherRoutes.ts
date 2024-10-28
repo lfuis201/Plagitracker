@@ -6,11 +6,11 @@ import ForgotPasswordView from '@/views/Teacher/auth/ForgotPasswordView.vue'
 
 const authTeacherRoutes = [
   {
-    path: '/teacher/auth/signin',
+    path: '/teacher/auth/login',
     name: 'teachersignin',
     component: SigninView,
     meta: {
-      title: 'TeacherSignin',
+      title: 'Teacher Login',
       requiresAuth: false,
       allowedRoles: []
     },

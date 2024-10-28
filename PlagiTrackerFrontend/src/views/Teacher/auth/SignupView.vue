@@ -56,10 +56,9 @@ const handleSubmit = async (event: Event) => {
       text: 'Teacher registered successfully!',
       confirmButtonText: 'Aceptar'
     })
-    router.push('/teacher/auth/signin')
+    router.push('/teacher/auth/login')
   } catch (error: any) {
     console.log(error)
-
 
     if (error instanceof z.ZodError) {
       // Errores de validación de Zod (errores del frontend)
@@ -94,7 +93,11 @@ const handleSubmit = async (event: Event) => {
 
 <template>
   <FullScreenLayout>
-    <DefaultAuthCard subtitle="Start for free" title="Sign Up to PlagiTracker">
+    <DefaultAuthCard
+    banner="Try as a Teacher" 
+    subtitle="Start for free"
+      title="Sign Up to PlagiTracker"
+    >
       <form @submit="handleSubmit">
         <InputGroup
           v-model="teacher.firstName"
@@ -273,7 +276,7 @@ const handleSubmit = async (event: Event) => {
         <div class="mt-6 text-center">
           <p class="font-medium">
             Already have an account?
-            <router-link to="/teacher/auth/signin" class="text-primary">Sign in</router-link>
+            <router-link to="/teacher/auth/login" class="text-primary">Sign in</router-link>
           </p>
         </div>
       </form>
