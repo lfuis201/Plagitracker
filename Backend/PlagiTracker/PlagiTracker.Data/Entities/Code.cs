@@ -6,7 +6,7 @@ namespace PlagiTracker.Data.Entities
     /// <summary>
     /// Archivo de código
     /// </summary>
-    public class Code
+    public class Code : BaseEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

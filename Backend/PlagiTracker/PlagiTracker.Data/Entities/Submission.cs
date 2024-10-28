@@ -6,7 +6,7 @@ namespace PlagiTracker.Data.Entities
     /// <summary>
     /// Entrega del estudiante, con la url de la entrega
     /// </summary>
-    public class Submission
+    public class Submission : BaseEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

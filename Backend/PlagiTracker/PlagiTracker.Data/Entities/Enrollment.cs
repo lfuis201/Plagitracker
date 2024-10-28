@@ -6,7 +6,7 @@ namespace PlagiTracker.Data.Entities
     /// <summary>
     /// Inscripción de un estudiante a un curso
     /// </summary>
-    public class Enrollment
+    public class Enrollment : BaseEntity
     {
         [Required]
         public Guid StudentId { get; set; }

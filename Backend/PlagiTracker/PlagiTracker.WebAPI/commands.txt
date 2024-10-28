@@ -1,4 +1,4 @@
-Add-Migration ExerciseUpdated -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
+Add-Migration BaseEntityAdded -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 Update-Database -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 
 {
