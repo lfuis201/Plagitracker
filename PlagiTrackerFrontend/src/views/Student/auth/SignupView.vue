@@ -80,7 +80,7 @@ const handleSubmit = async (event: Event) => {
       await Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Error registering teacher. Please try again.',
+        text: 'Error registering student. Please try again.',
         confirmButtonText: 'Aceptar'
       })
     }
