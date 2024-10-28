@@ -14,7 +14,7 @@ namespace PlagiTracker.WebAPI.Controllers
 
         public EnrollmentController(DataContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context), "Error: Data Base connection");
         }
 
         [HttpPost]

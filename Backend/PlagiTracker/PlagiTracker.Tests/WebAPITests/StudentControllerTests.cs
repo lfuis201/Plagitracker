@@ -51,7 +51,7 @@ namespace PlagiTracker.Tests.WebAPITests
                 Email = "jane.doe@example.com",
                 PasswordHash = Encoding.UTF8.GetBytes("password")
             };
-            await _context.Students.AddAsync(existingStudent);
+            await _context.Students!.AddAsync(existingStudent);
             await _context.SaveChangesAsync();
 
             var signUpRequest = new SignUpRequest
@@ -100,7 +100,7 @@ namespace PlagiTracker.Tests.WebAPITests
                 IsLocked = true,
                 UnlockDate = DateTime.UtcNow.AddMinutes(10)
             };
-            await _context.Students.AddAsync(student);
+            await _context.Students!.AddAsync(student);
             await _context.SaveChangesAsync();
 
             var logInRequest = new LogInRequest
@@ -130,7 +130,7 @@ namespace PlagiTracker.Tests.WebAPITests
                 IsLocked = false,
                 LogInAttempts = 0
             };
-            await _context.Students.AddAsync(student);
+            await _context!.Students!.AddAsync(student);
             await _context.SaveChangesAsync();
 
             var logInRequest = new LogInRequest

@@ -14,7 +14,7 @@ namespace PlagiTracker.WebAPI.Controllers
 
         public CourseController(DataContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context), "Error: Data Base connection");
         }
 
         [HttpPost]
@@ -84,7 +84,7 @@ namespace PlagiTracker.WebAPI.Controllers
                 SubmissionDate = s.SubmissionDate,
                 Grade = s.Grade,
                 StudentId = s.StudentId,
-                StudentFirstName = s.Student.FirstName,
+                StudentFirstName = s!.Student!.FirstName,
                 StudentLastName = s.Student.LastName,
                 StudentEmail = s.Student.Email
             }));

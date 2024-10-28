@@ -3,7 +3,7 @@
     [TestClass]
     public class StateTransitionTests
     {
-        private StateTransition stateMachine;
+        private StateTransition? stateMachine;
 
         [TestInitialize]
         public void Setup()
@@ -15,7 +15,7 @@
         [DynamicData(nameof(GetTestCases), DynamicDataSourceType.Method)]
         public void TestLogin(string id, string password, string correctPassword, string expected)
         {
-            Assert.AreEqual(expected, stateMachine.LogIn(password, correctPassword));
+            Assert.AreEqual(expected, stateMachine!.LogIn(password, correctPassword));
         }
 
         public static IEnumerable<object[]> GetTestCases()

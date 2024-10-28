@@ -51,7 +51,7 @@ namespace PlagiTracker.Data.DataAccess
                 builder.HasKey(enrollment => new 
                 { 
                     enrollment.StudentId, 
-                    enrollment.CourseId 
+                    enrollment.CourseId,
                 });
 
                 // Configura la columna como decimal con 2 valores enteros y con 2 decimales
@@ -68,7 +68,7 @@ namespace PlagiTracker.Data.DataAccess
                 builder.HasIndex(s => new 
                 {
                     s.StudentId, 
-                    s.AssignmentId 
+                    s.AssignmentId,
                 }).IsUnique();
 
                 // Configura la Url como única 
@@ -85,7 +85,7 @@ namespace PlagiTracker.Data.DataAccess
                 builder.HasIndex(code => new
                 {
                     code.SubmissionId,
-                    code.FileName
+                    code.FileName,
                 }).IsUnique();
             });
 
@@ -97,7 +97,7 @@ namespace PlagiTracker.Data.DataAccess
                 { 
                     plagiarism.Id,
                     plagiarism.CodeId, 
-                    plagiarism.Algorithm 
+                    plagiarism.Algorithm,
                 }).IsUnique();
 
                 // Configura la columna como decimal con 3 valores enteros y con 2 decimales

@@ -1,4 +1,4 @@
-Add-Migration AssigmentCodeEstructureAdded -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
+Add-Migration ExerciseUpdated -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 Update-Database -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 
 {

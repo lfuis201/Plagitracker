@@ -16,8 +16,11 @@ namespace PlagiTracker.Data.Entities
         public string? Name { get; set; }
 
         [Required]
-        public string? Description { get; set; } 
-        
+        public string? Description { get; set; }
+
+        [Required]
+        public bool HaveBody { get; set; } = false;
+
         /// <summary>
         /// </summary>
         [Required]

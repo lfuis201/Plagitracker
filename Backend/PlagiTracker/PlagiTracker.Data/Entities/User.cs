@@ -14,17 +14,17 @@ namespace PlagiTracker.Data.Entities
 
         [Required]
         [MinLength(1)]
-        [MaxLength(40)]
+        [MaxLength(50)]
         public string? FirstName { get; set; }
 
         [Required]
         [MinLength(1)]
-        [MaxLength(40)]
+        [MaxLength(50)]
         public string? LastName { get; set; }
 
         [Required]
         [MinLength(5)]
-        [MaxLength(35)]
+        [MaxLength(50)]
         public string? Email { get; set; }
 
         [Required]

@@ -17,7 +17,7 @@ namespace PlagiTracker.WebAPI.Controllers
 
         public StudentController(DataContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context), "Error: Data Base connection");
         }
 
         #region IUserController Implementation

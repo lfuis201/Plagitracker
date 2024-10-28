@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PlagiTracker.CodeUtils\PlagiTracker.CodeUtils.csproj" />
     <ProjectReference Include="..\PlagiTracker.Data\PlagiTracker.Data.csproj" />
     <ProjectReference Include="..\PlagiTracker.Services\PlagiTracker.Services.csproj" />
   </ItemGroup>

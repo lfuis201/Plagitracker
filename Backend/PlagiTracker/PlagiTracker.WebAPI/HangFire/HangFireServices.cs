@@ -37,7 +37,7 @@ namespace PlagiTracker.WebAPI.HangFire
                 return;
             }
             */
-            var assignment = await _context.Assignments.FindAsync(assignmentId);
+            var assignment = await _context.Assignments!.FindAsync(assignmentId);
 
             if (assignment == null)
             {
