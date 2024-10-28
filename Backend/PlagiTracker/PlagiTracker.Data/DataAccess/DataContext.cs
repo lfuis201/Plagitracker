@@ -14,6 +14,9 @@ namespace PlagiTracker.Data.DataAccess
         public DbSet<Submission>? Submissions { get; set; }
         public DbSet<Plagiarism>? Plagiarisms { get; set; }
         public DbSet<Code>? Codes { get; set; }
+        public DbSet<Exercise>? Exercises { get; set; }
+        public DbSet<Class>? Classes { get; set; }
+        public DbSet<Function>? Functions { get; set; }
 
         /// <summary>
         /// Configuraciones adicionales para la base de datos como columnas únicas
@@ -48,7 +51,7 @@ namespace PlagiTracker.Data.DataAccess
                 builder.HasKey(enrollment => new 
                 { 
                     enrollment.StudentId, 
-                    enrollment.CourseId 
+                    enrollment.CourseId,
                 });
 
                 // Configura la columna como decimal con 2 valores enteros y con 2 decimales
@@ -65,7 +68,7 @@ namespace PlagiTracker.Data.DataAccess
                 builder.HasIndex(s => new 
                 {
                     s.StudentId, 
-                    s.AssignmentId 
+                    s.AssignmentId,
                 }).IsUnique();
 
                 // Configura la Url como única 
@@ -82,7 +85,7 @@ namespace PlagiTracker.Data.DataAccess
                 builder.HasIndex(code => new
                 {
                     code.SubmissionId,
-                    code.FileName
+                    code.FileName,
                 }).IsUnique();
             });
 
@@ -94,11 +97,43 @@ namespace PlagiTracker.Data.DataAccess
                 { 
                     plagiarism.Id,
                     plagiarism.CodeId, 
-                    plagiarism.Algorithm 
+                    plagiarism.Algorithm,
                 }).IsUnique();
 
                 // Configura la columna como decimal con 3 valores enteros y con 2 decimales
                 builder.Property(p => p.Similarity).HasColumnType("decimal(5, 2)");
+            });
+
+            // Ejercicio
+            modelBuilder.Entity<Exercise>(builder =>
+            {
+                builder.HasIndex(exercise => new
+                {
+                    exercise.AssignmentId,
+                    exercise.Name,
+                }).IsUnique();
+            });
+
+            // Clase
+            modelBuilder.Entity<Class>(builder =>
+            {
+                builder.HasIndex(classEntity => new
+                {
+                    classEntity.ExerciseId,
+                    classEntity.Name,
+                }).IsUnique();
+            });
+
+            // Función
+            modelBuilder.Entity<Function>(builder =>
+            {
+                builder.HasIndex(function => new
+                {
+                    function.ClassId,
+                    function.Name,
+                    function.Parameters,
+                    function.Type,
+                }).IsUnique();
             });
         }
     }

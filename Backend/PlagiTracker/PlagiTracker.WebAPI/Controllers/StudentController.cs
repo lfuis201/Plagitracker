@@ -17,7 +17,7 @@ namespace PlagiTracker.WebAPI.Controllers
 
         public StudentController(DataContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context), "Error: Data Base connection");
         }
 
         #region IUserController Implementation
@@ -110,7 +110,7 @@ namespace PlagiTracker.WebAPI.Controllers
                                 if (student.LogInAttempts == IUserController.MAX_LOGIN_ATTEMPTS)
                                 {
                                     student.IsLocked = true;
-                                    student.UnlockDate = DateTime.UtcNow.AddMinutes(IUserController.UNLOCK_MINUTES);
+                                    student.UnlockDate = DateTime.UtcNow.AddMinutes(IUserController.LOG_IN_UNLOCK_MINUTES);
 
                                     await _context.SaveChangesAsync();
 

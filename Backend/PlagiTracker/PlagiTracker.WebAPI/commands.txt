@@ -1,4 +1,4 @@
-Add-Migration VerificationCodeUserAdded -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
+Add-Migration ExerciseUpdated -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 Update-Database -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 
 {
@@ -119,3 +119,8 @@ VALUES('6252ac2f-e197-4ec3-821f-56ef3dffc72c'::uuid, 'https://www.codiva.io/p/0d
 INSERT INTO public."Submissions"
 ("Id", "Url", "SubmissionDate", "StudentId", "AssignmentId", "Grade")
 VALUES('bd755547-68fc-4094-8f87-8b65797d668e'::uuid, 'https://www.covid.io/p/0dc699a0-6033-4bb6-b46c-15d238277749', '2024-10-07 10:35:31.051', '1979d2a7-de35-4d83-9aa9-857171cba7fa'::uuid, 'ac85b4e5-33ea-4d2c-a281-f7ec41da15f7'::uuid, 0.00);
+
+plagitracker@protonmail.com
+J62CXg-_9&IapzC2
+Replit
+7SasF6B^X99db(VH

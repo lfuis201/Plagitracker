@@ -15,7 +15,7 @@
 </ItemGroup>
 	
   <ItemGroup>
-    <Folder Include="FileServices\" />
+    <Folder Include="FileServices\Replit\Downloads\" />
   </ItemGroup>
 	
   <ItemGroup>
