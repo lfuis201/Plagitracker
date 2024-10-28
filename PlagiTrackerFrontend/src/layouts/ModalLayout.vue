@@ -7,7 +7,7 @@
     >
       <div
         @click.stop
-        class="relative w-full max-w-142.5 rounded-lg bg-white px-8 py-12 dark:bg-boxdark md:px-17.5 md:py-15"
+        class="relative w-full max-h-[90vh] overflow-y-auto rounded-lg bg-white px-8 py-12 dark:bg-boxdark sm:max-w-full md:max-w-3xl"
       >
         <!-- Botón de cerrar (X) -->
         <button
