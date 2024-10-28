@@ -17,9 +17,9 @@ const logout = () => {
 
   // Redirigir según el rol
   if (role.value === 'teacher') {
-    router.push('/teacher/auth/signin') // Redirigir a la página de login de teacher
+    router.push('/teacher/auth/login') // Redirigir a la página de login de teacher
   } else if (role.value === 'student') {
-    router.push('/student/auth/signin') // Redirigir a la página de login de student
+    router.push('/student/auth/login') // Redirigir a la página de login de student
   }
 
   userStore.clearUser() // Limpiar el estado del usuario
