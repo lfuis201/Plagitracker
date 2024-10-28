@@ -11,6 +11,11 @@ const props = defineProps<{
   course: Course
 }>()
 
+// Define emits for the component
+const emit = defineEmits<{
+  (event: 'course-deleted'): void; // Define an event for course deletion
+}>();
+
 const modalOpen = ref(false) // State to control modal visibility
 
 const coursesStore = useCoursesStore()
@@ -43,7 +48,7 @@ const handleDelete = async (courseId: string) => {
       Swal.fire('Deleted!', 'Your course has been deleted.', 'success')
       console.log('Course deleted:', courseId)
       await coursesStore.fetchCoursesByTeacher()
-
+      emit('course-deleted'); // Emit the event to notify the parent component
       // Opcional: redirige o actualiza la vista después de eliminar
     } catch (error) {
       console.error('Error deleting course:', error)
@@ -55,7 +60,7 @@ const handleDelete = async (courseId: string) => {
 const copyLinkToClipboard = async (courseId: string) => {
   try {
     await navigator.clipboard.writeText(courseId)
-    Swal.fire('Copied!', 'The course link has been copied to your clipboard.', 'success')
+    Swal.fire('Copied!', 'The course code has been copied to your clipboard.', 'success')
   } catch (error) {
     console.error('Error copying link:', error)
     Swal.fire('Error!', 'Failed to copy the link. Please try again.', 'error')

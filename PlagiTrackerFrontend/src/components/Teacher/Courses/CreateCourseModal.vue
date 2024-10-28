@@ -18,8 +18,6 @@
 
           <button
             type="submit"
-            :disabled="isSubmitting"
-
             class="mt-4 block w-full rounded bg-blue-500 p-3 text-white hover:bg-blue-600"
           >
             Create Course
@@ -36,6 +34,7 @@ import ModalLayout from '@/layouts/ModalLayout.vue'
 import { useUserStore } from '@/stores/userStore' // Importa el store
 import CourseService from '@/services/CourseService' // Asegúrate de importar el servicio
 import { useCoursesStore } from '@/stores/coursesStore';
+
 // Definir las propiedades que el componente recibe del padre
 const props = defineProps({
   modalOpen: Boolean
@@ -50,7 +49,6 @@ const course = ref({
   name: '',
   teacherId: '' // Este se llenará con el ID del usuario
 })
-const isSubmitting = ref(false); // Inicialmente no está enviando
 
 // Usar el store de cursos
 const coursesStore = useCoursesStore();
@@ -76,14 +74,12 @@ const handleSubmit = async () => {
     console.log('Course Created:', createdCourse)
     await coursesStore.fetchCoursesByTeacher();
     
-    handleClose(); // Cierra el modal aquí
-    isSubmitting.value = false; // Restablece el estado de envío independientemente del resultado
+    // Restablece el campo del nombre del curso después de crear el curso
+    course.value.name = ''; // Limpia el campo
 
- 
+    handleClose(); // Cierra el modal aquí
   } catch (error) {
     console.error('Error creating course:', error)
-  }finally {
-    isSubmitting.value = false; // Restablece el estado de envío independientemente del resultado
   }
 }
 </script>

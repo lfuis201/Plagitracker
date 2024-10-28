@@ -15,6 +15,7 @@ export const StudentSchema = z.object({
 
   email: z
     .string()
+    .min(1, { message: 'Email is required and must be at least 1 character long' }) // Requerido y mínimo de 1 carácter
     .email({ message: 'Invalid email address.' })
     .max(50, { message: 'Email must not exceed 50 characters' })
     .refine(
@@ -27,7 +28,7 @@ export const StudentSchema = z.object({
     ),
   passwordHash: z
     .string()
-    .min(8, { message: 'Password must be at least 8 characters long' }) // Mínimo de 8 caracteres
+    .min(8, { message: 'Password is required and must be at least 8 characters long' }) // Mínimo de 8 caracteres
     .max(30, { message: 'Password must not exceed 30 characters' }) // Máximo de 30 caracteres
 })
 

@@ -122,16 +122,28 @@ const loadAssignmentDetails = async () => {
 }
 
 // Function to handle submission
+// Function to handle submission
 const submitLink = async () => {
   if (!submissionUrl.value) {
-    //alert('Please enter a valid URL.')
     Swal.fire({
       title: 'Error!',
       text: 'Please enter a valid URL.',
       icon: 'warning',
       confirmButtonText: 'OK'
     });
-    return
+    return;
+  }
+
+  // Validate the URL
+  const isCodivaUrl = submissionUrl.value.startsWith("https://www.codiva.io/");
+  if (!isCodivaUrl) {
+    Swal.fire({
+      title: 'Invalid URL!',
+      text: 'Please enter a URL that starts with "https://www.codiva.io/".',
+      icon: 'warning',
+      confirmButtonText: 'OK'
+    });
+    return;
   }
 
   try {
@@ -140,10 +152,9 @@ const submitLink = async () => {
       studentId: user.value.id,
       assignmentId: assignmentId,
       submissionDate: new Date()
-    }
+    };
 
-    await SubmissionService.createSubmission(submission)
-    //alert('Submission uploaded successfully!')
+    await SubmissionService.createSubmission(submission);
     Swal.fire({
       title: 'Success!',
       text: 'Submission uploaded successfully!',
@@ -151,8 +162,7 @@ const submitLink = async () => {
       confirmButtonText: 'OK'
     });
   } catch (error) {
-    console.error('Error submitting link:', error)
-    //alert('There was an issue submitting your link.')
+    console.error('Error submitting link:', error);
     Swal.fire({
       title: 'Error!',
       text: 'There was an issue submitting your link.',
@@ -160,7 +170,8 @@ const submitLink = async () => {
       confirmButtonText: 'OK'
     });
   }
-}
+};
+
 
 // Fetch assignment details on component mount
 onMounted(() => {

@@ -112,7 +112,13 @@ const handleSubmit = async () => {
     const createdAssignment = await AssignmentService.createAssignment(assignment.value)
     console.log('Assignment Created:', createdAssignment)
     await assignmentStore.fetchAssignmentsByCourse(props.courseId)
-
+    assignment.value = {
+      id: '',
+      title: '',
+      description: '',
+      submissionDate: '',
+      courseId: props.courseId // Asigna el courseId nuevamente
+    }
     handleClose()
   } catch (error) {
     console.error('Error creating assignment:', error)

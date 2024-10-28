@@ -15,6 +15,6 @@ export const loginSchema = z.object({
 
   password: z
     .string()
-    .min(8, { message: 'Password must be at least 8 characters long.' }) // Cambiado a 9 para permitir contraseñas de mínimo 9 caracteres
+    .min(1, { message: 'Password is required.' })  // Mensaje de "Password is required" añadido aquí
     .max(30, { message: 'Password must not exceed 30 characters' })
 });

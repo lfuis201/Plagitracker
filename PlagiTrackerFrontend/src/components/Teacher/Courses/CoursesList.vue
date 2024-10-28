@@ -1,36 +1,43 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import { useCoursesStore } from '@/stores/coursesStore'; // Importa el store de cursos
-import CourseCard from './CourseCard.vue'; // Asegúrate de importar el componente CourseCard
+import { useCoursesStore } from '@/stores/coursesStore'; // Import the courses store
+import CourseCard from './CourseCard.vue'; // Make sure to import the CourseCard component
 
-// Usamos el store de cursos
+// Use the courses store
 const coursesStore = useCoursesStore();
 
-// Llama a fetchCoursesByTeacher cuando el componente se monte
+// Fetch courses function
+const fetchCourses = async () => {
+  await coursesStore.fetchCoursesByTeacher();
+  console.log(coursesStore.courses);
+};
+
+// Call fetchCoursesByTeacher when the component is mounted
 onMounted(() => {
-  coursesStore.fetchCoursesByTeacher(); // Cargar los cursos al montar el componente
-  console.log(coursesStore.courses)
+  fetchCourses(); // Load courses when the component mounts
 });
 </script>
 
 <template>
-  <!-- Pantalla de carga -->
+  <!-- Loading screen -->
   <div v-if="coursesStore.isLoading" class="flex items-center justify-center min-h-screen">
     <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
   </div>
 
-  <!-- Mostrar error si ocurre -->
-  <div v-if="coursesStore.errorMessage" class="text-red-500 text-center">
-    {{ coursesStore.errorMessage }}
+
+  <!-- Show message if no courses are available -->
+  <div v-if="!coursesStore.isLoading && coursesStore.courses.length === 0" class="text-gray-500 text-center mt-6">
+    No courses available.
   </div>
 
-  <!-- Lista de cursos -->
+  <!-- List of courses -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-    <!-- Iteramos sobre la lista de cursos y mostramos un CourseCard para cada uno -->
+    <!-- Iterate over the list of courses and show a CourseCard for each one -->
     <CourseCard
       v-for="course in coursesStore.courses"
       :key="course.id"
       :course="course"
+      @course-deleted="fetchCourses"
     />
   </div>
 </template>

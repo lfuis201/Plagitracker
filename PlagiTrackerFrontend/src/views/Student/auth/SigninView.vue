@@ -9,7 +9,6 @@ import { useUserStore } from '@/stores/userStore' // Usamos el store general
 import { z } from 'zod'
 import { loginSchema } from '@/schemas/loginSchema'
 
-
 const email = ref<string>('')
 const password = ref<string>('')
 const errorMessage = ref<string>('') // Variable para el mensaje de error
@@ -20,7 +19,6 @@ const showPassword = ref<boolean>(false) // Estado para mostrar/ocultar la contr
 
 const errors = ref<{ [key: string]: string }>({}) // Object to manage errors
 
-
 const userStore = useUserStore() // Usar el store generalizado
 
 // Manejo del formulario
@@ -29,9 +27,8 @@ const handleSubmit = async (event: Event) => {
   errorMessage.value = '' // Limpiar cualquier mensaje de error previo
   isLoading.value = true
 
-  errors.value = {}; // Limpiar todos los errores previos
+  errors.value = {} // Limpiar todos los errores previos
   try {
-
     loginSchema.parse({
       email: email.value,
       password: password.value
@@ -160,8 +157,9 @@ const handleSubmit = async (event: Event) => {
 
         <!-- Mostrar mensaje si la cuenta está bloqueada -->
         <div v-if="unlockDate !== null" class="text-yellow-500 mb-4">
-          Your account is locked. It will be unlocked on {{ unlockDate.toLocaleString() }}.
+          Your account will be unlocked on {{ unlockDate.toLocaleString() }}.
         </div>
+
         <div class="mb-5 mt-6">
           <button
             type="submit"
@@ -218,7 +216,6 @@ const handleSubmit = async (event: Event) => {
             >
           </p>
         </div>
-
       </form>
     </DefaultAuthCard>
   </FullScreenLayout>

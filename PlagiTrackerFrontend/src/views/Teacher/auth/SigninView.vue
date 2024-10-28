@@ -155,9 +155,8 @@ const handleSubmit = async (event: Event) => {
           {{ remainingAttempts }} login attempts remaining.
         </div>
 
-        <!-- Mostrar mensaje si la cuenta está bloqueada -->
         <div v-if="unlockDate !== null" class="text-yellow-500 mb-4">
-          Your account is locked. It will be unlocked on {{ unlockDate.toLocaleString() }}.
+          Your account will be unlocked on {{ unlockDate.toLocaleString() }}.
         </div>
 
         <div class="mb-5 mt-6">
