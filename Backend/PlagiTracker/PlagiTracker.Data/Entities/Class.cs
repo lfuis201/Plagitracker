@@ -5,7 +5,7 @@ namespace PlagiTracker.Data.Entities
 {
     /// <summary>
     /// </summary>
-    public class Class
+    public class Class : BaseEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

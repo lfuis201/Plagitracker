@@ -6,7 +6,7 @@ namespace PlagiTracker.Data.Entities
     /// <summary>
     /// Asignación de un curso, puede ser una tarea, un examen, etc.
     /// </summary>
-    public class Assignment
+    public class Assignment : BaseEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

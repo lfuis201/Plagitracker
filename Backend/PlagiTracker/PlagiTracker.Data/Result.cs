@@ -2,22 +2,39 @@
 {
     public class Result
     {
-        public bool Success { get; set; }
-        public object? Data { get; set; } = null;
+        public bool? Success { get; set; }
+        
         public string? Message { get; set; }
-
-        public Result(bool success, object data, string? message = null)
+        
+        private object? _data;
+        
+        public object? Data 
         {
-            Success = success;
-            Data = data;
-            Message = message;
+            get
+            {
+                if (_data != null && DataType != null)
+                {
+                    return Convert.ChangeType(_data, DataType);
+                }
+                return null;
+            }
+            set
+            {
+                if (value != null)
+                {
+                    _data = value;
+                }
+            }
         }
+        
+        public Type? DataType { get; set; }
 
-        public Result(bool success, string? message = null)
+        public Result(bool success, string? message, object? data = null, Type? dataType = null)
         {
             Success = success;
-            Data = null;
             Message = message;
+            Data = data;
+            DataType = dataType;
         }
 
         public Result()

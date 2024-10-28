@@ -6,7 +6,7 @@ namespace PlagiTracker.Data.Entities
     /// <summary>
     /// Caso de plagio detectado
     /// </summary>
-    public class Plagiarism
+    public class Plagiarism : BaseEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

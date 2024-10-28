@@ -6,7 +6,7 @@ namespace PlagiTracker.Data.Entities
     /// <summary>
     /// Clase para el usuario (profesor y estudiante)
     /// </summary>
-    public class User
+    public class User : BaseEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
