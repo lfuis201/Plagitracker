@@ -16,12 +16,11 @@ const changePasswordSchema = z.object({
       { message: 'Email can only have up to two extensions.' }
     ),
   verificationCode: z
-    .string() // Aceptamos como string para validar con regex
-    .regex(/^\d+$/, 'Verification code must only contain numbers') // Verificar que solo contenga dígitos
-    .min(1, 'Verification code is required') // El código de verificación es obligatorio
-    .transform(Number), // Convertir a número
-  newPasswordHash: z.string().min(8, 'Password must be at least 8 characters long') // Contraseña de mínimo 8 caracteres
+    .string()
+    .regex(/^\d+$/, 'Verification code must only contain numbers')
+    .min(1, 'Verification code is required')
+    .transform(Number),
+  newPasswordHash: z.string().min(8, 'Password must be at least 8 characters long')
 })
 
-// Exportar el esquema
 export default changePasswordSchema

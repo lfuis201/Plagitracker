@@ -2,7 +2,7 @@
 import { onMounted } from 'vue';
 import { useCoursesStore } from '@/stores/coursesStore'; // Import the courses store
 import CourseCard from './CourseCard.vue'; // Make sure to import the CourseCard component
-
+import LoadingSpinner from '@/components/LoadingSpinner.vue';
 // Use the courses store
 const coursesStore = useCoursesStore();
 
@@ -20,9 +20,7 @@ onMounted(() => {
 
 <template>
   <!-- Loading screen -->
-  <div v-if="coursesStore.isLoading" class="flex items-center justify-center min-h-screen">
-    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
-  </div>
+  <LoadingSpinner :isLoading="coursesStore.isLoading" />
 
 
   <!-- Show message if no courses are available -->

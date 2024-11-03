@@ -15,6 +15,7 @@ export const useAssignmentStore = defineStore('assignment', () => {
     isLoading.value = true;
     errorMessage.value = ''; // Reiniciar el mensaje de error
     assignments.value = []; // Limpiar asignaciones antes de cargar nuevas
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     try {
       assignments.value = await AssignmentService.getAssignmentsByCourse(courseId);

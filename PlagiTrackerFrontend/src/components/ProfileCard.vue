@@ -1,3 +1,13 @@
+<script setup lang="ts">
+import { useUserStore } from '@/stores/userStore'
+import { computed } from 'vue'
+
+const userStore = useUserStore() // Usar el store generalizado
+const user = computed(() => userStore.getUser)
+const role = computed(() => userStore.getRole)
+
+</script>
+
 <template>
   <!-- ====== Profile Section Start -->
   <div
@@ -78,8 +88,10 @@
         </div>
       </div>
       <div class="mt-4">
-        <h3 class="mb-1.5 text-2xl font-medium text-black dark:text-white">Elmerson Heilium</h3>
-        <p class="font-medium">Joyano</p>
+        <h3 class="mb-1.5 text-2xl font-medium text-black dark:text-white">{{
+            user?.firstName
+          }}</h3>
+        <p class="font-medium">{{ role }}</p>
         <div
           class="mx-auto mt-4.5 mb-5.5 grid max-w-94 grid-cols-3 rounded-md border border-stroke py-2.5 shadow-1 dark:border-strokedark dark:bg-[#37404F]"
         >

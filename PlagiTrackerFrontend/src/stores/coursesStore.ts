@@ -20,7 +20,7 @@ export const useCoursesStore = defineStore('coursesStore', () => {
       try {
         isLoading.value = true
         errorMessage.value = ''
-
+        await new Promise(resolve => setTimeout(resolve, 2000));
         const coursesData = await CourseService.getAllByTeacher(user.id)
         courses.value = coursesData
       } catch (error) {
