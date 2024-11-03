@@ -11,6 +11,8 @@ const assigmentsRoutes = [
     component: SubmitForm,
     meta: {
       title: 'Submit',
+      requiresAuth: true,
+      allowedRoles: ['student']
     },
   },
   {
@@ -19,6 +21,8 @@ const assigmentsRoutes = [
     component: CoursesView,
     meta: {
       title: 'My Courses',
+      requiresAuth: true,
+      allowedRoles: ['student']
     },
   },
   {
@@ -27,6 +31,8 @@ const assigmentsRoutes = [
     component: AssigmenstView,
     meta: {
       title: 'My Assignments',
+      requiresAuth: true,
+      allowedRoles: ['student']
     },
   },
   {
@@ -35,6 +41,8 @@ const assigmentsRoutes = [
     component: EnrollmentView,
     meta: {
       title: 'Enrrolments',
+      requiresAuth: true,
+      allowedRoles: ['student']
     },
   }
 
