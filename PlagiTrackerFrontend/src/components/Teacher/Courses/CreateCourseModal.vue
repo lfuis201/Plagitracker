@@ -18,9 +18,12 @@
 
           <button
             type="submit"
-            class="mt-4 block w-full rounded bg-blue-500 p-3 text-white hover:bg-blue-600"
-          >
-            Create Course
+            :disabled="isSubmitting"
+            :class="[
+              'mt-4 block w-full rounded p-3 text-white',
+              isSubmitting ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
+            ]"          >
+            {{ isSubmitting ? 'Creating...' : 'Create Course' }}
           </button>
         </form>
       </template>
@@ -33,7 +36,8 @@ import { ref, defineEmits, defineProps } from 'vue'
 import ModalLayout from '@/layouts/ModalLayout.vue'
 import { useUserStore } from '@/stores/userStore' // Importa el store
 import CourseService from '@/services/CourseService' // Asegúrate de importar el servicio
-import { useCoursesStore } from '@/stores/coursesStore';
+import { useCoursesStore } from '@/stores/coursesStore'
+import Swal from 'sweetalert2'
 
 // Definir las propiedades que el componente recibe del padre
 const props = defineProps({
@@ -51,10 +55,12 @@ const course = ref({
 })
 
 // Usar el store de cursos
-const coursesStore = useCoursesStore();
+const coursesStore = useCoursesStore()
 // Inicializa el store
 const userStore = useUserStore()
 const user = userStore.getUser // Obtiene el usuario del store
+
+const isSubmitting = ref(false)
 
 // Asigna el teacherId al curso
 if (user) {
@@ -70,20 +76,29 @@ const handleClose = () => {
 const handleSubmit = async () => {
   try {
     // Crea el curso usando el servicio
+    isSubmitting.value = true // Deshabilita el botón
+
     const createdCourse = await CourseService.createCourse(course.value)
     console.log('Course Created:', createdCourse)
-    await coursesStore.fetchCoursesByTeacher();
-    
-    // Restablece el campo del nombre del curso después de crear el curso
-    course.value.name = ''; // Limpia el campo
+    await coursesStore.fetchCoursesByTeacher()
 
-    handleClose(); // Cierra el modal aquí
+    // Restablece el campo del nombre del curso después de crear el curso
+    course.value.name = '' // Limpia el campo
+
+    handleClose() // Cierra el modal aquí
+
+    Swal.fire({
+      title: 'Course Created!',
+      text: 'The course has been created successfully.',
+      icon: 'success',
+      confirmButtonText: 'Okay'
+    })
   } catch (error) {
     console.error('Error creating course:', error)
+  } finally {
+    isSubmitting.value = false // Habilita el botón nuevamente
   }
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

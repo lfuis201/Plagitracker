@@ -2,9 +2,9 @@
 import type { Course } from '@/types/Course'
 import CourseService from '@/services/CourseService'
 import { useCoursesStore } from '@/stores/coursesStore'
-import EditCourseModal from './EditCourseModal.vue' // Import your modal component
+import EditCourseModal from './EditCourseModal.vue'
 
-import Swal from 'sweetalert2' // Importa SweetAlert2
+import Swal from 'sweetalert2'
 import { ref } from 'vue'
 
 const props = defineProps<{

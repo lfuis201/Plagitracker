@@ -17,10 +17,13 @@
           </div>
 
           <button
-            type="submit"
-            class="mt-4 block w-full rounded bg-blue-500 p-3 text-white hover:bg-blue-600"
+            :disabled="isSubmitting"
+            :class="[
+              'mt-4 block w-full rounded p-3 text-white',
+              isSubmitting ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
+            ]"
           >
-            Update Course
+            {{ isSubmitting ? 'Updating...' : 'Update Course' }}
           </button>
         </form>
       </template>
@@ -34,6 +37,7 @@ import ModalLayout from '@/layouts/ModalLayout.vue'
 import type { Course } from '@/types/Course' // Ensure Course type is defined
 import CourseService from '@/services/CourseService' // Import CourseService
 import { useCoursesStore } from '@/stores/coursesStore'
+import Swal from 'sweetalert2'
 
 // Define the properties the component receives from the parent
 const props = defineProps<{
@@ -41,13 +45,15 @@ const props = defineProps<{
   course: Course // The course object to edit
 }>()
 
-const coursesStore = useCoursesStore();
+const coursesStore = useCoursesStore()
 
 // Define the events the component can emit
 const emit = defineEmits(['close'])
 
 // State for the course, initialized with the received prop
 const course = ref<Course>({ ...props.course })
+
+const isSubmitting = ref(false)
 
 // Watch for changes in props.course and update the course ref
 watch(
@@ -68,6 +74,9 @@ const handleClose = () => {
 const handleSubmit = async () => {
   try {
     // Check if submission date exists and format it to ISO if needed
+
+    isSubmitting.value = true // Deshabilita el botón
+
     if (course.value.submissionDate) {
       course.value.submissionDate = new Date(course.value.submissionDate).toISOString()
     }
@@ -75,16 +84,26 @@ const handleSubmit = async () => {
     // Update the course using the service
     const updatedCourse = await CourseService.updateCourse(course.value)
     console.log('Course Updated:', updatedCourse)
-    await coursesStore.fetchCoursesByTeacher();
+    await coursesStore.fetchCoursesByTeacher()
 
     // Fetch the updated list of courses for the teacher
 
     handleClose() // Close the modal after updating the course
 
 
+    // Show success alert
+    Swal.fire({
+      title: 'Course Updated!',
+      text: 'The course has been updated successfully.',
+      icon: 'success',
+      confirmButtonText: 'Okay'
+    });
+
 
   } catch (error) {
     console.error('Error updating course:', error)
+  } finally {
+    isSubmitting.value = false // Habilita el botón nuevamente
   }
 }
 </script>
