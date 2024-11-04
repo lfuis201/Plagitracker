@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import type { Assignment } from '@/types/Assigment'
-import { ref } from 'vue';
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import EditAssigment from './EditAssigment .vue';
+import EditAssigment from './EditAssigment .vue'
 import { useAssignmentStore } from '@/stores/assigmentStore'
-import AssignmentService from '@/services/AssigmentService';
+import AssignmentService from '@/services/AssigmentService'
 import Swal from 'sweetalert2' // Importa SweetAlert2
-
 
 // Define una prop que recibe un objeto de tipo Assignment
 const props = defineProps<{
@@ -18,7 +17,7 @@ const assignmentStore = useAssignmentStore()
 
 const router = useRouter()
 
-const isEditing = ref(false); // Estado para controlar la visibilidad del modal
+const isEditing = ref(false) // Estado para controlar la visibilidad del modal
 
 const deleteAssignment = async () => {
   const result = await Swal.fire({
@@ -30,39 +29,30 @@ const deleteAssignment = async () => {
     cancelButtonColor: '#d33',
     confirmButtonText: 'Yes, delete it!',
     cancelButtonText: 'No, cancel'
-  });
+  })
 
   if (result.isConfirmed) {
     try {
       // Delete the assignment using the service
-      await AssignmentService.deleteAssignment(props.assignment.id);
+      await AssignmentService.deleteAssignment(props.assignment.id)
 
       // Reload the assignments from the store
-      await assignmentStore.fetchAssignmentsByCourse(props.assignment.courseId);
-      
-      console.log('Assignment deleted successfully');
+      await assignmentStore.fetchAssignmentsByCourse(props.assignment.courseId)
+
+      console.log('Assignment deleted successfully')
 
       // Show success message
-      await Swal.fire(
-        'Deleted!',
-        'The assignment has been deleted.',
-        'success'
-      );
+      await Swal.fire('Deleted!', 'The assignment has been deleted.', 'success')
     } catch (error) {
-      console.error('Error deleting the assignment:', error);
-      await Swal.fire(
-        'Oops!',
-        'Something went wrong while deleting the assignment.',
-        'error'
-      );
+      console.error('Error deleting the assignment:', error)
+      await Swal.fire('Oops!', 'Something went wrong while deleting the assignment.', 'error')
     }
   }
-};
+}
 
 const editAssignment = () => {
-  isEditing.value = true; // Abre el modal de edición
-};
-
+  isEditing.value = true // Abre el modal de edición
+}
 
 const navigateToTask = () => {
   router.push({ name: 'teacherSubmissions', params: { id: props.assignment.id } }) // Navega usando el ID de la asignación
@@ -70,9 +60,7 @@ const navigateToTask = () => {
 </script>
 
 <template>
-  <div
-    class="flex items-center p-4 bg-white shadow-md dark:bg-card cursor-pointer"
-  >
+  <div class="flex items-center p-4 bg-white shadow-md dark:bg-card cursor-pointer">
     <!-- Icono -->
     <div class="flex-shrink-0">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 1024 1024">
@@ -100,7 +88,8 @@ const navigateToTask = () => {
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit',
-            hour12: false
+            hour12: false,
+            timeZone: 'UTC'
           })
         }}
       </p>
@@ -141,16 +130,8 @@ const navigateToTask = () => {
       </button>
     </div>
 
-    <EditAssigment
-      :modalOpen="isEditing"
-      :assignment="assignment"
-      @close="isEditing = false"
-    />
-
-
+    <EditAssigment :modalOpen="isEditing" :assignment="assignment" @close="isEditing = false" />
   </div>
-
-
 </template>
 
 <style scoped>

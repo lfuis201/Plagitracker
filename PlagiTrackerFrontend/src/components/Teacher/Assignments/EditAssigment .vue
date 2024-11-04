@@ -37,6 +37,8 @@
               type="datetime-local"
               id="submissionDate"
               v-model="formattedSubmissionDate"
+               :min="minDate"
+                :max="maxDate"
               class="border rounded w-full px-3 py-2"
               required
             />
@@ -84,6 +86,19 @@ const isSubmitting = ref(false)
 
 const assignmentStore = useAssignmentStore()
 const route = useRoute() // Acceder a los parámetros de la ruta
+
+
+const minDate = computed(() => {
+  const now = new Date()
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset()) // Ajustar para la zona horaria
+  return now.toISOString().slice(0, 16) // Devuelve la fecha y hora en el formato correcto
+})
+
+const maxDate = computed(() => {
+  const now = new Date()
+  now.setFullYear(now.getFullYear() + 2) // Sumar 2 años a la fecha actual
+  return now.toISOString().slice(0, 16) // Formato 'YYYY-MM-DDTHH:MM'
+})
 
 // Estado para la asignación
 const assignment = ref<Assignment>({ ...props.assignment }) // Clonar el assignment recibido
