@@ -42,12 +42,18 @@
             />
           </div>
 
+    
           <button
             type="submit"
-            class="mt-4 block w-full rounded bg-blue-500 p-3 text-white hover:bg-blue-600"
-          >
-            Update Assignment
+            :disabled="isSubmitting"
+            :class="[
+              'mt-4 block w-full rounded p-3 text-white',
+              isSubmitting ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
+            ]"          >
+            {{ isSubmitting ? 'Updating...' : 'Update Assignment' }}
           </button>
+
+
         </form>
       </template>
     </ModalLayout>
@@ -61,6 +67,7 @@ import type { Assignment } from '@/types/Assigment'
 import AssignmentService from '@/services/AssigmentService'
 import { useAssignmentStore } from '@/stores/assigmentStore'
 import { useRoute } from 'vue-router'
+import Swal from 'sweetalert2'
 
 // Definir las propiedades que el componente recibe del padre
 const props = defineProps({
@@ -71,6 +78,10 @@ const props = defineProps({
 
 // Definir los eventos que el componente puede emitir
 const emit = defineEmits(['close'])
+
+const isSubmitting = ref(false)
+
+
 const assignmentStore = useAssignmentStore()
 const route = useRoute() // Acceder a los parámetros de la ruta
 
@@ -106,6 +117,10 @@ const handleClose = () => {
 const handleSubmit = async () => {
   try {
     // Actualiza la asignación usando el servicio
+
+    isSubmitting.value = true // Deshabilita el botón
+
+
     const updatedAssignment = await AssignmentService.updateAssignment(assignment.value)
     console.log('Assignment Updated:', updatedAssignment)
     // Obtener courseId de los parámetros de la ruta
@@ -116,8 +131,20 @@ const handleSubmit = async () => {
     // Si deseas realizar alguna acción adicional después de la actualización, hazlo aquí
 
     handleClose() // Cierra el modal después de actualizar la asignación
+
+     // Mostrar alerta de éxito
+     Swal.fire({
+      title: 'Assignment Updated!',
+      text: 'The assignment has been updated successfully.',
+      icon: 'success',
+      confirmButtonText: 'Okay'
+    })
+
+
   } catch (error) {
     console.error('Error updating assignment:', error)
+  }finally {
+    isSubmitting.value = false // Habilita el botón nuevamente
   }
 }
 </script>

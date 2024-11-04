@@ -45,12 +45,17 @@
               />
             </div>
 
+       
             <button
-              type="submit"
-              class="mt-4 block w-full rounded bg-blue-500 p-3 text-white hover:bg-blue-600"
-            >
-              Create Assignment
-            </button>
+            type="submit"
+            :disabled="isSubmitting"
+            :class="[
+              'mt-4 block w-full rounded p-3 text-white',
+              isSubmitting ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
+            ]"          >
+            {{ isSubmitting ? 'Creating...' : ' Create Assignment' }}
+          </button>
+
           </form>
         </div>
 
@@ -87,6 +92,10 @@ import AssignmentService from '@/services/AssigmentService'
 import { useAssignmentStore } from '@/stores/assigmentStore'
 import CreateExcercise from '../Excercises/CreateExcercise.vue'
 import type { Exercise } from '@/types/Excercises'
+import Swal from 'sweetalert2'
+
+
+
 // Definir las propiedades que el componente recibe del padre
 const props = defineProps({
   modalOpen: Boolean,
@@ -96,6 +105,10 @@ const props = defineProps({
 // Definir los eventos que el componente puede emitir
 const emit = defineEmits(['close'])
 // Calcula la fecha mínima para el campo de entrada
+
+const isSubmitting = ref(false)
+
+
 const minDate = computed(() => {
   const now = new Date()
   now.setMinutes(now.getMinutes() - now.getTimezoneOffset()) // Ajustar para la zona horaria
@@ -128,6 +141,10 @@ const handleClose = () => {
 const handleSubmit = async () => {
   try {
     // Convierte submissionDate a UTC antes de enviar
+
+    isSubmitting.value = true // Deshabilita el botón
+
+
     const localDate = new Date(assignment.value.submissionDate)
     assignment.value.submissionDate = localDate.toISOString() // Convierte a UTC
 
@@ -143,8 +160,18 @@ const handleSubmit = async () => {
       courseId: props.courseId // Asigna el courseId nuevamente
     }
     handleClose()
+
+    Swal.fire({
+      title: 'Assignment Created!',
+      text: 'The assignment has been created successfully.',
+      icon: 'success',
+      confirmButtonText: 'Okay'
+    })
+
   } catch (error) {
     console.error('Error creating assignment:', error)
+  } finally {
+    isSubmitting.value = false // Habilita el botón nuevamente
   }
 }
 
