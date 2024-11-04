@@ -18,10 +18,11 @@ const courseId = route.params.id // Acceder al id de la ruta
 
 // Nuevas propiedades reactivas
 const courseExists = ref(false)
-
+const courseTitle = ref('')
 const loadCourse = async () => {
   try {
-    await CourseService.getCourseById(courseId)
+    const course = await CourseService.getCourseById(courseId)
+    courseTitle.value = course.name
   } catch (error: any) {
     // Comprobar si el error tiene respuesta y un código de estado
     if (error.response && error.response.status === 400) {
@@ -52,7 +53,7 @@ onMounted(() => {
 
 <template>
   <DefaultLayout>
-    <BreadcrumbDefault :pageTitle="pageTitle" />
+    <BreadcrumbDefault :pageTitle="`${pageTitle} - ${courseTitle}`" /> <!-- Use template literals to combine titles -->
 
     <!-- Show this error view when the course does not exist -->
     <ItemNotFoundView
