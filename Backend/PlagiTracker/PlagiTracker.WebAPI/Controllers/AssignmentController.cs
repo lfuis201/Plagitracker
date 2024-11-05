@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using PlagiTracker.CodeUtils.GrammarFiles;
+using PlagiTracker.CodeUtils.JavaUtils;
+using PlagiTracker.CodeUtils.JCode.Responses;
+using PlagiTracker.Data;
 using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Entities;
 using PlagiTracker.Data.Requests;
@@ -25,37 +28,185 @@ namespace PlagiTracker.WebAPI.Controllers
         {
             _context = context ?? throw new ArgumentNullException(nameof(context), "Error: Data Base connection");
         }
+        //class OuterClass {   int x = 10;    class InnerClass {     int y = 5;          public void f1(String args, int b) {    }          public void f1(int b, String args) {    }   } }  public class Main {   public static void main(String[] args) {     OuterClass myOuter = new OuterClass();     OuterClass.InnerClass myInner = myOuter.new InnerClass();     System.out.println(myInner.y + myOuter.x);   } } 
+/*
+{
+  "clases": [
+    {
+      "claseNombre": "OuterClass",
+      "metodos": []
+    },
+    {
+      "claseNombre": "Main",
+      "metodos": [
+        {
+          "metodoNombre": "main",
+          "variables": [
+            {
+              "variableNombre": "myOuter",
+              "variableTipo": "OuterClass"
+            },
+            {
+    "variableNombre": "myInner",
+              "variableTipo": "OuterClass.InnerClass"
+            }
+          ],
+          "parametros": [
+            {
+              "parametroNombre": "args",
+              "parametroTipo": "String[]"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+*/
+        [HttpPost]
+        [Route("JCode")]
+        public async Task<ActionResult> JCode([FromBody] string code)
+        {
+            if (string.IsNullOrEmpty(code))
+            {
+                return BadRequest("The code is empty.");
+            }
+
+            JCodeResponse result;
+
+            try
+            {
+                result = await CodeUtils.JCode.JCodeClient.Execute(code);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Error in JCode");
+            }
+            
+            return Ok(result);
+        }
 
         [HttpPost]
-        [Route("ValidateAssignmentBody")]
-        public async Task<ActionResult> ValidateAssignmentBody(List<string> codes)
+        [Route("ValidateAssignmentBodyST")]
+        public async Task<ActionResult> ValidateAssignmentBodyST(List<string> codes)
         {
             if (codes == null || codes.Count < 1)
             {
                 return BadRequest("There are not enough codes to analyze.");
             }
 
-            List<bool> results = [];
+            //List<bool> results = [];
+            var results = new List<object>();
 
             foreach (var code in codes)
             {
                 try
                 {
-                    AntlrInputStream inputStream = new (code);
-                    JavaLexer lexer = new (inputStream);
-                    CommonTokenStream commonTokenStream = new (lexer);
-                    JavaParser parser = new (commonTokenStream);
+                    AntlrInputStream inputStream = new(code);
+                    JavaLexer lexer = new(inputStream);
+                    CommonTokenStream commonTokenStream = new(lexer);
+                    JavaParser parser = new(commonTokenStream);
                     parser.BuildParseTree = true;
                     IParseTree tree = parser.compilationUnit();
 
-                    results.Add(parser.NumberOfSyntaxErrors == 0);
+                    // Obtener los tokens
+                    var tokens = commonTokenStream.GetTokens();
+
+                    // Verificar si hay errores de sintaxis
+                    bool isValid = parser.NumberOfSyntaxErrors == 0;
+
+                    // Crear un resultado con el árbol de sintaxis y los tokens
+                    var result = new
+                    {
+                        IsValid = isValid,
+                        SyntaxTree = tree.ToStringTree(parser),
+                        Tokens = tokens.Select(t => new
+                        {
+                            t.Text,
+                            t.Type,
+                            t.Line,
+                            t.Column
+                        }).ToList()
+                    };
+
+                    results.Add(result);
                 }
                 catch (Exception)
                 {
                     results.Add(false);
                 }
             }
-            
+
+            return Ok(results);
+        }
+
+        [HttpPost]
+        [Route("ValidateJavaCode")]
+        public ActionResult ValidateJavaCode(List<string> codes)
+        {
+            if (codes == null || codes.Count < 1)
+            {
+                return BadRequest("There are not enough codes to analyze.");
+            }
+
+            List<Result> results = [];
+
+            foreach (var code in codes)
+            {
+                try
+                {
+                    AntlrInputStream inputStream = new(code);
+                    JavaLexer lexer = new(inputStream);
+                    CommonTokenStream commonTokenStream = new(lexer);
+                    JavaParser parser = new(commonTokenStream)
+                    {
+                        BuildParseTree = true
+                    };
+
+                    // Crear y agregar el ErrorListener personalizado
+                    CustomErrorListener.LexerErrorListener lexerErrorListener = new();
+                    CustomErrorListener.ParserErrorListener parserErrorListener = new();
+                    lexer.RemoveErrorListeners();
+                    lexer.AddErrorListener(lexerErrorListener);
+                    parser.RemoveErrorListeners();
+                    parser.AddErrorListener(parserErrorListener);
+
+                    IParseTree tree = parser.compilationUnit();
+
+                    // Verificar si hay errores de sintaxis
+                    bool isValid = parser.NumberOfSyntaxErrors == 0;
+
+                    if(isValid)
+                    {
+                        // Crear un resultado con el árbol de sintaxis
+                        results.Add(new Result(true));
+                    }
+                    else
+                    {
+                        if(lexerErrorListener.Errors.Count > 0 && parserErrorListener.Errors.Count > 0)
+                        {
+                            results.Add(new Result(
+                                false, 
+                                "Error: Lexer and Parser errors", 
+                                [lexerErrorListener.Errors, parserErrorListener.Errors]
+                            ));
+                        }
+                        else if(lexerErrorListener.Errors.Count > 0)
+                        {
+                            results.Add(new Result(false, "Error: Lexer errors", [lexerErrorListener.Errors]));
+                        }
+                        else if(parserErrorListener.Errors.Count > 0)
+                        {
+                            results.Add(new Result(false, "Error: Parser errors", [parserErrorListener.Errors]));
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    results.Add(new (false, ex.Message));
+                }
+            }
+
             return Ok(results);
         }
 
