@@ -131,8 +131,19 @@ namespace PlagiTracker.Data.DataAccess
                 {
                     function.ClassId,
                     function.Name,
-                    function.Parameters,
                     function.Type,
+                    function.ParameterTypes,
+                }).IsUnique();
+            });
+
+            // Parámetro
+            modelBuilder.Entity<Parameter>(builder =>
+            {
+                builder.HasIndex(parameter => new
+                {
+                    parameter.FunctionId,
+                    parameter.Name,
+                    parameter.Type,
                 }).IsUnique();
             });
         }

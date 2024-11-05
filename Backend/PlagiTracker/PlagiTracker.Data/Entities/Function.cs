@@ -15,14 +15,19 @@ namespace PlagiTracker.Data.Entities
         [MaxLength(40)]
         public string? Name { get; set; }
 
-        [Required]
-        public int Parameters { get; set; }
-
         /// <summary>
         /// Tipo de la función
         /// </summary>
         [Required]
         public string? Type { get; set; }
+
+        /// <summary>
+        /// Tipos de los parámetros. Se concatenan los tipos de los parámetros separados por coma.
+        /// Ejemplo 1: String,int
+        /// Ejemplo 2: int,String
+        /// </summary>
+        [Required]
+        public string? ParameterTypes { get; set; }
 
         public string? Description { get; set; }
 

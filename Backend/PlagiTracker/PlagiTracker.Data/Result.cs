@@ -2,6 +2,8 @@
 {
     public class Result
     {
+        private bool dataIsCollection = false;
+
         public bool? Success { get; set; }
         
         public string? Message { get; set; }
@@ -16,7 +18,7 @@
                 {
                     return Convert.ChangeType(_data, DataType);
                 }
-                return null;
+                return _data;
             }
             set
             {
@@ -27,15 +29,48 @@
             }
         }
         
-        public Type? DataType { get; set; }
+        private Type? DataType { get; set; }
+        
+        public Result(bool success)
+        {
+            Success = success;
+        }
 
-        public Result(bool success, string? message, object? data = null, Type? dataType = null)
+        public Result(bool success, string? message = null)
+        {
+            Success = success;
+            Message = message;
+        }
+        public Result(bool success, string? message = null, object? data = null, Type? dataType = null)
         {
             Success = success;
             Message = message;
             Data = data;
             DataType = dataType;
         }
+
+        public Result(bool success, string? message = null, object[]? data = null, Type? dataType = null)
+        {
+            Success = success;
+            Message = message;
+
+            if(data != null && data.Length > 0)
+            {
+                Data = data;
+                dataIsCollection = true;
+            }
+
+            DataType = dataType;
+        }
+        /*
+        public Result(bool success, string? message = null, (object data, Type dataType)[]? values = null)
+        {
+            Success = success;
+            Message = message;
+            Data = values;
+        verificar que los count sean iguales
+        }
+        */
 
         public Result()
         {
