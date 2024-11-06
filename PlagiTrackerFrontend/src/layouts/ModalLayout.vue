@@ -37,12 +37,17 @@ const props = defineProps({
   modalOpen: {
     type: Boolean,
     required: true
+  },
+  disableClose: {
+    type: Boolean,
   }
 })
 
 // Función para cerrar el modal y emitir el evento
 const emitClose = () => {
-  emit('close')
+  if (!props.disableClose) { // Check if closing is allowed
+    emit('close')
+  }
 }
 
 // Eventos de transición (opcional)

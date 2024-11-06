@@ -11,7 +11,9 @@ const props = defineProps(['pageTitle'])
     <nav>
       <ol class="flex items-center gap-2">
         <li>
-          <router-link class="font-medium" to="/"> Dashboard / </router-link>
+          <p class="font-medium">
+            Dashboard /
+          </p>
         </li>
         <li class="font-medium text-primary">{{ props.pageTitle }}</li>
       </ol>

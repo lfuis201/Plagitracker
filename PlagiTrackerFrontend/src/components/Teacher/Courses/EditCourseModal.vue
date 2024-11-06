@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- ModalLayout that emits the 'close' event -->
-    <ModalLayout :modalOpen="modalOpen" @close="handleClose">
+    <ModalLayout :modalOpen="modalOpen" @close="handleClose" :disableClose="isSubmitting">
       <template #default>
         <h3 class="pb-2 text-xl font-bold text-black dark:text-white sm:text-2xl">Update Course</h3>
         <form @submit.prevent="handleSubmit">

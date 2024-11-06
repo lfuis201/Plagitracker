@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- ModalLayout que emite el evento 'close' -->
-    <ModalLayout :modalOpen="modalOpen" @close="handleClose">
+    <ModalLayout :modalOpen="modalOpen" @close="handleClose" :disableClose="isSubmitting">
       <template #default>
         <h3 class="pb-2 text-xl font-bold text-black dark:text-white sm:text-2xl">Create Course</h3>
         <form @submit.prevent="handleSubmit">
@@ -11,6 +11,8 @@
               type="text"
               id="courseName"
               v-model="course.name"
+              maxlength="256"
+
               class="border rounded w-full px-3 py-2"
               required
             />

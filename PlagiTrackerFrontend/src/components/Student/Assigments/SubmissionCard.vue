@@ -55,7 +55,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import SubmissionService from '@/services/SubmissionService'
 import AssignmentService from '@/services/AssigmentService'
@@ -70,7 +70,7 @@ const user = computed(() => userStore.getUser)
 
 const route = useRoute()
 const assignmentId = route.params.id as string
-
+const router = useRouter()
 // Input for submission URL
 const submissionUrl = ref('')
 
@@ -160,7 +160,13 @@ const submitLink = async () => {
       text: 'Submission uploaded successfully!',
       icon: 'success',
       confirmButtonText: 'OK'
+    }).then(() => {
+      router.push('/student/courses')  // Redirige a la página de cursos después de la confirmación
     });
+
+
+    router.push('/student/courses')
+
   } catch (error) {
     console.error('Error submitting link:', error);
     Swal.fire({

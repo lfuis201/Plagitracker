@@ -48,7 +48,7 @@ const handleDelete = async (courseId: string, studentId: string) => {
         <h2 class="text-lg font-bold truncate" style="max-width: 100%">
           {{ props.course.name }}
         </h2>
-        <p class="text-sm text-muted-foreground">Soporte Informático</p>
+        <p class="text-sm text-muted-foreground">PlagiTracker</p>
       </div>
     </router-link>
 
