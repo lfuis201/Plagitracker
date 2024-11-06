@@ -19,6 +19,9 @@ const fetchCourses = async () => {
   if (user && user.id) {
     try {
       const response= await CourseService.getCoursesByStudent(user.id); 
+
+      console.log(response)
+
       courses.value = response; // Llama al servicio para obtener cursos
       courses.value = response.map(item => item.course);  
     } catch (error) {

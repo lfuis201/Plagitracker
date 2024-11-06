@@ -85,6 +85,7 @@ const isSubmissionClosed = ref(false)
 // Error tracking
 const error = ref<boolean>(false)
 const assignmentNotFound = ref<boolean>(false)
+  const errorMessage = ref('')
 
 // Function to load assignment details
 const loadAssignmentDetails = async () => {
@@ -121,7 +122,6 @@ const loadAssignmentDetails = async () => {
   }
 }
 
-// Function to handle submission
 // Function to handle submission
 const submitLink = async () => {
   if (!submissionUrl.value) {
@@ -167,11 +167,18 @@ const submitLink = async () => {
 
     router.push('/student/courses')
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error submitting link:', error);
+
+    if (error.response && error.response.status === 409 && error.response.data.message === "URL already used.") {
+      errorMessage.value = 'URL already used. Please submit a different link.';
+    } else {
+      errorMessage.value = 'There was an issue submitting your link.';
+    }
+
     Swal.fire({
       title: 'Error!',
-      text: 'There was an issue submitting your link.',
+      text: errorMessage.value,
       icon: 'warning',
       confirmButtonText: 'OK'
     });

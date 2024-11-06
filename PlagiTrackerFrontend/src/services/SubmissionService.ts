@@ -117,6 +117,47 @@ class SubmissionService {
       throw error
     }
   }
+
+
+  /**
+   * Obtiene una entrega (submission) por su ID.
+   *
+   * @param {string} id - El ID de la entrega que se va a obtener.
+   * @returns {Promise<Submission>} - Una promesa que se resuelve con la entrega obtenida.
+   * @throws {Error} - Lanza un error si ocurre algún problema al obtener la entrega.
+   */
+  static async getSubmission(id: string): Promise<Submission> {
+    try {
+      const response = await axiosInstance.get(`${API_ENDPOINT}/Get`, {
+        params: { id }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error retrieving submission:', error)
+      throw error
+    }
+  }
+
+
+  /**
+   * Verifica si el estudiante ya ha realizado una entrega para una tarea específica.
+   *
+   * @param {string} assignmentId - El ID de la tarea.
+   * @param {string} studentId - El ID del estudiante.
+   * @returns {Promise<boolean>} - Retorna true si la entrega ya existe, false de lo contrario.
+   * @throws {Error} - Lanza un error si ocurre algún problema al verificar la entrega.
+   */
+  static async verifySubmission(assignmentId: string, studentId: string): Promise<boolean> {
+    try {
+      const response = await axiosInstance.get(`${API_ENDPOINT}/VerifySubmission`, {
+        params: { assignmentId, studentId }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error verifying submission:', error);
+      throw error;
+    }
+  }
   
 }
 

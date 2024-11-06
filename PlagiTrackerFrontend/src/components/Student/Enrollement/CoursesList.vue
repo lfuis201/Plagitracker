@@ -80,6 +80,18 @@ const enrollInCourse = async () => {
   courseId.value=''
 }
 
+
+const verifyCourse = () => {
+  const userId = userStore.getUser?.id;
+  const courseExists = courses.value.some(course => course.id === courseId.value && course.userId === userId);
+
+  if (courseExists) {
+    console.log('You are already enrolled in this course.');
+  } else {
+    console.log('No enrollment found for this course.');
+  }
+};
+
 // Llama a fetchCourses al montar el componente
 onMounted(() => {
   fetchCourses()

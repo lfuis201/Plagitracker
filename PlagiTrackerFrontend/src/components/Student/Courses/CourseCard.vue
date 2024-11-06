@@ -63,6 +63,8 @@ const handleDelete = async (courseId: string, studentId: string) => {
 
       <div class="flex space-x-2">
       <!-- Botón de borrar -->
+      <p class="text-sm text-muted-foreground">Tasks: {{ props.course.taskCount }}</p>
+
       <button
         @click="handleDelete(props.course.id, user.id)"
         aria-label="Files"

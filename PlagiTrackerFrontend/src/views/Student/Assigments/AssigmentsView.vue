@@ -6,7 +6,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import CourseService from '@/services/CourseService';
 
-const pageTitle = ref('Courses');
+const pageTitle = ref('Assignments');
 const route = useRoute();
 const courseId = route.params.id; // Acceder al id de la ruta
 
