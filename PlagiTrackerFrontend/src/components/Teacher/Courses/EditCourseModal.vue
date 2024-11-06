@@ -96,7 +96,7 @@ const handleSubmit = async () => {
       title: 'Course Updated!',
       text: 'The course has been updated successfully.',
       icon: 'success',
-      confirmButtonText: 'Okay'
+      confirmButtonText: 'Ok'
     });
 
 

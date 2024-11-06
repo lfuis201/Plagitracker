@@ -152,7 +152,7 @@ const handleSubmit = async () => {
       title: 'Assignment Updated!',
       text: 'The assignment has been updated successfully.',
       icon: 'success',
-      confirmButtonText: 'Okay'
+      confirmButtonText: 'Ok'
     })
 
 

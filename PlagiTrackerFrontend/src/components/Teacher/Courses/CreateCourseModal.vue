@@ -93,7 +93,7 @@ const handleSubmit = async () => {
       title: 'Course Created!',
       text: 'The course has been created successfully.',
       icon: 'success',
-      confirmButtonText: 'Okay'
+      confirmButtonText: 'Ok'
     })
   } catch (error) {
     console.error('Error creating course:', error)

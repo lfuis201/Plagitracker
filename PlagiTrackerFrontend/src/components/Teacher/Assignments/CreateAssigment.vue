@@ -165,7 +165,7 @@ const handleSubmit = async () => {
       title: 'Assignment Created!',
       text: 'The assignment has been created successfully.',
       icon: 'success',
-      confirmButtonText: 'Okay'
+      confirmButtonText: 'Ok'
     })
 
   } catch (error) {
