@@ -2,8 +2,6 @@
   <!-- ModalLayout que emite el evento 'close' -->
   <ModalLayout :modalOpen="modalOpen" @close="handleClose" :disableClose="isSubmitting">
     <template #default>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
-        <div>
           <h3 class="pb-2 text-xl font-bold text-black dark:text-white sm:text-2xl">
             Create Assignment
           </h3>
@@ -57,29 +55,8 @@
           </button>
 
           </form>
-        </div>
 
-        <div class="flex flex-col h-full">
-          <h3 class="pb-2 text-xl font-bold text-black dark:text-white sm:text-2xl">
-            Create Assignment
-          </h3>
-          <button
-            @click="addExercise"
-            class="mt-2 block w-full rounded bg-green-500 p-3 text-white hover:bg-green-600"
-          >
-            Add Exercise
-          </button>
-          <div
-          class="flex-1 overflow-y-auto border border-gray-300 rounded-lg p-4 mt-4 max-h-[45vh]"
-          >
-            <div v-for="(exercise, index) in exercises" :key="index">
-              <CreateExcercise :exercise="exercise" @remove="removeExercise(index)" />
-            </div>
-          </div>
-
-         
-        </div>
-      </div>
+       
     </template>
   </ModalLayout>
 </template>
@@ -107,6 +84,7 @@ const emit = defineEmits(['close'])
 // Calcula la fecha mínima para el campo de entrada
 
 const isSubmitting = ref(false)
+const errorMessage = ref('')
 
 
 const minDate = computed(() => {
@@ -168,8 +146,24 @@ const handleSubmit = async () => {
       confirmButtonText: 'Ok'
     })
 
-  } catch (error) {
+  } catch (error:any) {
     console.error('Error creating assignment:', error)
+    handleClose()
+    if (error.response && error.response.status === 409) {
+      errorMessage.value ='There is already a course with the same name'
+    }else {
+        // Si es cualquier otro error, mostrar un mensaje genérico
+        errorMessage.value = 'An unexpected error occurred. Please try again later.';
+    }
+
+
+     // Display error using SweetAlert
+     Swal.fire({
+      title: 'Assignment Creation Failed',
+      text: errorMessage.value,
+      icon: 'error',
+      confirmButtonText: 'Try Again'
+    })
   } finally {
     isSubmitting.value = false // Habilita el botón nuevamente
   }

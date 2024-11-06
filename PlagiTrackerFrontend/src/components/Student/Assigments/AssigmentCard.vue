@@ -37,7 +37,7 @@ const navigateToTask = () => {
       <!-- Fecha de entrega y última modificación -->
       <p class="text-sm text-muted-foreground">
         <strong>Fecha de entrega:</strong>
-        {{
+         {{
           new Date(assignment.submissionDate).toLocaleString('en-US', {
             year: 'numeric',
             month: 'long',
@@ -45,7 +45,8 @@ const navigateToTask = () => {
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit',
-            hour12: false
+            hour12: true,
+            timeZone: 'UTC'
           })
         }}
       </p>

@@ -82,6 +82,7 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 const isSubmitting = ref(false)
+const errorMessage = ref('')
 
 
 const assignmentStore = useAssignmentStore()
@@ -156,8 +157,28 @@ const handleSubmit = async () => {
     })
 
 
-  } catch (error) {
+  } catch (error:any) {
     console.error('Error updating assignment:', error)
+
+    if (
+      error.response &&
+      error.response.status === 409 &&
+      error.response.data.message === 'An assignment with the same title already exists in this course.'
+    ) {
+      errorMessage.value =  error.response.data.message
+    } else {
+      errorMessage.value = 'An error occurred while updating the course.'
+    }
+
+    handleClose()
+    // Display error using SweetAlert
+     // Mostrar el error usando SweetAlert
+     Swal.fire({
+      title: 'Assignment Update Failed',  // Cambiar a "Assignment Update Failed"
+      text: errorMessage.value,          // Usar el mensaje de error adecuado
+      icon: 'error',
+      confirmButtonText: 'Try Again'
+    });
   }finally {
     isSubmitting.value = false // Habilita el botón nuevamente
   }

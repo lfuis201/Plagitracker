@@ -23,6 +23,10 @@ export const useCoursesStore = defineStore('coursesStore', () => {
         await new Promise(resolve => setTimeout(resolve, 2000));
         const coursesData = await CourseService.getAllByTeacher(user.id)
         courses.value = coursesData
+
+        courses.value = coursesData.filter(course => course.isEnabled && !course.isArchived)
+
+
       } catch (error) {
         console.error('Error fetching courses:', error)
         errorMessage.value = 'Failed to load courses'

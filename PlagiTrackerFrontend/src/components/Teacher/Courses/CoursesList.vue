@@ -9,6 +9,9 @@ const coursesStore = useCoursesStore();
 // Fetch courses function
 const fetchCourses = async () => {
   await coursesStore.fetchCoursesByTeacher();
+
+
+
   console.log(coursesStore.courses);
 };
 

@@ -12,7 +12,6 @@
               id="courseName"
               v-model="course.name"
               maxlength="256"
-
               class="border rounded w-full px-3 py-2"
               required
             />
@@ -24,7 +23,8 @@
             :class="[
               'mt-4 block w-full rounded p-3 text-white',
               isSubmitting ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
-            ]"          >
+            ]"
+          >
             {{ isSubmitting ? 'Creating...' : 'Create Course' }}
           </button>
         </form>
@@ -63,6 +63,7 @@ const userStore = useUserStore()
 const user = userStore.getUser // Obtiene el usuario del store
 
 const isSubmitting = ref(false)
+const errorMessage = ref('')
 
 // Asigna el teacherId al curso
 if (user) {
@@ -95,8 +96,24 @@ const handleSubmit = async () => {
       icon: 'success',
       confirmButtonText: 'Ok'
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating course:', error)
+    handleClose()
+    if (error.response && error.response.status === 409) {
+      errorMessage.value ='There is already a course with the same name'
+    }else {
+        // Si es cualquier otro error, mostrar un mensaje genérico
+        errorMessage.value = 'An unexpected error occurred. Please try again later.';
+    }
+
+
+    // Display error using SweetAlert
+    Swal.fire({
+      title: 'Course Creation Failed',
+      text: errorMessage.value,
+      icon: 'error',
+      confirmButtonText: 'Try Again'
+    })
   } finally {
     isSubmitting.value = false // Habilita el botón nuevamente
   }

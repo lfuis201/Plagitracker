@@ -33,26 +33,26 @@ const closeModal = () => {
 const handleDelete = async (courseId: string) => {
   const { isConfirmed } = await Swal.fire({
     title: 'Are you sure?',
-    text: "You won't be able to revert this!",
+    text: "You won't be able to revert this once archived!",
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#3085d6',
     cancelButtonColor: '#d33',
-    confirmButtonText: 'Yes, delete it!',
+    confirmButtonText: 'Yes, archive it!',
     cancelButtonText: 'Cancel'
   })
 
   if (isConfirmed) {
     try {
       await CourseService.deleteCourse(courseId)
-      Swal.fire('Deleted!', 'Your course has been deleted.', 'success')
+      Swal.fire('Archived!', 'Your course has been archived', 'success')
       console.log('Course deleted:', courseId)
       await coursesStore.fetchCoursesByTeacher()
       emit('course-deleted'); // Emit the event to notify the parent component
       // Opcional: redirige o actualiza la vista después de eliminar
     } catch (error) {
       console.error('Error deleting course:', error)
-      Swal.fire('Error!', 'There was a problem deleting your course.', 'error')
+      Swal.fire('Error!', 'There was a problem archiving your course.', 'error')
     }
   }
 }

@@ -52,6 +52,7 @@ const emit = defineEmits(['close'])
 
 // State for the course, initialized with the received prop
 const course = ref<Course>({ ...props.course })
+const messageError = ref<string | null>(null) // Error message ref
 
 const isSubmitting = ref(false)
 
@@ -90,18 +91,33 @@ const handleSubmit = async () => {
 
     handleClose() // Close the modal after updating the course
 
-
     // Show success alert
     Swal.fire({
       title: 'Course Updated!',
       text: 'The course has been updated successfully.',
       icon: 'success',
       confirmButtonText: 'Ok'
-    });
-
-
-  } catch (error) {
+    })
+  } catch (error: any) {
     console.error('Error updating course:', error)
+    // If the error code is 409 (conflict), handle the case where the course name is already the same
+    if (
+      error.response &&
+      error.response.status === 409 &&
+      error.response.data.message === 'The course name is already the same.'
+    ) {
+      messageError.value = 'The course name is already the same.'
+    } else {
+      messageError.value = 'An error occurred while updating the course.'
+    }
+    handleClose()
+    // Display error using SweetAlert
+    Swal.fire({
+      title: 'Course Update Failed',
+      text: messageError.value,
+      icon: 'error',
+      confirmButtonText: 'Try Again'
+    })
   } finally {
     isSubmitting.value = false // Habilita el botón nuevamente
   }
