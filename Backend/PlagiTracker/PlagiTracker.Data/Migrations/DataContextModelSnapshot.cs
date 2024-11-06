@@ -151,6 +151,9 @@ namespace PlagiTracker.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsEnabled")
                         .HasColumnType("boolean");
 
@@ -166,6 +169,9 @@ namespace PlagiTracker.Data.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.HasIndex("TeacherId");
 

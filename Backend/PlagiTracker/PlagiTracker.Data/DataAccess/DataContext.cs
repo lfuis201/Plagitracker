@@ -45,6 +45,12 @@ namespace PlagiTracker.Data.DataAccess
                 builder.ToTable("Students");
             });
 
+            //Curso
+            modelBuilder.Entity<Course>(builder =>
+            {
+                builder.HasIndex(course => course.Name).IsUnique();
+            });
+
             //Inscripción
             modelBuilder.Entity<Enrollment>(builder =>
             {
