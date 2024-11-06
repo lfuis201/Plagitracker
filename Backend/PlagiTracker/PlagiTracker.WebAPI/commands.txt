@@ -1,4 +1,4 @@
-Add-Migration ParameterAdded -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
+Add-Migration IsArchivedAddedInCourse -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 Update-Database -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 
 {

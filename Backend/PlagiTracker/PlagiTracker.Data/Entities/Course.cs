@@ -15,6 +15,9 @@ namespace PlagiTracker.Data.Entities
         public string? Name { get; set; }
 
         [Required]
+        public bool IsArchived { get; set; } = false;
+
+        [Required]
         public Guid TeacherId { get; set; }
 
         [ForeignKey(nameof(TeacherId))]

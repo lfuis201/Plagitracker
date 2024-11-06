@@ -28,25 +28,41 @@ namespace PlagiTracker.WebAPI.Controllers
 
                 if (course == null)
                 {
-                    return NotFound();
+                    return NotFound("Course not found");
                 }
-                else
+
+                var student = await _context!.Students!.FirstOrDefaultAsync(s => s.Id == studentId);
+
+                if (student == null)
                 {
-                    await _context!.Enrollments!.AddAsync(new Enrollment()
-                    {
-                        CourseId = courseId,
-                        StudentId = studentId
-                    });
-
-                    await _context.SaveChangesAsync();
-
-                    return Ok("Success");
+                    return NotFound("Student not found");
                 }
+
+                await _context!.Enrollments!.AddAsync(new Enrollment()
+                {
+                    CourseId = courseId,
+                    StudentId = studentId
+                });
+
+                await _context.SaveChangesAsync();
+
+                return Ok("Success");
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
-                return NotFound();
+                if (
+                    ex.InnerException != null
+                    && ex.InnerException.Message.Contains("23505: duplicate key value violates unique constraint")
+                )
+                {
+                    return Conflict(new
+                    {
+                        title = "Enrollment Failed",
+                        message = "You are already enrolled in this course"
+                    });
+                }
+
+                return BadRequest(ex.ToString());
             }
         }
 

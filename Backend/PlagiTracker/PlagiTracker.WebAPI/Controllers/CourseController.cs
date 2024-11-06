@@ -1,8 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿// Ignore Spelling: Unarchive
+
+using Hangfire;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Entities;
 using PlagiTracker.Data.Requests;
+using System.Transactions;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
@@ -112,30 +116,46 @@ namespace PlagiTracker.WebAPI.Controllers
 
         [HttpGet]
         [Route("GetAllByStudent")]
-        public async Task<ActionResult> GetAllByStudent(Guid studentId)
+        public async Task<ActionResult> GetAllByStudent(Guid studentId, bool archived)
         {
-            var enrollments = await _context!.Enrollments!.Where(e => e.StudentId == studentId).ToListAsync();
-
-            if (enrollments == null || enrollments.Count < 1)
+            try
             {
-                return NotFound();
-            }
-            else
-            {
-                var courses = new List<Course>();
-
-                foreach (var enrollment in enrollments)
-                {
-                    var course = await _context!.Courses!.FindAsync(enrollment.CourseId);
-                    courses.Add(new Course()
+                var enrollments = await _context!.Enrollments!
+                    .Where(e => e.StudentId == studentId && e.Course != null && e.Course.IsArchived == archived)
+                    .Include(e => e.Course)
+                    .ThenInclude(c => c.Teacher)
+                    .Include(e => e.Course)
+                    .Select(e => new
                     {
-                        Id = course!.Id,
-                        Name = course.Name,
-                        TeacherId = course.TeacherId
-                    });
-                }
+                        e.Grade,
+                        Course = new
+                        {
+                            e.Course!.Id,
+                            e.Course.Name,
+                            e.Course.TeacherId,
+                            Teacher = new
+                            {
+                                e.Course.Teacher!.Id,
+                                e.Course.Teacher.FirstName,
+                                e.Course.Teacher.LastName,
+                                e.Course.Teacher.Email,
+                            },
+                        }
+                    })
+                    .ToListAsync();
 
-                return Ok(courses);
+                if (enrollments == null || enrollments.Count < 1)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    return Ok(enrollments);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
 
@@ -143,37 +163,44 @@ namespace PlagiTracker.WebAPI.Controllers
         [Route("GetAllByTeacher")]
         public async Task<ActionResult<List<Course>>> GetAllByTeacher(Guid teacherId)
         {
-            var courses = await _context!.Courses!.Where(c => c.TeacherId == teacherId).ToListAsync();
-
-            // Verificar si no se encontraron cursos
-            if (courses == null || courses.Count < 1)
+            try
             {
-                return NotFound();
-            }
+                var courses = await _context!.Courses!.Where(c => c.TeacherId == teacherId && !c.IsArchived).ToListAsync();
 
-            return Ok(courses);
+                // Verificar si no se encontraron cursos
+                if (courses == null || courses.Count < 1)
+                {
+                    return NotFound();
+                }
+
+                return Ok(courses);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet]
-        [Route("GetAllCourses")]
-        public async Task<ActionResult<List<Course>>> GetAllCourses()
+        [Route("GetAllArchivedByTeacher")]
+        public async Task<ActionResult<List<Course>>> GetAllArchivedByTeacher(Guid teacherId)
         {
-            // Verificar si _context.Courses es nulo antes de usarlo
-            if (_context.Courses == null)
+            try
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Database not initialized.");
+                var courses = await _context!.Courses!.Where(c => c.TeacherId == teacherId && c.IsArchived).ToListAsync();
+
+                // Verificar si no se encontraron cursos
+                if (courses == null || courses.Count < 1)
+                {
+                    return NotFound();
+                }
+
+                return Ok(courses);
             }
-
-            // Obtener todos los cursos de la base de datos
-            var courses = await _context.Courses.ToListAsync();
-
-            // Verificar si no hay cursos disponibles
-            if (courses.Count == 0)
+            catch (Exception ex)
             {
-                return NotFound("No courses found.");
+                return BadRequest(ex.Message);
             }
-
-            return Ok(courses);
         }
 
         [HttpPut]
@@ -191,11 +218,94 @@ namespace PlagiTracker.WebAPI.Controllers
         [Route("Delete")]
         public async Task<ActionResult> Delete(Guid id)
         {
-            var course = await _context!.Courses!.FindAsync(id);
-            _context.Courses.Remove(course!);
+            try
+            {
+                var assignment = await _context!.Courses!.FindAsync(id);
 
-            await _context.SaveChangesAsync();
-            return Ok();
+                if (assignment == null)
+                {
+                    return NotFound("Course not exist");
+                }
+
+                assignment.IsEnabled = false;
+
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete]
+        [Route("Archive")]
+        public async Task<ActionResult> Archive(Guid id)
+        {
+            try
+            {
+                var course = await _context!.Courses!.Include(c => c.Teacher).FirstOrDefaultAsync(c => c.Id == id);
+
+                if (course == null)
+                {
+                    return NotFound("Course not exist");
+                }
+
+                var enrollments = await _context.Enrollments!
+                    .Where(e => e.CourseId == id)
+                    .Include(e => e.Student)
+                    .Select(e => new
+                    {
+                        toEmail = e.Student!.Email,
+                        displayName = $"{e.Student.FirstName} {e.Student.LastName}"
+                    })
+                    .ToListAsync();
+
+                course.IsArchived = true;
+                await _context.SaveChangesAsync();
+
+                var recipientList = enrollments.Select(e => (e.toEmail, e.displayName)).ToList();
+
+
+                BackgroundJob.Schedule(() =>
+                    Services.EmailServices.EmailCourseNotifications.ArchivedCourse(
+                        recipientList!, 
+                        $"{course.Teacher!.FirstName} {course.Teacher!.LastName}",
+                        course.Name!
+                        ),
+                    new DateTimeOffset(DateTime.UtcNow)
+                );
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete]
+        [Route("Unarchive")]
+        public async Task<ActionResult> Unarchive(Guid id)
+        {
+            try
+            {
+                var assignment = await _context!.Courses!.FindAsync(id);
+
+                if (assignment == null)
+                {
+                    return NotFound("Course not exist");
+                }
+
+                assignment.IsArchived = false;
+
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

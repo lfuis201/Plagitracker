@@ -14,7 +14,6 @@ using PlagiTracker.Data.Requests;
 using PlagiTracker.Services.FileServices;
 using PlagiTracker.Services.SeleniumServices;
 using PlagiTracker.WebAPI.HangFire;
-using System.Text;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
@@ -214,24 +213,31 @@ namespace PlagiTracker.WebAPI.Controllers
         [Route("Create")]
         public async Task<ActionResult> Create(AssignmentRequest assignmentRequest)
         {
-            if(assignmentRequest.SubmissionDate.ToUniversalTime() < DateTime.UtcNow)
+            try
             {
-                return BadRequest("The submission date must be greater than the current date.");
+                if(assignmentRequest.SubmissionDate.ToUniversalTime() < DateTime.UtcNow)
+                {
+                    return BadRequest("The submission date must be greater than the current date.");
+                }
+
+                var id = Guid.NewGuid();
+                await _context!.Assignments!.AddAsync(new Assignment()
+                {
+                    Id = id,
+                    Description = assignmentRequest.Description,
+                    Title = assignmentRequest.Title,
+                    //Tiempo universal coordinado (UTC)
+                    SubmissionDate = assignmentRequest.SubmissionDate,
+                    CourseId = assignmentRequest.CourseId
+                });
+
+                await _context.SaveChangesAsync();
+                return Ok(id);
             }
-
-            var id = Guid.NewGuid();
-            await _context!.Assignments!.AddAsync(new Assignment()
+            catch(Exception ex)
             {
-                Id = id,
-                Description = assignmentRequest.Description,
-                Title = assignmentRequest.Title,
-                //Tiempo universal coordinado (UTC)
-                SubmissionDate = assignmentRequest.SubmissionDate,
-                CourseId = assignmentRequest.CourseId
-            });
-
-            await _context.SaveChangesAsync();
-            return Ok(id);
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost]
@@ -352,11 +358,31 @@ namespace PlagiTracker.WebAPI.Controllers
         [Route("Delete")]
         public async Task<ActionResult> Delete(Guid id)
         {
-            var assignment = await _context!.Assignments!.FindAsync(id);
-            _context.Assignments.Remove(assignment!);
+            try
+            {
+                var assignment = await _context!.Assignments!.FindAsync(id);
 
-            await _context.SaveChangesAsync();
-            return Ok();
+                if (assignment == null)
+                {
+                    return NotFound("Assignment not exist");
+                }
+
+                var course = await _context!.Courses!.FindAsync(assignment.CourseId);
+
+                if (course != null && course.IsArchived)
+                {
+                    return BadRequest("The course is archived");
+                }
+
+                _context.Assignments.Remove(assignment!);
+
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
         
         [HttpGet]
