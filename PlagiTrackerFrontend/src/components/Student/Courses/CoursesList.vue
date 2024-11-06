@@ -18,10 +18,14 @@ const fetchCourses = async () => {
   // Verifica que el usuario esté autenticado y tenga un ID
   if (user && user.id) {
     try {
-      courses.value = await CourseService.getCoursesByStudent(user.id); // Llama al servicio para obtener cursos
+      const response= await CourseService.getCoursesByStudent(user.id); 
+      courses.value = response; // Llama al servicio para obtener cursos
+      courses.value = response.map(item => item.course);  
     } catch (error) {
       console.error('Error fetching courses:', error);
     }
+
+    console.log(courses)
   } else {
     console.error('User not authenticated or ID not available.');
   }

@@ -12,6 +12,8 @@ const props = defineProps<{
   course: Course
 }>()
 
+console.log(props.course)
+
 // Función para manejar la eliminación del curso
 const handleDelete = async (courseId: string, studentId: string) => {
   const { isConfirmed } = await Swal.fire({
