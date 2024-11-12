@@ -124,3 +124,75 @@ plagitracker@protonmail.com
 J62CXg-_9&IapzC2
 Replit
 7SasF6B^X99db(VH
+
+___________________________________________________________________
+class OuterClass {
+  int x = 10;
+  public static void main(String[] args, int param, Person person) {
+	x = 322;
+    OuterClass myOuter = new OuterClass();
+  }
+  
+  class InnerClass {
+    public InnerClass main2(String args, String abc) {
+      OuterClass myOuter = new OuterClass();
+    }
+  }
+}
+
+public class Main {
+  void main() {
+    OuterClass myOuter = new OuterClass();
+  }
+}
+___________________________________________________________________
+OuterClass {
+  void main(String[] args)
+  
+  InnerClass {
+    public static void main(String[] args)
+  }
+}
+Main {
+  void main(String[] args)
+}
+___________________________________________________________________
+class ¿False 0 0? 
+	OuterClass ¿True 1 1? 
+	{ ¿True 1 1? 
+		main ¿True 2 2? 
+			String ¿True 3 3? 
+			[ ¿True 3 3? 
+			] ¿True 3 4? 
+			args ¿True 3 3? 
+				int ¿True 4 4? 
+				param ¿True 4 4? 
+					Person ¿True 5 5? 
+					person ¿True 5 5? 
+			InnerClass ¿True 3 3? 
+			{ ¿True 3 3? 
+				InnerClass ¿True 4 4? 
+				main2 ¿True 4 4? 
+					String ¿True 5 5? 
+					args ¿True 5 5? 
+						String ¿True 6 6? 
+						abc ¿True 6 6? 
+			} ¿True 3 4? 
+	} ¿True 1 2? 
+class ¿False 0 0? 
+	Main ¿True 1 1? 
+	{ ¿True 1 1? 
+		main ¿True 2 2? 
+	} ¿True 1 2?
+___________________________________________________________________
+class OuterClass 
+{ 
+	void main ( String [ ] args int param Person person ) 
+	class InnerClass { 
+		InnerClass main2 ( String args String abc ) 
+	} 
+} 
+class Main 
+{ 
+	void main ( ) 
+}

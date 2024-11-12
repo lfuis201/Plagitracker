@@ -11,6 +11,7 @@ using PlagiTracker.Data;
 using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Entities;
 using PlagiTracker.Data.Requests;
+using PlagiTracker.Data.Responses;
 using PlagiTracker.Services.FileServices;
 using PlagiTracker.Services.SeleniumServices;
 using PlagiTracker.WebAPI.HangFire;
@@ -76,13 +77,12 @@ namespace PlagiTracker.WebAPI.Controllers
             try
             {
                 result = await CodeUtils.JCode.JCodeClient.Execute(code);
+                return Ok(result);
             }
             catch (Exception ex)
             {
                 return BadRequest("Error in JCode");
             }
-            
-            return Ok(result);
         }
 
         [HttpPost]
@@ -118,25 +118,133 @@ namespace PlagiTracker.WebAPI.Controllers
                     var result = new
                     {
                         IsValid = isValid,
+                        //Tree = tree,
                         SyntaxTree = tree.ToStringTree(parser),
-                        Tokens = tokens.Select(t => new
+                        //Tokens = tokens,
+                        /*
+                        TokensInfo = tokens.Select(t => new TokenInfo
                         {
-                            t.Text,
-                            t.Type,
-                            t.Line,
-                            t.Column
-                        }).ToList()
+                            Text = t.Text,
+                            Type = t.Type,
+                            Line = t.Line,
+                            Column = t.Column
+                        }).ToList(),
+                        
+                        Body = BodyGenerator.GenerateBody(tokens.Select(t => new TokenInfo
+                        {
+                            Text = t.Text,
+                            Type = t.Type,
+                            Line = t.Line,
+                            Column = t.Column
+                        }).ToList())*/
+                        Body = BodyGenerator.ParseSyntaxTree(tree),
+                        BodyJson = AssignmentRequest.ParseTextToClassRequests(BodyGenerator.ParseSyntaxTree(tree)),
                     };
 
                     results.Add(result);
                 }
-                catch (Exception)
+                catch (Exception) 
                 {
                     results.Add(false);
                 }
             }
 
+            //return Ok(results);
+
             return Ok(results);
+
+            /*
+            return Ok(new ExerciseRequest
+            {
+                Name = "Exercise 1",
+                Description = "Description of Exercise 1",
+                HaveBody = true,
+                Classes = new List<ClassRequest>
+                {
+                    new ClassRequest
+                    {
+                        Name = "OuterClass",
+                        Description = "Description of OuterClass",
+                        Functions = new List<FunctionRequest>
+                        {
+                            new FunctionRequest
+                            {
+                                Name = "f1",
+                                Type = "void",
+                                Description = "Description of f1",
+                                Parameters = new List<ParameterRequest>
+                                {
+                                    new ParameterRequest
+                                    {
+                                        Name = "args",
+                                        Type = "String",
+                                        Description = "Description of args"
+                                    },
+                                    new ParameterRequest
+                                    {
+                                        Name = "b",
+                                        Type = "int",
+                                        Description = "Description of b"
+                                    }
+                                }
+                            }
+                        },
+                        ChildClass = new ClassRequest
+                        {
+                            Name = "InnerClass",
+                            Description = "Description of InnerClass",
+                            Functions = new List<FunctionRequest>
+                            {
+                                new FunctionRequest
+                                {
+                                    Name = "f1",
+                                    Type = "void",
+                                    Description = "Description of f1",
+                                    Parameters = new List<ParameterRequest>
+                                    {
+                                        new ParameterRequest
+                                        {
+                                            Name = "b",
+                                            Type = "int",
+                                            Description = "Description of b"
+                                        },
+                                        new ParameterRequest
+                                        {
+                                            Name = "args",
+                                            Type = "String",
+                                            Description = "Description of args"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    new ClassRequest
+                    {
+                        Name = "Main",
+                        Description = "Description of Main",
+                        Functions = new List<FunctionRequest>
+                        {
+                            new FunctionRequest
+                            {
+                                Name = "main",
+                                Type = "void",
+                                Description = "Description of main",
+                                Parameters = new List<ParameterRequest>
+                                {
+                                    new ParameterRequest
+                                    {
+                                        Name = "args",
+                                        Type = "String[]",
+                                        Description = "Description of args"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            */
         }
 
         [HttpPost]
@@ -316,22 +424,86 @@ namespace PlagiTracker.WebAPI.Controllers
         [Route("GetAllByCourse")]
         public async Task<ActionResult> GetAllByCourse(Guid courseId)
         {
-            var course = await _context!.Courses!.FindAsync(courseId);
-
-            if (course == null)
+            try
             {
-                return NotFound();
-            }
-            else
-            {
-                var assignments = await _context!.Assignments!.Where(a => a.CourseId == courseId).ToListAsync();
-
-                if (assignments == null || assignments.Count < 1)
+                var course = await _context!.Courses!.FindAsync(courseId);
+                if (course == null)
                 {
                     return NotFound();
                 }
+                else
+                {
+                    var assignments = await _context!.Assignments!.Where(a => a.CourseId == courseId).ToListAsync();
+                    if (assignments == null || assignments.Count < 1)
+                    {
+                        return NotFound("There are not assignments in this course.");
+                    }
 
-                return Ok(assignments);
+                    return Ok(assignments);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("GetAllByCourseForStudent")]
+        public async Task<ActionResult> GetAllByCourseForStudent(Guid studentId, Guid courseId)
+        {
+            try
+            {
+                var student = await _context!.Students!.FindAsync(studentId);
+                if (student == null)
+                {
+                    return NotFound("Student not exist");
+                }
+                var course = await _context!.Courses!.FindAsync(courseId);
+                if (course == null)
+                {
+                    return NotFound("Course not exist");
+                }
+                var assignments = await _context!.Assignments!
+                    .Where(a => a.CourseId == courseId)
+                    .Select(a => new Assignment
+                    {
+                        Id = a.Id,
+                        Title = a.Title,
+                        Description = a.Description,
+                        SubmissionDate = a.SubmissionDate,
+                    })
+                    .ToListAsync();
+
+                if (assignments == null || assignments.Count < 1)
+                {
+                    return NotFound("There are not assignments in this course.");
+                }
+
+                var submissions = await _context!.Submissions!
+                    .Where(s => s.StudentId == studentId && s.Assignment!.CourseId == courseId)
+                    .Include(s => s.Assignment)
+                    .Select(s => new Submission
+                    {
+                        Id = s.Id,
+                        Url = s.Url,
+                        SubmissionDate = s.SubmissionDate,
+                        Grade = s.Grade,
+                        AssignmentId = s.AssignmentId,
+                    })
+                    .ToListAsync();
+                var assignmentsSubmissions = new List<AssignmentSubmissionResponse>();
+                foreach (var assignment in assignments)
+                {
+                    var submission = submissions.FirstOrDefault(s => s.AssignmentId == assignment.Id);
+                    assignmentsSubmissions.Add(new AssignmentSubmissionResponse { Assignment = assignment, Submission = submission! });
+                }
+                var response = assignmentsSubmissions as object;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
 
