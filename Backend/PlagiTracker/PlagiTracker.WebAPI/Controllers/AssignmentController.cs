@@ -11,6 +11,7 @@ using PlagiTracker.Data;
 using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Entities;
 using PlagiTracker.Data.Requests;
+using PlagiTracker.Data.Responses;
 using PlagiTracker.Services.FileServices;
 using PlagiTracker.Services.SeleniumServices;
 using PlagiTracker.WebAPI.HangFire;
@@ -423,22 +424,86 @@ namespace PlagiTracker.WebAPI.Controllers
         [Route("GetAllByCourse")]
         public async Task<ActionResult> GetAllByCourse(Guid courseId)
         {
-            var course = await _context!.Courses!.FindAsync(courseId);
-
-            if (course == null)
+            try
             {
-                return NotFound();
-            }
-            else
-            {
-                var assignments = await _context!.Assignments!.Where(a => a.CourseId == courseId).ToListAsync();
-
-                if (assignments == null || assignments.Count < 1)
+                var course = await _context!.Courses!.FindAsync(courseId);
+                if (course == null)
                 {
                     return NotFound();
                 }
+                else
+                {
+                    var assignments = await _context!.Assignments!.Where(a => a.CourseId == courseId).ToListAsync();
+                    if (assignments == null || assignments.Count < 1)
+                    {
+                        return NotFound("There are not assignments in this course.");
+                    }
 
-                return Ok(assignments);
+                    return Ok(assignments);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("GetAllByCourseForStudent")]
+        public async Task<ActionResult> GetAllByCourseForStudent(Guid studentId, Guid courseId)
+        {
+            try
+            {
+                var student = await _context!.Students!.FindAsync(studentId);
+                if (student == null)
+                {
+                    return NotFound("Student not exist");
+                }
+                var course = await _context!.Courses!.FindAsync(courseId);
+                if (course == null)
+                {
+                    return NotFound("Course not exist");
+                }
+                var assignments = await _context!.Assignments!
+                    .Where(a => a.CourseId == courseId)
+                    .Select(a => new Assignment
+                    {
+                        Id = a.Id,
+                        Title = a.Title,
+                        Description = a.Description,
+                        SubmissionDate = a.SubmissionDate,
+                    })
+                    .ToListAsync();
+
+                if (assignments == null || assignments.Count < 1)
+                {
+                    return NotFound("There are not assignments in this course.");
+                }
+
+                var submissions = await _context!.Submissions!
+                    .Where(s => s.StudentId == studentId && s.Assignment!.CourseId == courseId)
+                    .Include(s => s.Assignment)
+                    .Select(s => new Submission
+                    {
+                        Id = s.Id,
+                        Url = s.Url,
+                        SubmissionDate = s.SubmissionDate,
+                        Grade = s.Grade,
+                        AssignmentId = s.AssignmentId,
+                    })
+                    .ToListAsync();
+                var assignmentsSubmissions = new List<AssignmentSubmissionResponse>();
+                foreach (var assignment in assignments)
+                {
+                    var submission = submissions.FirstOrDefault(s => s.AssignmentId == assignment.Id);
+                    assignmentsSubmissions.Add(new AssignmentSubmissionResponse { Assignment = assignment, Submission = submission! });
+                }
+                var response = assignmentsSubmissions as object;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
 
