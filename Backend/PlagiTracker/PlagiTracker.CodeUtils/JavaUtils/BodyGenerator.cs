@@ -43,6 +43,17 @@ namespace PlagiTracker.CodeUtils.JavaUtils
             typeof(JavaParser.FieldDeclarationContext),
         };
 
+        private const string
+            CLASS_DECLARATION = "class",
+            COMMA = ",",
+            LEFT_KEY = "{",
+            RIGHT_KEY = "}",
+            LEFT_PARENTHESIS = "(",
+            RIGHT_PARENTHESIS = ")",
+            LEFT_BRACKET = "[",
+            RIGHT_BRACKET = "]"
+            ;
+
         public enum StructureType
         {
             Class,
@@ -155,9 +166,8 @@ namespace PlagiTracker.CodeUtils.JavaUtils
         {
             StringBuilder body = new();
             bool CaptureIdentifier = captureIdentifier;
-            StructureType CurrentStructure = currentStructure;
             int Count = count;
-
+            StructureType CurrentStructure = currentStructure;
             //  121 82 120 46 44
 
             for (int i = 0; i < parseTree.ChildCount; i++)
@@ -167,28 +177,71 @@ namespace PlagiTracker.CodeUtils.JavaUtils
                 {
                     if (RuleIdentifierIndexes.Contains(terminalNode.Parent.RuleContext.RuleIndex) && CaptureIdentifier)
                     {
-                        //body.Append($"{terminalNode.Symbol.Text} ¿{CaptureIdentifier} {count} {Count}? ");
-                        body.Append($"{terminalNode.Symbol.Text} ");
+                        //Console.WriteLine($"¿{terminalNode.Symbol.Text}? ");
+                        if (CurrentStructure == StructureType.Method)
+                        {
+                            body.Append($", \"Name\":\"{terminalNode.Symbol.Text}\"");
+                        }
+                        else
+                        {
+                            body.Append($" {terminalNode.Symbol.Text}");
+                        }
+
                         CaptureIdentifier = false;
                     }
                     else if (RuleDeclarationIndexes.Contains(terminalNode.Parent.RuleContext.RuleIndex) 
                         && terminalNode.Symbol.Text != "class" && terminalNode.Symbol.Text != "," && !CaptureIdentifier)
                     {
                         //body.Append($"{terminalNode.Symbol.Text} ¿{CaptureIdentifier} {count} {Count}? ");
-                        body.Append($"{terminalNode.Symbol.Text} ");
+                        body.Append($"{terminalNode.Symbol.Text}13");
                         CaptureIdentifier = true;
                     }
                     else if (RuleDeclarationIndexes.Contains(terminalNode.Parent.RuleContext.RuleIndex) 
                         && (terminalNode.Symbol.Text == "class" || terminalNode.Symbol.Text == ","))
                     {
-                        //body.Append($"{terminalNode.Symbol.Text} ¿{CaptureIdentifier} {count} {Count}? ");
-                        body.Append($"{terminalNode.Symbol.Text} ");
+                        if (terminalNode.Symbol.Text == CLASS_DECLARATION)
+                        {
+                            body.Append($"\"CName\":");
+                        }
+                        else if (terminalNode.Symbol.Text == COMMA)
+                        {
+                            //body.Append($"{terminalNode.Symbol.Text} ");
+                        }
                         CaptureIdentifier = true;
                     }
                     else if (RuleIndexes.Contains(terminalNode.Parent.RuleContext.RuleIndex) && CaptureIdentifier)
                     {
-                        //body.Append($"{terminalNode.Symbol.Text} ¿{CaptureIdentifier} {count} {Count}? ");
-                        body.Append($"{terminalNode.Symbol.Text} ");
+                        switch (terminalNode.Symbol.Text)
+                        {
+                            case LEFT_KEY:
+                                body.AppendLine(LEFT_KEY);
+                                break;
+                            case RIGHT_KEY:
+                                body.AppendLine(RIGHT_KEY);
+                                break;
+                            case LEFT_PARENTHESIS:
+                                body.AppendLine(LEFT_PARENTHESIS);
+                                break;
+                            case RIGHT_PARENTHESIS:
+                                body.Append(RIGHT_PARENTHESIS);
+                                break;
+                            case LEFT_BRACKET:
+                                body.Append(LEFT_BRACKET);
+                                break;
+                            case RIGHT_BRACKET:
+                                body.Append($"{RIGHT_BRACKET} ");
+                                break;
+                            default:
+                                if (CurrentStructure == StructureType.Method)
+                                {
+                                    body.Append($"\"Type\":\"{terminalNode.Symbol.Text}\"");
+                                }
+                                else
+                                {
+                                    body.Append($"{terminalNode.Symbol.Text}");
+                                }
+                                break;
+                        }
                     }
 
                     Count++;
@@ -200,24 +253,34 @@ namespace PlagiTracker.CodeUtils.JavaUtils
                         if (context.RuleIndex == JavaParser.RULE_methodDeclaration)
                         {
                             CaptureIdentifier = true;
+                            body.AppendLine($"      Method: |{ParseSyntaxTree(child, CaptureIdentifier, Count, StructureType.Method)}|");
                         }
                         else if (context.RuleIndex == JavaParser.RULE_formalParameter)
                         {
                             CaptureIdentifier = true;
+                            body.AppendLine($"          Parameter: {{{ParseSyntaxTree(child, CaptureIdentifier, Count, CurrentStructure)}}}");
                         }
                         else if (context.RuleIndex == JavaParser.RULE_fieldDeclaration)
                         {
                             CaptureIdentifier = false;
+                            body.Append($"_{ParseSyntaxTree(child, CaptureIdentifier, Count, CurrentStructure)}_");
                         }
                         else if (context.RuleIndex == JavaParser.RULE_methodBody)
                         {
                             CaptureIdentifier = false;
                         }
+                        else
+                        {
+                            body.Append(ParseSyntaxTree(child, CaptureIdentifier, Count, CurrentStructure));
+                        }
                     }
+                    else
+                    {
+                        body.Append(ParseSyntaxTree(child, CaptureIdentifier, Count, CurrentStructure));
+                    }
+                    //Console.WriteLine($"{child.Parent.GetText()} {0}");
 
-                    Console.WriteLine($"{child.Parent.GetText()} {0}");
-
-                    body.Append(ParseSyntaxTree(child, CaptureIdentifier, Count));
+                    //body.Append(ParseSyntaxTree(child, CaptureIdentifier, Count));
                 }
             }
 

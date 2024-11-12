@@ -126,9 +126,12 @@ Replit
 7SasF6B^X99db(VH
 
 ___________________________________________________________________
+class Person {
+}
+
 class OuterClass {
   int x = 10;
-  public static void main(String[] args, int param, Person person) {
+  public void main(String[] args, int param, Person person) {
 	x = 322;
     OuterClass myOuter = new OuterClass();
   }
@@ -137,6 +140,10 @@ class OuterClass {
     public InnerClass main2(String args, String abc) {
       OuterClass myOuter = new OuterClass();
     }
+  }
+  private static char ToChar(String[] args, int param, Person person) {
+	Integer x = 322;
+    OuterClass myOuter = new OuterClass();
   }
 }
 

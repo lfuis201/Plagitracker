@@ -138,9 +138,9 @@ namespace PlagiTracker.WebAPI.Controllers
                             Column = t.Column
                         }).ToList())*/
                         Body = BodyGenerator.ParseSyntaxTree(tree),
-                        BodyJson = BodyGenerator.ParseClassText(BodyGenerator.ParseSyntaxTree(tree)),
+                        //BodyJson = BodyGenerator.ParseClassText(BodyGenerator.ParseSyntaxTree(tree)),
                     };
-
+                    Console.WriteLine(result.Body);
                     results.Add(result);
                 }
                 catch (Exception) 
@@ -152,102 +152,6 @@ namespace PlagiTracker.WebAPI.Controllers
             //return Ok(results);
 
             return Ok(results);
-
-            /*
-            return Ok(new ExerciseRequest
-            {
-                Name = "Exercise 1",
-                Description = "Description of Exercise 1",
-                HaveBody = true,
-                Classes = new List<ClassRequest>
-                {
-                    new ClassRequest
-                    {
-                        Name = "OuterClass",
-                        Description = "Description of OuterClass",
-                        Functions = new List<FunctionRequest>
-                        {
-                            new FunctionRequest
-                            {
-                                Name = "f1",
-                                Type = "void",
-                                Description = "Description of f1",
-                                Parameters = new List<ParameterRequest>
-                                {
-                                    new ParameterRequest
-                                    {
-                                        Name = "args",
-                                        Type = "String",
-                                        Description = "Description of args"
-                                    },
-                                    new ParameterRequest
-                                    {
-                                        Name = "b",
-                                        Type = "int",
-                                        Description = "Description of b"
-                                    }
-                                }
-                            }
-                        },
-                        ChildClasses = new List<ClassRequest>
-                        {
-                            new ClassRequest
-                            {
-                                Name = "InnerClass",
-                                Description = "Description of InnerClass",
-                                Functions = new List<FunctionRequest>
-                                {
-                                    new FunctionRequest
-                                    {
-                                        Name = "f1",
-                                        Type = "void",
-                                        Description = "Description of f1",
-                                        Parameters = new List<ParameterRequest>
-                                        {
-                                            new ParameterRequest
-                                            {
-                                                Name = "b",
-                                                Type = "int",
-                                                Description = "Description of b"
-                                            },
-                                            new ParameterRequest
-                                            {
-                                                Name = "args",
-                                                Type = "String",
-                                                Description = "Description of args"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    new ClassRequest
-                    {
-                        Name = "Main",
-                        Description = "Description of Main",
-                        Functions = new List<FunctionRequest>
-                        {
-                            new FunctionRequest
-                            {
-                                Name = "main",
-                                Type = "void",
-                                Description = "Description of main",
-                                Parameters = new List<ParameterRequest>
-                                {
-                                    new ParameterRequest
-                                    {
-                                        Name = "args",
-                                        Type = "String[]",
-                                        Description = "Description of args"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-            */
         }
 
         [HttpPost]
