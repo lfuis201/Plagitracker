@@ -83,7 +83,7 @@ namespace PlagiTracker.Services.SeleniumServices
 
         public WebScraping()
         {
-            bool isCreated = CreateFireFoxDriver();
+            bool isCreated = CreateChromeDriver();
 
             if (!isCreated)
             {
@@ -211,8 +211,8 @@ namespace PlagiTracker.Services.SeleniumServices
                 return new();
             }
 
-            Dictionary<Guid, StudentSubmission> StudentSubmissionResults = []; 
-            PlagiaPythonResult analysis = new();
+            Dictionary<Guid, StudentSubmission> StudentSubmissionResults = [];
+            PlagiaPythonResult1 analysis = new();
             var jsonData = new Dictionary<string, List<Dictionary<string, string>>>();
             
             var ignorePatterns = new List<string>
@@ -306,13 +306,16 @@ namespace PlagiTracker.Services.SeleniumServices
                 Driver.Quit();
             }
             
-            if(analysis != null && analysis.Comparaciones_Entre_Ids != null && analysis.Comparaciones_Entre_Ids.Count > 2)
+            if(analysis != null && analysis.comparaciones_por_nombre != null && analysis.comparaciones_por_nombre.Count > 0)
             {
-                foreach (var plagiaPythonResult in analysis.Comparaciones_Entre_Ids)
+                foreach (var plagiaPythonResult in analysis.comparaciones_por_nombre.Values)
                 {
-                    if (StudentSubmissionResults.ContainsKey(Guid.Parse(plagiaPythonResult.UserId1)))
+                    foreach (var plagiaPythonResult2 in plagiaPythonResult)
                     {
-                        StudentSubmissionResults[Guid.Parse(plagiaPythonResult.UserId1)].PlagiResults.Add(plagiaPythonResult);
+                            if (StudentSubmissionResults.ContainsKey(Guid.Parse(plagiaPythonResult2.UserId1)))
+                            {
+                                StudentSubmissionResults[Guid.Parse(plagiaPythonResult2.UserId1)].PlagiResults.Add(plagiaPythonResult2);
+                            }
                     }
                 }
             }
