@@ -94,7 +94,7 @@ namespace PlagiTracker.Data.Requests
 
         public string? Description { get; set; }
 
-        public ClassRequest? ChildClass { get; set; }
+        public List<ClassRequest>? ChildClasses { get; set; }
 
         public List<FunctionRequest>? Functions { get; set; }
     }

@@ -6,6 +6,7 @@ using System.Text;
 using Antlr4.Runtime.Tree;
 using PlagiTracker.CodeUtils.GrammarFiles;
 using Antlr4.Runtime;
+using PlagiTracker.Data.Requests;
 
 namespace PlagiTracker.CodeUtils.JavaUtils
 {
@@ -48,71 +49,107 @@ namespace PlagiTracker.CodeUtils.JavaUtils
             Method,
             Parameter,
             None
-        } 
-        
-        public static string GenerateBody(List<TokenInfo> tokens)
+        }
+
+        public static List<ClassRequest> ParseClassText(string inputText)
         {
-            StringBuilder body = new StringBuilder();
-            Stack<string> classStack = new Stack<string>(); // Para rastrear clases anidadas
-            bool isMethod = false;
-            string methodName = "";
-            bool isMethodArgs = false;
-            StringBuilder methodArgs = new StringBuilder();
-            int indentationLevel = 0;
+            List<ClassRequest> classes = new List<ClassRequest>();
 
-            foreach (var token in tokens)
+            // Expresión regular para encontrar clases y métodos
+            Regex classRegex = new Regex(@"class\s+(\w+)\s*{([^{}]*(?:{[^{}]*}[^{}]*)*)}");
+            Regex methodRegex = new Regex(@"(\w+)\s+(\w+)\s*\(([^)]*)\)");
+            Regex paramRegex = new Regex(@"\s*(\w+)\s+(\w+)\s*");
+
+            // Encontrar todas las clases de nivel superior
+            MatchCollection classMatches = classRegex.Matches(inputText);
+            foreach (Match classMatch in classMatches)
             {
-                // Detecta el nombre de la clase
-                if (token.Type == 9) // Tipo 'class'
-                {
-                    isMethod = false;
-                    methodArgs.Clear();
+                string className = classMatch.Groups[1].Value;
+                string classBody = classMatch.Groups[2].Value;
 
-                    // Buscar nombre de clase
-                    var nextTokenIndex = tokens.IndexOf(token) + 2;
-                    if (nextTokenIndex < tokens.Count && tokens[nextTokenIndex].Type == 128) // Tipo identificador
-                    {
-                        string className = tokens[nextTokenIndex].Text;
-                        classStack.Push(className);
+                // Crear clase externa
+                ClassRequest classRequest = new ClassRequest
+                {
+                    Name = className,
+                    Description = $"Description of {className}",
+                    Functions = new List<FunctionRequest>(),
+                    ChildClasses = new List<ClassRequest>()
+                };
 
-                        body.AppendLine($"{new string(' ', indentationLevel * 2)}{className} {{");
-                        indentationLevel++; // Aumenta la indentación para la siguiente clase o método
-                    }
-                }
-                // Detecta métodos y su declaración
-                else if (token.Type == 48) // Tipo 'void'
-                {
-                    isMethod = true;
-                    methodName = tokens[tokens.IndexOf(token) + 2].Text; // El nombre del método viene después del tipo 'void'
-                }
-                else if (isMethod && token.Type == 78) // Tipo '(' inicio de argumentos
-                {
-                    isMethodArgs = true;
-                }
-                else if (isMethodArgs && token.Type != 79) // Mientras esté en los argumentos y no llegue a ')'
-                {
-                    methodArgs.Append(token.Text);
-                }
-                else if (isMethodArgs && token.Type == 79) // Fin de argumentos ')'
-                {
-                    isMethodArgs = false;
-                    body.AppendLine($"{new string(' ', indentationLevel * 2)}void {methodName}({methodArgs})");
-                    isMethod = false;
-                    methodArgs.Clear();
-                }
-                else if (token.Type == 81) // Fin de bloque '}'
-                {
-                    if (classStack.Count > 0)
-                    {
-                        classStack.Pop();
-                        indentationLevel--; // Disminuye la indentación al cerrar una clase
-                        body.AppendLine($"{new string(' ', indentationLevel * 2)}}}");
-                    }
-                }
+                // Procesar funciones y clases internas del cuerpo
+                ProcessFunctionsAndClasses(classBody, classRequest);
+
+                classes.Add(classRequest);
             }
 
-            return body.ToString();
+            return classes;
         }
+
+        // Función para procesar funciones y clases internas recursivamente
+        private static void ProcessFunctionsAndClasses(string body, ClassRequest currentClass)
+        {
+            Regex classRegex = new Regex(@"class\s+(\w+)\s*{([^{}]*(?:{[^{}]*}[^{}]*)*)}");
+            Regex methodRegex = new Regex(@"(\w+)\s+(\w+)\s*\(([^)]*)\)");
+            Regex paramRegex = new Regex(@"\s*(\w+)\s+(\w+)\s*");
+
+            // Buscar clases internas dentro del cuerpo
+            MatchCollection innerClassMatches = classRegex.Matches(body);
+            foreach (Match innerClassMatch in innerClassMatches)
+            {
+                string innerClassName = innerClassMatch.Groups[1].Value;
+                string innerClassBody = innerClassMatch.Groups[2].Value;
+
+                // Crear clase interna y agregarla a la clase actual
+                ClassRequest innerClassRequest = new ClassRequest
+                {
+                    Name = innerClassName,
+                    Description = $"Description of {innerClassName}",
+                    Functions = new List<FunctionRequest>(),
+                    ChildClasses = new List<ClassRequest>()
+                };
+
+                currentClass.ChildClasses.Add(innerClassRequest);
+
+                // Procesar funciones y posibles clases internas en la clase interna
+                ProcessFunctionsAndClasses(innerClassBody, innerClassRequest);
+            }
+
+            // Procesar funciones del nivel actual, excluyendo las que pertenecen a clases internas
+            MatchCollection methodMatches = methodRegex.Matches(body);
+            foreach (Match methodMatch in methodMatches)
+            {
+                string methodType = methodMatch.Groups[1].Value;
+                string methodName = methodMatch.Groups[2].Value;
+                string methodParams = methodMatch.Groups[3].Value;
+
+                FunctionRequest functionRequest = new FunctionRequest
+                {
+                    Type = methodType,
+                    Name = methodName,
+                    Description = $"Description of {methodName}",
+                    Parameters = new List<ParameterRequest>()
+                };
+
+                // Procesar parámetros del método
+                MatchCollection paramMatches = paramRegex.Matches(methodParams);
+                foreach (Match paramMatch in paramMatches)
+                {
+                    string paramType = paramMatch.Groups[1].Value;
+                    string paramName = paramMatch.Groups[2].Value;
+
+                    functionRequest.Parameters.Add(new ParameterRequest
+                    {
+                        Type = paramType,
+                        Name = paramName,
+                        Description = $"Description of {paramName}"
+                    });
+                }
+
+                // Agregar función solo al nivel actual
+                currentClass.Functions.Add(functionRequest);
+            }
+        }
+
 
         public static string ParseSyntaxTree(IParseTree parseTree, bool captureIdentifier = false, int count = 0, StructureType currentStructure = StructureType.None)
         {
@@ -134,16 +171,18 @@ namespace PlagiTracker.CodeUtils.JavaUtils
                         body.Append($"{terminalNode.Symbol.Text} ");
                         CaptureIdentifier = false;
                     }
-                    else if (RuleDeclarationIndexes.Contains(terminalNode.Parent.RuleContext.RuleIndex) && terminalNode.Symbol.Text != "class" && !CaptureIdentifier)
+                    else if (RuleDeclarationIndexes.Contains(terminalNode.Parent.RuleContext.RuleIndex) 
+                        && terminalNode.Symbol.Text != "class" && terminalNode.Symbol.Text != "," && !CaptureIdentifier)
                     {
                         //body.Append($"{terminalNode.Symbol.Text} ¿{CaptureIdentifier} {count} {Count}? ");
                         body.Append($"{terminalNode.Symbol.Text} ");
                         CaptureIdentifier = true;
                     }
-                    else if (RuleDeclarationIndexes.Contains(terminalNode.Parent.RuleContext.RuleIndex) && terminalNode.Symbol.Text == "class")
+                    else if (RuleDeclarationIndexes.Contains(terminalNode.Parent.RuleContext.RuleIndex) 
+                        && (terminalNode.Symbol.Text == "class" || terminalNode.Symbol.Text == ","))
                     {
                         //body.Append($"{terminalNode.Symbol.Text} ¿{CaptureIdentifier} {count} {Count}? ");
-                        body.Append($"\n{terminalNode.Symbol.Text} ");
+                        body.Append($"{terminalNode.Symbol.Text} ");
                         CaptureIdentifier = true;
                     }
                     else if (RuleIndexes.Contains(terminalNode.Parent.RuleContext.RuleIndex) && CaptureIdentifier)

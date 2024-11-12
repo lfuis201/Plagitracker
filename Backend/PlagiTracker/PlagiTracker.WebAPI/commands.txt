@@ -146,53 +146,90 @@ public class Main {
   }
 }
 ___________________________________________________________________
-OuterClass {
-  void main(String[] args)
-  
-  InnerClass {
-    public static void main(String[] args)
-  }
-}
-Main {
-  void main(String[] args)
-}
-___________________________________________________________________
-class ¿False 0 0? 
-	OuterClass ¿True 1 1? 
-	{ ¿True 1 1? 
-		main ¿True 2 2? 
-			String ¿True 3 3? 
-			[ ¿True 3 3? 
-			] ¿True 3 4? 
-			args ¿True 3 3? 
-				int ¿True 4 4? 
-				param ¿True 4 4? 
-					Person ¿True 5 5? 
-					person ¿True 5 5? 
-			InnerClass ¿True 3 3? 
-			{ ¿True 3 3? 
-				InnerClass ¿True 4 4? 
-				main2 ¿True 4 4? 
-					String ¿True 5 5? 
-					args ¿True 5 5? 
-						String ¿True 6 6? 
-						abc ¿True 6 6? 
-			} ¿True 3 4? 
-	} ¿True 1 2? 
-class ¿False 0 0? 
-	Main ¿True 1 1? 
-	{ ¿True 1 1? 
-		main ¿True 2 2? 
-	} ¿True 1 2?
-___________________________________________________________________
-class OuterClass 
-{ 
-	void main ( String [ ] args int param Person person ) 
+class OuterClass { 
+	void main ( String [ ] args , int param , Person person ) 
 	class InnerClass { 
-		InnerClass main2 ( String args String abc ) 
+		InnerClass main2 ( String args , String abc ) 
 	} 
 } 
-class Main 
-{ 
-	void main ( ) 
-}
+class Main { void main ( ) }
+___________________________________________________________________
+{
+        "name": "OuterClass",
+        "description": "Description of OuterClass",
+        "childClasses": [
+          {
+            "name": "InnerClass",
+            "description": "Description of InnerClass",
+            "childClasses": [],
+            "functions": [
+              {
+                "name": "main2",
+                "type": "InnerClass",
+                "description": "Description of main2",
+                "parameters": [
+                  {
+                    "name": "args",
+                    "type": "String",
+                    "description": "Description of args"
+                  },
+                  {
+                    "name": "abc",
+                    "type": "String",
+                    "description": "Description of abc"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "functions": [
+          {
+            "name": "main",
+            "type": "void",
+            "description": "Description of main",
+            "parameters": [
+              {
+                "name": "param",
+                "type": "int",
+                "description": "Description of param"
+              },
+              {
+                "name": "person",
+                "type": "Person",
+                "description": "Description of person"
+              }
+            ]
+          },
+          {
+            "name": "main2",
+            "type": "InnerClass",
+            "description": "Description of main2",
+            "parameters": [
+              {
+                "name": "args",
+                "type": "String",
+                "description": "Description of args"
+              },
+              {
+                "name": "abc",
+                "type": "String",
+                "description": "Description of abc"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Main",
+        "description": "Description of Main",
+        "childClasses": [],
+        "functions": [
+          {
+            "name": "main",
+            "type": "void",
+            "description": "Description of main",
+            "parameters": []
+          }
+        ]
+      }

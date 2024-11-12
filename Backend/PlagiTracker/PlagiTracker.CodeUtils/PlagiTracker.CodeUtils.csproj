@@ -19,4 +19,8 @@
     <Folder Include="JCode\Requests\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PlagiTracker.Data\PlagiTracker.Data.csproj" />
+  </ItemGroup>
+
 </Project>

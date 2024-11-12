@@ -138,7 +138,7 @@ namespace PlagiTracker.WebAPI.Controllers
                             Column = t.Column
                         }).ToList())*/
                         Body = BodyGenerator.ParseSyntaxTree(tree),
-                        BodyJson = AssignmentRequest.ParseTextToClassRequests(BodyGenerator.ParseSyntaxTree(tree)),
+                        BodyJson = BodyGenerator.ParseClassText(BodyGenerator.ParseSyntaxTree(tree)),
                     };
 
                     results.Add(result);
@@ -189,30 +189,33 @@ namespace PlagiTracker.WebAPI.Controllers
                                 }
                             }
                         },
-                        ChildClass = new ClassRequest
+                        ChildClasses = new List<ClassRequest>
                         {
-                            Name = "InnerClass",
-                            Description = "Description of InnerClass",
-                            Functions = new List<FunctionRequest>
+                            new ClassRequest
                             {
-                                new FunctionRequest
+                                Name = "InnerClass",
+                                Description = "Description of InnerClass",
+                                Functions = new List<FunctionRequest>
                                 {
-                                    Name = "f1",
-                                    Type = "void",
-                                    Description = "Description of f1",
-                                    Parameters = new List<ParameterRequest>
+                                    new FunctionRequest
                                     {
-                                        new ParameterRequest
+                                        Name = "f1",
+                                        Type = "void",
+                                        Description = "Description of f1",
+                                        Parameters = new List<ParameterRequest>
                                         {
-                                            Name = "b",
-                                            Type = "int",
-                                            Description = "Description of b"
-                                        },
-                                        new ParameterRequest
-                                        {
-                                            Name = "args",
-                                            Type = "String",
-                                            Description = "Description of args"
+                                            new ParameterRequest
+                                            {
+                                                Name = "b",
+                                                Type = "int",
+                                                Description = "Description of b"
+                                            },
+                                            new ParameterRequest
+                                            {
+                                                Name = "args",
+                                                Type = "String",
+                                                Description = "Description of args"
+                                            }
                                         }
                                     }
                                 }
