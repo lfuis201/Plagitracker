@@ -76,13 +76,12 @@ namespace PlagiTracker.WebAPI.Controllers
             try
             {
                 result = await CodeUtils.JCode.JCodeClient.Execute(code);
+                return Ok(result);
             }
             catch (Exception ex)
             {
                 return BadRequest("Error in JCode");
             }
-            
-            return Ok(result);
         }
 
         [HttpPost]
@@ -118,25 +117,133 @@ namespace PlagiTracker.WebAPI.Controllers
                     var result = new
                     {
                         IsValid = isValid,
+                        //Tree = tree,
                         SyntaxTree = tree.ToStringTree(parser),
-                        Tokens = tokens.Select(t => new
+                        //Tokens = tokens,
+                        /*
+                        TokensInfo = tokens.Select(t => new TokenInfo
                         {
-                            t.Text,
-                            t.Type,
-                            t.Line,
-                            t.Column
-                        }).ToList()
+                            Text = t.Text,
+                            Type = t.Type,
+                            Line = t.Line,
+                            Column = t.Column
+                        }).ToList(),
+                        
+                        Body = BodyGenerator.GenerateBody(tokens.Select(t => new TokenInfo
+                        {
+                            Text = t.Text,
+                            Type = t.Type,
+                            Line = t.Line,
+                            Column = t.Column
+                        }).ToList())*/
+                        Body = BodyGenerator.ParseSyntaxTree(tree),
+                        BodyJson = AssignmentRequest.ParseTextToClassRequests(BodyGenerator.ParseSyntaxTree(tree)),
                     };
 
                     results.Add(result);
                 }
-                catch (Exception)
+                catch (Exception) 
                 {
                     results.Add(false);
                 }
             }
 
+            //return Ok(results);
+
             return Ok(results);
+
+            /*
+            return Ok(new ExerciseRequest
+            {
+                Name = "Exercise 1",
+                Description = "Description of Exercise 1",
+                HaveBody = true,
+                Classes = new List<ClassRequest>
+                {
+                    new ClassRequest
+                    {
+                        Name = "OuterClass",
+                        Description = "Description of OuterClass",
+                        Functions = new List<FunctionRequest>
+                        {
+                            new FunctionRequest
+                            {
+                                Name = "f1",
+                                Type = "void",
+                                Description = "Description of f1",
+                                Parameters = new List<ParameterRequest>
+                                {
+                                    new ParameterRequest
+                                    {
+                                        Name = "args",
+                                        Type = "String",
+                                        Description = "Description of args"
+                                    },
+                                    new ParameterRequest
+                                    {
+                                        Name = "b",
+                                        Type = "int",
+                                        Description = "Description of b"
+                                    }
+                                }
+                            }
+                        },
+                        ChildClass = new ClassRequest
+                        {
+                            Name = "InnerClass",
+                            Description = "Description of InnerClass",
+                            Functions = new List<FunctionRequest>
+                            {
+                                new FunctionRequest
+                                {
+                                    Name = "f1",
+                                    Type = "void",
+                                    Description = "Description of f1",
+                                    Parameters = new List<ParameterRequest>
+                                    {
+                                        new ParameterRequest
+                                        {
+                                            Name = "b",
+                                            Type = "int",
+                                            Description = "Description of b"
+                                        },
+                                        new ParameterRequest
+                                        {
+                                            Name = "args",
+                                            Type = "String",
+                                            Description = "Description of args"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    new ClassRequest
+                    {
+                        Name = "Main",
+                        Description = "Description of Main",
+                        Functions = new List<FunctionRequest>
+                        {
+                            new FunctionRequest
+                            {
+                                Name = "main",
+                                Type = "void",
+                                Description = "Description of main",
+                                Parameters = new List<ParameterRequest>
+                                {
+                                    new ParameterRequest
+                                    {
+                                        Name = "args",
+                                        Type = "String[]",
+                                        Description = "Description of args"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            */
         }
 
         [HttpPost]
