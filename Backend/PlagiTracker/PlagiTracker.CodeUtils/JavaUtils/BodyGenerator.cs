@@ -41,6 +41,7 @@ namespace PlagiTracker.CodeUtils.JavaUtils
             typeof(JavaParser.FormalParameterListContext),
             typeof(JavaParser.FormalParameterContext),
             typeof(JavaParser.FieldDeclarationContext),
+            typeof(JavaParser.TypeTypeContext),
         };
 
         private const string
@@ -62,103 +63,46 @@ namespace PlagiTracker.CodeUtils.JavaUtils
             None
         }
 
-        public static List<ClassRequest> ParseClassText(string inputText)
+        private const string 
+            classRegex = @"""Name""\s*:\s*""(\w+)""\s*{",
+            classNameRegex = @"""Name""\s*:\s*""(\w+)""\s*{"
+            ;
+
+
+        public static List<ClassRequest> ParseClassInput(string inputText)
         {
-            List<ClassRequest> classes = new List<ClassRequest>();
+            List<ClassRequest> classes = [];
+            int currentClassLevel = 0;
 
-            // Expresión regular para encontrar clases y métodos
-            Regex classRegex = new Regex(@"class\s+(\w+)\s*{([^{}]*(?:{[^{}]*}[^{}]*)*)}");
-            Regex methodRegex = new Regex(@"(\w+)\s+(\w+)\s*\(([^)]*)\)");
-            Regex paramRegex = new Regex(@"\s*(\w+)\s+(\w+)\s*");
+            int currentClassOpened = 0;
+            int currentClassClosed = 0;
+            ClassRequest? currentClass = null;
+            string currentTest = string.Empty;
 
-            // Encontrar todas las clases de nivel superior
-            MatchCollection classMatches = classRegex.Matches(inputText);
-            foreach (Match classMatch in classMatches)
+            foreach (var line in inputText.Split("\n"))
             {
-                string className = classMatch.Groups[1].Value;
-                string classBody = classMatch.Groups[2].Value;
-
-                // Crear clase externa
-                ClassRequest classRequest = new ClassRequest
+                
+                if (new Regex(classRegex).IsMatch(line))
                 {
-                    Name = className,
-                    Description = $"Description of {className}",
-                    Functions = new List<FunctionRequest>(),
-                    ChildClasses = new List<ClassRequest>()
-                };
+                    if (currentClass == null)
+                    {
+                        currentClass = new();
+                        currentClassOpened++;
+                    }
+                    else if (currentClassOpened == currentClassClosed)
+                    {
+                        classes.Add(currentClass);
+                        currentClass = new();
+                        currentClassClosed++;
+                    }
 
-                // Procesar funciones y clases internas del cuerpo
-                ProcessFunctionsAndClasses(classBody, classRequest);
-
-                classes.Add(classRequest);
+                    //Console.WriteLine(new Regex(classRegex).Match(line).Value);
+                    var className = new Regex(classRegex).Match(line).Groups[1].Value;
+                    currentClass.Name = className;
+                }
             }
 
             return classes;
-        }
-
-        // Función para procesar funciones y clases internas recursivamente
-        private static void ProcessFunctionsAndClasses(string body, ClassRequest currentClass)
-        {
-            Regex classRegex = new Regex(@"class\s+(\w+)\s*{([^{}]*(?:{[^{}]*}[^{}]*)*)}");
-            Regex methodRegex = new Regex(@"(\w+)\s+(\w+)\s*\(([^)]*)\)");
-            Regex paramRegex = new Regex(@"\s*(\w+)\s+(\w+)\s*");
-
-            // Buscar clases internas dentro del cuerpo
-            MatchCollection innerClassMatches = classRegex.Matches(body);
-            foreach (Match innerClassMatch in innerClassMatches)
-            {
-                string innerClassName = innerClassMatch.Groups[1].Value;
-                string innerClassBody = innerClassMatch.Groups[2].Value;
-
-                // Crear clase interna y agregarla a la clase actual
-                ClassRequest innerClassRequest = new ClassRequest
-                {
-                    Name = innerClassName,
-                    Description = $"Description of {innerClassName}",
-                    Functions = new List<FunctionRequest>(),
-                    ChildClasses = new List<ClassRequest>()
-                };
-
-                currentClass.ChildClasses.Add(innerClassRequest);
-
-                // Procesar funciones y posibles clases internas en la clase interna
-                ProcessFunctionsAndClasses(innerClassBody, innerClassRequest);
-            }
-
-            // Procesar funciones del nivel actual, excluyendo las que pertenecen a clases internas
-            MatchCollection methodMatches = methodRegex.Matches(body);
-            foreach (Match methodMatch in methodMatches)
-            {
-                string methodType = methodMatch.Groups[1].Value;
-                string methodName = methodMatch.Groups[2].Value;
-                string methodParams = methodMatch.Groups[3].Value;
-
-                FunctionRequest functionRequest = new FunctionRequest
-                {
-                    Type = methodType,
-                    Name = methodName,
-                    Description = $"Description of {methodName}",
-                    Parameters = new List<ParameterRequest>()
-                };
-
-                // Procesar parámetros del método
-                MatchCollection paramMatches = paramRegex.Matches(methodParams);
-                foreach (Match paramMatch in paramMatches)
-                {
-                    string paramType = paramMatch.Groups[1].Value;
-                    string paramName = paramMatch.Groups[2].Value;
-
-                    functionRequest.Parameters.Add(new ParameterRequest
-                    {
-                        Type = paramType,
-                        Name = paramName,
-                        Description = $"Description of {paramName}"
-                    });
-                }
-
-                // Agregar función solo al nivel actual
-                currentClass.Functions.Add(functionRequest);
-            }
         }
 
 
@@ -175,16 +119,27 @@ namespace PlagiTracker.CodeUtils.JavaUtils
                 IParseTree child = parseTree.GetChild(i);
                 if (child is TerminalNodeImpl terminalNode)
                 {
-                    if (RuleIdentifierIndexes.Contains(terminalNode.Parent.RuleContext.RuleIndex) && CaptureIdentifier)
+                    if(terminalNode.Symbol.Text == "void")
+                    {
+                        //Console.WriteLine($"{CaptureIdentifier}-{CurrentStructure}-{terminalNode.Parent.RuleContext.RuleIndex}");
+                        body.AppendLine($"  \"MType\":\"{terminalNode.Symbol.Text}\"");
+                    }
+
+                    else if (RuleIdentifierIndexes.Contains(terminalNode.Parent.RuleContext.RuleIndex) && CaptureIdentifier)
                     {
                         //Console.WriteLine($"¿{terminalNode.Symbol.Text}? ");
                         if (CurrentStructure == StructureType.Method)
                         {
-                            body.Append($", \"Name\":\"{terminalNode.Symbol.Text}\"");
+                            body.Append($"    \"MName\":\"{terminalNode.Symbol.Text}\"");
+                        }
+                        else if (CurrentStructure == StructureType.Parameter)
+                        {
+                            body.Append($"\"PName\":\"{terminalNode.Symbol.Text}\"");
                         }
                         else
                         {
-                            body.Append($" {terminalNode.Symbol.Text}");
+                            //Console.WriteLine($"{CaptureIdentifier} {CurrentStructure}");
+                            body.AppendLine($"  \"CName\":\"{terminalNode.Symbol.Text}\"");
                         }
 
                         CaptureIdentifier = false;
@@ -201,11 +156,11 @@ namespace PlagiTracker.CodeUtils.JavaUtils
                     {
                         if (terminalNode.Symbol.Text == CLASS_DECLARATION)
                         {
-                            body.Append($"\"CName\":");
+                            body.AppendLine(LEFT_KEY);
                         }
                         else if (terminalNode.Symbol.Text == COMMA)
                         {
-                            //body.Append($"{terminalNode.Symbol.Text} ");
+                            body.Append(terminalNode.Symbol.Text);
                         }
                         CaptureIdentifier = true;
                     }
@@ -214,30 +169,39 @@ namespace PlagiTracker.CodeUtils.JavaUtils
                         switch (terminalNode.Symbol.Text)
                         {
                             case LEFT_KEY:
-                                body.AppendLine(LEFT_KEY);
+                                //body.AppendLine(LEFT_KEY);
                                 break;
                             case RIGHT_KEY:
                                 body.AppendLine(RIGHT_KEY);
                                 break;
                             case LEFT_PARENTHESIS:
-                                body.AppendLine(LEFT_PARENTHESIS);
+                                CurrentStructure = StructureType.Parameter;
+                                //body.AppendLine();
                                 break;
                             case RIGHT_PARENTHESIS:
-                                body.Append(RIGHT_PARENTHESIS);
+                                //body.Append(RIGHT_PARENTHESIS);
+                                CurrentStructure = StructureType.None;
                                 break;
                             case LEFT_BRACKET:
                                 body.Append(LEFT_BRACKET);
+                                //body.AppendLine();
                                 break;
                             case RIGHT_BRACKET:
-                                body.Append($"{RIGHT_BRACKET} ");
+                                body.Append($"{RIGHT_BRACKET}");
                                 break;
                             default:
                                 if (CurrentStructure == StructureType.Method)
                                 {
-                                    body.Append($"\"Type\":\"{terminalNode.Symbol.Text}\"");
+                                    //Console.WriteLine($"\"Type\":\"{terminalNode.Symbol.Text}\" 245");
+                                    body.Append($"{terminalNode.Symbol.Text}");
+                                }
+                                else if (CurrentStructure == StructureType.Parameter)
+                                {
+                                    body.Append($"{terminalNode.Symbol.Text}");
                                 }
                                 else
                                 {
+                                    //Console.WriteLine($"{terminalNode.Symbol.Text}\" 253");
                                     body.Append($"{terminalNode.Symbol.Text}");
                                 }
                                 break;
@@ -253,17 +217,46 @@ namespace PlagiTracker.CodeUtils.JavaUtils
                         if (context.RuleIndex == JavaParser.RULE_methodDeclaration)
                         {
                             CaptureIdentifier = true;
-                            body.AppendLine($"      Method: |{ParseSyntaxTree(child, CaptureIdentifier, Count, StructureType.Method)}|");
+                            body.AppendLine($"  \"Method\": {{");
+                            body.AppendLine($"  {ParseSyntaxTree(child, CaptureIdentifier, Count, StructureType.Method)}}}");
+                        }
+                        else if (context.RuleIndex == JavaParser.RULE_formalParameterList)
+                        {
+                            CaptureIdentifier = true;
+                            body.AppendLine();
+                            body.AppendLine($"    \"Parameters\": [");
+                            body.AppendLine($"{ParseSyntaxTree(child, CaptureIdentifier, Count, CurrentStructure)}]");
                         }
                         else if (context.RuleIndex == JavaParser.RULE_formalParameter)
                         {
                             CaptureIdentifier = true;
-                            body.AppendLine($"          Parameter: {{{ParseSyntaxTree(child, CaptureIdentifier, Count, CurrentStructure)}}}");
+                            body.AppendLine($"      {{{ParseSyntaxTree(child, CaptureIdentifier, Count, StructureType.Parameter)}}}");
+
                         }
                         else if (context.RuleIndex == JavaParser.RULE_fieldDeclaration)
                         {
                             CaptureIdentifier = false;
-                            body.Append($"_{ParseSyntaxTree(child, CaptureIdentifier, Count, CurrentStructure)}_");
+                        }
+                        else if (context.RuleIndex == JavaParser.RULE_typeType)
+                        {
+                            CaptureIdentifier = true;
+                            if (CurrentStructure == StructureType.Method)
+                            {
+                                body.Append($"\"MType\":\"{ParseSyntaxTree(child, CaptureIdentifier, Count, CurrentStructure)}\",");
+                            }
+                            else
+                            {
+                                body.Append($"\"PType\":\"{ParseSyntaxTree(child, CaptureIdentifier, Count, CurrentStructure)}\",");
+                            }
+                            
+                        }
+                        else if (context.RuleIndex == JavaParser.RULE_typeTypeOrVoid)
+                        {
+                            CaptureIdentifier = true;
+                            if (CurrentStructure == StructureType.Method)
+                            {
+                                body.Append($"\"MType\":\"{ParseSyntaxTree(child, CaptureIdentifier, Count, CurrentStructure)}\",");
+                            }
                         }
                         else if (context.RuleIndex == JavaParser.RULE_methodBody)
                         {
@@ -271,7 +264,7 @@ namespace PlagiTracker.CodeUtils.JavaUtils
                         }
                         else
                         {
-                            body.Append(ParseSyntaxTree(child, CaptureIdentifier, Count, CurrentStructure));
+                            //body.Append(ParseSyntaxTree(child, CaptureIdentifier, Count, CurrentStructure));
                         }
                     }
                     else

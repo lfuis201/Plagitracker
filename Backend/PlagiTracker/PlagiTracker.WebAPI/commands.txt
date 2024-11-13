@@ -137,11 +137,20 @@ class OuterClass {
   }
   
   class InnerClass {
-    public InnerClass main2(String args, String abc) {
+    public InnerClass[] main2(String args, String abc) {
+      OuterClass myOuter = new OuterClass();
+    }
+	
+	public void VoidMethod(String args, String abc) {
       OuterClass myOuter = new OuterClass();
     }
   }
   private static char ToChar(String[] args, int param, Person person) {
+	Integer x = 322;
+    OuterClass myOuter = new OuterClass();
+  }
+  
+  private static void Print(String text) {
 	Integer x = 322;
     OuterClass myOuter = new OuterClass();
   }
@@ -153,90 +162,87 @@ public class Main {
   }
 }
 ___________________________________________________________________
-class OuterClass { 
-	void main ( String [ ] args , int param , Person person ) 
-	class InnerClass { 
-		InnerClass main2 ( String args , String abc ) 
-	} 
-} 
-class Main { void main ( ) }
+class Person {
+}
+
+class OuterClass {
+  public void main(String[] args, int param, Person person) {
+  }
+  
+  class InnerClass {
+    public InnerClass[] main2(String args, String abc) {
+      OuterClass myOuter = new OuterClass();
+    }
+	
+	public void VoidMethod(String args, String abc) {
+    }
+  }
+  private static char ToChar(String[] args, int param, Person person) {
+  }
+  
+  private static void Print(String text) {
+  }
+}
+
+public class Main {
+  void main() {
+  }
+}
 ___________________________________________________________________
-{
-        "name": "OuterClass",
-        "description": "Description of OuterClass",
-        "childClasses": [
-          {
-            "name": "InnerClass",
-            "description": "Description of InnerClass",
-            "childClasses": [],
-            "functions": [
-              {
-                "name": "main2",
-                "type": "InnerClass",
-                "description": "Description of main2",
-                "parameters": [
-                  {
-                    "name": "args",
-                    "type": "String",
-                    "description": "Description of args"
-                  },
-                  {
-                    "name": "abc",
-                    "type": "String",
-                    "description": "Description of abc"
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        "functions": [
-          {
-            "name": "main",
-            "type": "void",
-            "description": "Description of main",
-            "parameters": [
-              {
-                "name": "param",
-                "type": "int",
-                "description": "Description of param"
-              },
-              {
-                "name": "person",
-                "type": "Person",
-                "description": "Description of person"
-              }
-            ]
-          },
-          {
-            "name": "main2",
-            "type": "InnerClass",
-            "description": "Description of main2",
-            "parameters": [
-              {
-                "name": "args",
-                "type": "String",
-                "description": "Description of args"
-              },
-              {
-                "name": "abc",
-                "type": "String",
-                "description": "Description of abc"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "name": "Main",
-        "description": "Description of Main",
-        "childClasses": [],
-        "functions": [
-          {
-            "name": "main",
-            "type": "void",
-            "description": "Description of main",
-            "parameters": []
-          }
-        ]
-      }
+
+(typeDeclaration (classDeclaration class (identifier Person) (classBody { }))) 
+
+(typeDeclaration (classDeclaration class (identifier OuterClass) (classBody { 
+(classBodyDeclaration (memberDeclaration (fieldDeclaration (typeType (primitiveType int)) (variableDeclarators (variableDeclarator (variableDeclaratorId (identifier x)) = (variableInitializer (expression (primary (literal (integerLiteral 10))))))) ;))) 
+
+
+
+(classBodyDeclaration 
+	(modifier (classOrInterfaceModifier public)) 
+	(memberDeclaration 
+		(methodDeclaration 
+			(typeTypeOrVoid void) 
+			(identifier main) 
+			(formalParameters 
+				( 
+					(formalParameterList 
+						(formalParameter 
+							(typeType (classOrInterfaceType (typeIdentifier String)) [ ]) (variableDeclaratorId (identifier args))) , 
+						(formalParameter 
+							(typeType (primitiveType int)) (variableDeclaratorId (identifier param))) , 
+						(formalParameter 
+							(typeType (classOrInterfaceType (typeIdentifier Person))) (variableDeclaratorId (identifier person)))
+					) )) (methodBody (block { (blockStatement (statement (expression (expression (primary (identifier x))) = (expression (primary (literal (integerLiteral 322))))) ;)) (blockStatement (localVariableDeclaration (typeType (classOrInterfaceType (typeIdentifier OuterClass))) (variableDeclarators (variableDeclarator (variableDeclaratorId (identifier myOuter)) = (variableInitializer (expression new (creator (createdName (identifier OuterClass)) (classCreatorRest (arguments ( ))))))))) ;) }))))) 
+	
+	
+	
+(classBodyDeclaration (memberDeclaration (classDeclaration class (identifier InnerClass) (classBody { 
+	(classBodyDeclaration 
+		(modifier (classOrInterfaceModifier public)) 
+		(memberDeclaration 
+			(methodDeclaration 
+			
+				(typeTypeOrVoid (typeType (classOrInterfaceType (typeIdentifier InnerClass)) [ ])) 
+				
+				(identifier main2) 
+				(formalParameters ( (formalParameterList (formalParameter (typeType (classOrInterfaceType (typeIdentifier String))) (variableDeclaratorId (identifier args))) , (formalParameter (typeType (classOrInterfaceType (typeIdentifier String))) (variableDeclaratorId (identifier abc)))) )) (methodBody (block { (blockStatement (localVariableDeclaration (typeType (classOrInterfaceType (typeIdentifier OuterClass))) (variableDeclarators (variableDeclarator (variableDeclaratorId (identifier myOuter)) = (variableInitializer (expression new (creator (createdName (identifier OuterClass)) (classCreatorRest (arguments ( ))))))))) ;) })))))
+})))) 
+
+
+
+
+
+
+
+
+\"CName\":- Person{\r\n}
+
+\r\n\"CName\":- OuterClass{\r\n  
+	\"Method\": {\"Type\":\"void\", \"Name\":\"main\"\r\n      
+	
+	\"Parameters\": [          
+		{\"Type\":\"String[]\"- args}\r\n          
+		{\"Type\":\"int- param}\r\n          
+		{\"Type\":\"Person- person}\r\n]\r\n)}\r\n
+	
+	- main\r\n      \"Parameters\": [          {\"Type\":\"String[]\"- args}\r\n          {\"Type\":\"int- param}\r\n          {\"Type\":\"Person- person}\r\n]\r\n)\"CName\":- InnerClass{\r\n  \"Method\": {\"Type\":\"InnerClass[]\", \"Name\":\"main2\"\r\n      \"Parameters\": [          {\"Type\":\"String- args}\r\n          {\"Type\":\"String- abc}\r\n]\r\n)}\r\n\"Type\":\"InnerClass[]\"- main2\r\n      \"Parameters\": [          {\"Type\":\"String- args}\r\n          {\"Type\":\"String- abc}\r\n]\r\n)}\r\n  \"Method\": {\"Type\":\"char, \"Name\":\"ToChar\"\r\n      \"Parameters\": [          {\"Type\":\"String[]\"- args}\r\n          {\"Type\":\"int- param}\r\n          {\"Type\":\"Person- person}\r\n]\r\n)}\r\n\"Type\":\"char- ToChar\r\n      \"Parameters\": [          {\"Type\":\"String[]\"- args}\r\n          {\"Type\":\"int- param}\r\n          {\"Type\":\"Person- person}\r\n]\r\n)}\r\n\"CName\":- Main{\r\n  \"Method\": {\"Type\":\"void\", \"Name\":\"main\"\r\n)}\r\n- main\r\n)}\r\n

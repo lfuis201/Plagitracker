@@ -138,9 +138,11 @@ namespace PlagiTracker.WebAPI.Controllers
                             Column = t.Column
                         }).ToList())*/
                         Body = BodyGenerator.ParseSyntaxTree(tree),
-                        //BodyJson = BodyGenerator.ParseClassText(BodyGenerator.ParseSyntaxTree(tree)),
+                        BodyJson = BodyGenerator.ParseClassInput(BodyGenerator.ParseSyntaxTree(tree)),
                     };
+                    //Console.WriteLine(result.SyntaxTree);
                     Console.WriteLine(result.Body);
+                    //Console.WriteLine(JsonConvert.SerializeObject(result.BodyJson));
                     results.Add(result);
                 }
                 catch (Exception) 
