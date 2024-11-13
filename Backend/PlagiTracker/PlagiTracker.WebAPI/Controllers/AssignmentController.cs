@@ -1,6 +1,7 @@
 ﻿using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 using Hangfire;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -15,6 +16,7 @@ using PlagiTracker.Data.Responses;
 using PlagiTracker.Services.FileServices;
 using PlagiTracker.Services.SeleniumServices;
 using PlagiTracker.WebAPI.HangFire;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace PlagiTracker.WebAPI.Controllers
@@ -357,6 +359,7 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet]
         [Route("GetAllByCourse")]
         public async Task<ActionResult> GetAllByCourse(Guid courseId)
