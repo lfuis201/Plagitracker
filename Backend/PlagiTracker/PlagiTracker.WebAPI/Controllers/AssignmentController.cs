@@ -15,6 +15,7 @@ using PlagiTracker.Data.Responses;
 using PlagiTracker.Services.FileServices;
 using PlagiTracker.Services.SeleniumServices;
 using PlagiTracker.WebAPI.HangFire;
+using System.Text;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
@@ -28,41 +29,7 @@ namespace PlagiTracker.WebAPI.Controllers
         {
             _context = context ?? throw new ArgumentNullException(nameof(context), "Error: Data Base connection");
         }
-        //class OuterClass {   int x = 10;    class InnerClass {     int y = 5;          public void f1(String args, int b) {    }          public void f1(int b, String args) {    }   } }  public class Main {   public static void main(String[] args) {     OuterClass myOuter = new OuterClass();     OuterClass.InnerClass myInner = myOuter.new InnerClass();     System.out.println(myInner.y + myOuter.x);   } } 
-/*
-{
-  "clases": [
-    {
-      "claseNombre": "OuterClass",
-      "metodos": []
-    },
-    {
-      "claseNombre": "Main",
-      "metodos": [
-        {
-          "metodoNombre": "main",
-          "variables": [
-            {
-              "variableNombre": "myOuter",
-              "variableTipo": "OuterClass"
-            },
-            {
-    "variableNombre": "myInner",
-              "variableTipo": "OuterClass.InnerClass"
-            }
-          ],
-          "parametros": [
-            {
-              "parametroNombre": "args",
-              "parametroTipo": "String[]"
-            }
-          ]
-        }
-      ]
-    }
-  ]
-}
-*/
+
         [HttpPost]
         [Route("JCode")]
         public async Task<ActionResult> JCode([FromBody] string code)
@@ -77,7 +44,62 @@ namespace PlagiTracker.WebAPI.Controllers
             try
             {
                 result = await CodeUtils.JCode.JCodeClient.Execute(code);
-                return Ok(result);
+
+                if (result == null || result.Clases == null)
+                {
+                    return BadRequest("Error in JCode");
+                }
+
+                // Convertir el resultado a inglés y eliminar las variables
+                result.ToEnglish();
+                result.IgnoreVariables();
+
+                return Ok(result.Classes);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Error in JCode");
+            }
+        }
+
+        [HttpPost]
+        [Route("JCodeForFiles")]
+        public async Task<ActionResult> JCodeForFiles(IFormFileCollection files)
+        {
+            if (files == null || files.Count < 1)
+            {
+                return BadRequest("No files uploaded.");
+            }
+
+            StringBuilder filesContent = new();
+
+            foreach (var file in files)
+            {
+                if (file.Length > 0)
+                {
+                    using (var reader = new StreamReader(file.OpenReadStream()))
+                    {
+                        filesContent.AppendLine(await reader.ReadToEndAsync());
+                    }
+                }
+            }
+
+            JCodeResponse result;
+
+            try
+            {
+                result = await CodeUtils.JCode.JCodeClient.Execute(filesContent.ToString());
+
+                if (result == null || result.Clases == null)
+                {
+                    return BadRequest("Error in JCode");
+                }
+
+                // Convertir el resultado a inglés y eliminar las variables
+                result.ToEnglish();
+                result.IgnoreVariables();
+
+                return Ok(result.Classes);
             }
             catch (Exception ex)
             {

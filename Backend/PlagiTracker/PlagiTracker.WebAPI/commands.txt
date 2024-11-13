@@ -1,4 +1,4 @@
-Add-Migration IsArchivedAddedInCourse -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
+Add-Migration ChangeNameFunctionToMethod -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 Update-Database -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 
 {

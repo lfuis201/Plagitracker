@@ -16,7 +16,7 @@ namespace PlagiTracker.Data.DataAccess
         public DbSet<Code>? Codes { get; set; }
         public DbSet<Exercise>? Exercises { get; set; }
         public DbSet<Class>? Classes { get; set; }
-        public DbSet<Function>? Functions { get; set; }
+        public DbSet<Method>? Methods { get; set; }
 
         /// <summary>
         /// Configuraciones adicionales para la base de datos como columnas únicas
@@ -131,14 +131,14 @@ namespace PlagiTracker.Data.DataAccess
             });
 
             // Función
-            modelBuilder.Entity<Function>(builder =>
+            modelBuilder.Entity<Method>(builder =>
             {
-                builder.HasIndex(function => new
+                builder.HasIndex(method => new
                 {
-                    function.ClassId,
-                    function.Name,
-                    function.Type,
-                    function.ParameterTypes,
+                    method.ClassId,
+                    method.Type,
+                    method.Name,
+                    method.ParameterTypes,
                 }).IsUnique();
             });
 
@@ -147,9 +147,9 @@ namespace PlagiTracker.Data.DataAccess
             {
                 builder.HasIndex(parameter => new
                 {
-                    parameter.FunctionId,
-                    parameter.Name,
+                    parameter.MethodId,
                     parameter.Type,
+                    parameter.Name,
                 }).IsUnique();
             });
         }

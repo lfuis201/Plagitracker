@@ -5,7 +5,7 @@ namespace PlagiTracker.Data.Entities
 {
     /// <summary>
     /// </summary>
-    public class Function : BaseEntity
+    public class Method : BaseEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -16,10 +16,10 @@ namespace PlagiTracker.Data.Entities
         public string? Name { get; set; }
 
         /// <summary>
-        /// Tipo de la función
+        /// Tipo del método.
         /// </summary>
         [Required]
-        public string? Type { get; set; }
+        public string? Type { get; set; } = "undefined";
 
         /// <summary>
         /// Tipos de los parámetros. Se concatenan los tipos de los parámetros separados por coma.
