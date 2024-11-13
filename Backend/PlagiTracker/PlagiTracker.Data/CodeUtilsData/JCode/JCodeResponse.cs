@@ -1,12 +1,14 @@
 ﻿// Ignore Spelling: Utils Clases
 
-namespace PlagiTracker.CodeUtils.JCode.Responses
+using PlagiTracker.Data.Requests;
+
+namespace PlagiTracker.Data.CodeUtilsData.JCode
 {
     public class JCodeResponse
     {
         public List<Clase>? Clases { get; set; }
 
-        public List<JCodeClass>? Classes { get; set; }
+        public List<ClassRequest>? Classes { get; set; }
 
         public void ToEnglish()
         {

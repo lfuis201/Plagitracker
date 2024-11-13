@@ -6,19 +6,15 @@ using PlagiTracker.Data.Entities;
 using PlagiTracker.Data.Requests;
 using PlagiTracker.Data.Responses;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TeacherController : ControllerBase, IUserController
+    public class TeacherController : CustomControllerBase, IUserController
     {
-        private readonly DataContext _context;
-
-        public TeacherController(DataContext context)
+        public TeacherController(DataContext context) : base(context)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context), "Error: Data Base connection");
         }
 
         #region IUserController Implementation
@@ -292,24 +288,38 @@ namespace PlagiTracker.WebAPI.Controllers
 
         [HttpGet]
         [Route("Get")]
-        public async Task<ActionResult> Get(Guid id)
+        public async Task<ActionResult> Get(BaseRequest baseRequest, Guid id)
         {
-            var teacher = await _context!.Teachers!.FindAsync(id);
-
-            if (teacher == null)
+            try
             {
-                return NotFound();
+                var verifyTokenResult = await VerifyToken(baseRequest);
+
+                if (verifyTokenResult.Success)
+                {
+                    return Unauthorized(verifyTokenResult.Message);
+                }
+
+                var teacher = await _context!.Teachers!.FindAsync(id);
+
+                if (teacher == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(new TeacherResponse()
+                {
+                    Id = teacher.Id,
+                    FirstName = teacher.FirstName,
+                    LastName = teacher.LastName,
+                    Email = teacher.Email
+                });
             }
-
-            return Ok(new TeacherResponse()
+            catch (Exception ex)
             {
-                Id = teacher.Id,
-                FirstName = teacher.FirstName,
-                LastName = teacher.LastName,
-                Email = teacher.Email
-            });
+                return BadRequest(ex.Message);
+            }
+            
         }
-
 
         [HttpPut]
         [Route("Update")]

@@ -1,12 +1,8 @@
-﻿// Ignore Spelling: Parametros Metodo Nombre
+﻿// Ignore Spelling: Parametros Metodo Nombre Utils
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using PlagiTracker.Data.Requests;
 
-namespace PlagiTracker.CodeUtils.JCode.Responses
+namespace PlagiTracker.Data.CodeUtilsData.JCode
 {
     public class Metodo
     {
@@ -14,9 +10,9 @@ namespace PlagiTracker.CodeUtils.JCode.Responses
         public List<Variable>? Variables { get; set; }
         public List<Parametro>? Parametros { get; set; }
 
-        public JCodeMethod ToEnglish()
+        public MethodRequest ToEnglish()
         {
-            var jCodeMethod = new JCodeMethod
+            var jCodeMethod = new MethodRequest
             {
                 Name = MetodoNombre,
                 Variables = Variables?.Select(variable => variable.ToEnglish()).ToList(),
@@ -25,12 +21,5 @@ namespace PlagiTracker.CodeUtils.JCode.Responses
 
             return jCodeMethod;
         }
-    }
-
-    public class JCodeMethod
-    {
-        public string? Name { get; set; }
-        public List<JCodeVariable>? Variables { get; set; }
-        public List<JCodeParameter>? Parameters { get; set; }
     }
 }

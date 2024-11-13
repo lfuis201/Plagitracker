@@ -1,5 +1,7 @@
-﻿using Newtonsoft.Json;
-using PlagiTracker.CodeUtils.JCode.Responses;
+﻿// Ignore Spelling: Utils
+
+using Newtonsoft.Json;
+using PlagiTracker.Data.CodeUtilsData.JCode;
 
 namespace PlagiTracker.CodeUtils.JCode
 {

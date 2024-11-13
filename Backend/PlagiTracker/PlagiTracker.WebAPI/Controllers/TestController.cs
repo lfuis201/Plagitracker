@@ -2,22 +2,16 @@
 
 using Microsoft.AspNetCore.Mvc;
 using PlagiTracker.Data.DataAccess;
-using PlagiTracker.Data.Entities;
-using PlagiTracker.Data.Requests;
 using PlagiTracker.Services.SeleniumServices;
-using System;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TestController : ControllerBase
+    public class TestController : CustomControllerBase
     {
-        private readonly DataContext _context;
-
-        public TestController(DataContext context)
+        public TestController(DataContext context) : base(context)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context), "Error: Data Base connection");
         }
 
         [HttpPost]

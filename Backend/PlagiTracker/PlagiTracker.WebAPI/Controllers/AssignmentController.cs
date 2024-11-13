@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using PlagiTracker.CodeUtils.GrammarFiles;
 using PlagiTracker.CodeUtils.JavaUtils;
-using PlagiTracker.CodeUtils.JCode.Responses;
 using PlagiTracker.Data;
+using PlagiTracker.Data.CodeUtilsData.JCode;
 using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Entities;
 using PlagiTracker.Data.Requests;
@@ -279,9 +279,15 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Analiza el código de una asignación
+        /// </summary>
+        /// <param name="baseRequest"></param>
+        /// <param name="assignmentId"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("Analyze")]
-        public async Task<ActionResult> Analyze(Guid assignmentId)
+        public async Task<ActionResult> Analyze(BaseRequest baseRequest, Guid assignmentId)
         {
             var assignment = await _context!.Assignments!.FindAsync(assignmentId);
 

@@ -1,8 +1,6 @@
-﻿
-
-namespace PlagiTracker.Data.Requests
+﻿namespace PlagiTracker.Data.Requests
 {
-    public class SubmissionRequest
+    public class SubmissionRequest : BaseRequest
     {
         public string? Url { get; set; }
 
