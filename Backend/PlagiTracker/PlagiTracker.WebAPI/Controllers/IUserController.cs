@@ -1,5 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using PlagiTracker.Data.Requests;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
@@ -30,5 +34,29 @@ namespace PlagiTracker.WebAPI.Controllers
         Task<ActionResult> ResetPasswordVerification(string email, int code);
 
         Task<ActionResult> ResetPassword(ResetPasswordRequest resetPasswordRequest);
+
+        string GenerateJwtToken(IConfiguration _configuration, string email)
+        {
+            var jwtSettings = _configuration.GetSection("Jwt");
+            var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    // intentar con SID!!!
+                    // usar Role !!
+                    new Claim(ClaimTypes.Email, email)
+                }),
+                Expires = DateTime.UtcNow.AddMinutes(double.Parse(jwtSettings["ExpireMinutes"]!)),
+                Issuer = jwtSettings["Issuer"],
+                Audience = jwtSettings["Audience"],
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
     }
 }

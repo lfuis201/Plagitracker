@@ -1,4 +1,4 @@
-Add-Migration IsArchivedAddedInCourse -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
+Add-Migration ChangeNameFunctionToMethod -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 Update-Database -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 
 {
@@ -126,17 +126,33 @@ Replit
 7SasF6B^X99db(VH
 
 ___________________________________________________________________
+class Person {
+}
+
 class OuterClass {
   int x = 10;
-  public static void main(String[] args, int param, Person person) {
+  public void main(String[] args, int param, Person person) {
 	x = 322;
     OuterClass myOuter = new OuterClass();
   }
   
   class InnerClass {
-    public InnerClass main2(String args, String abc) {
+    public InnerClass[] main2(String args, String abc) {
       OuterClass myOuter = new OuterClass();
     }
+	
+	public void VoidMethod(String args, String abc) {
+      OuterClass myOuter = new OuterClass();
+    }
+  }
+  private static char ToChar(String[] args, int param, Person person) {
+	Integer x = 322;
+    OuterClass myOuter = new OuterClass();
+  }
+  
+  private static void Print(String text) {
+	Integer x = 322;
+    OuterClass myOuter = new OuterClass();
   }
 }
 
@@ -146,53 +162,87 @@ public class Main {
   }
 }
 ___________________________________________________________________
-OuterClass {
-  void main(String[] args)
+class Person {
+}
+
+class OuterClass {
+  public void main(String[] args, int param, Person person) {
+  }
   
-  InnerClass {
-    public static void main(String[] args)
+  class InnerClass {
+    public InnerClass[] main2(String args, String abc) {
+      OuterClass myOuter = new OuterClass();
+    }
+	
+	public void VoidMethod(String args, String abc) {
+    }
+  }
+  private static char ToChar(String[] args, int param, Person person) {
+  }
+  
+  private static void Print(String text) {
   }
 }
-Main {
-  void main(String[] args)
+
+public class Main {
+  void main() {
+  }
 }
 ___________________________________________________________________
-class ¿False 0 0? 
-	OuterClass ¿True 1 1? 
-	{ ¿True 1 1? 
-		main ¿True 2 2? 
-			String ¿True 3 3? 
-			[ ¿True 3 3? 
-			] ¿True 3 4? 
-			args ¿True 3 3? 
-				int ¿True 4 4? 
-				param ¿True 4 4? 
-					Person ¿True 5 5? 
-					person ¿True 5 5? 
-			InnerClass ¿True 3 3? 
-			{ ¿True 3 3? 
-				InnerClass ¿True 4 4? 
-				main2 ¿True 4 4? 
-					String ¿True 5 5? 
-					args ¿True 5 5? 
-						String ¿True 6 6? 
-						abc ¿True 6 6? 
-			} ¿True 3 4? 
-	} ¿True 1 2? 
-class ¿False 0 0? 
-	Main ¿True 1 1? 
-	{ ¿True 1 1? 
-		main ¿True 2 2? 
-	} ¿True 1 2?
-___________________________________________________________________
-class OuterClass 
-{ 
-	void main ( String [ ] args int param Person person ) 
-	class InnerClass { 
-		InnerClass main2 ( String args String abc ) 
-	} 
-} 
-class Main 
-{ 
-	void main ( ) 
-}
+
+(typeDeclaration (classDeclaration class (identifier Person) (classBody { }))) 
+
+(typeDeclaration (classDeclaration class (identifier OuterClass) (classBody { 
+(classBodyDeclaration (memberDeclaration (fieldDeclaration (typeType (primitiveType int)) (variableDeclarators (variableDeclarator (variableDeclaratorId (identifier x)) = (variableInitializer (expression (primary (literal (integerLiteral 10))))))) ;))) 
+
+
+
+(classBodyDeclaration 
+	(modifier (classOrInterfaceModifier public)) 
+	(memberDeclaration 
+		(methodDeclaration 
+			(typeTypeOrVoid void) 
+			(identifier main) 
+			(formalParameters 
+				( 
+					(formalParameterList 
+						(formalParameter 
+							(typeType (classOrInterfaceType (typeIdentifier String)) [ ]) (variableDeclaratorId (identifier args))) , 
+						(formalParameter 
+							(typeType (primitiveType int)) (variableDeclaratorId (identifier param))) , 
+						(formalParameter 
+							(typeType (classOrInterfaceType (typeIdentifier Person))) (variableDeclaratorId (identifier person)))
+					) )) (methodBody (block { (blockStatement (statement (expression (expression (primary (identifier x))) = (expression (primary (literal (integerLiteral 322))))) ;)) (blockStatement (localVariableDeclaration (typeType (classOrInterfaceType (typeIdentifier OuterClass))) (variableDeclarators (variableDeclarator (variableDeclaratorId (identifier myOuter)) = (variableInitializer (expression new (creator (createdName (identifier OuterClass)) (classCreatorRest (arguments ( ))))))))) ;) }))))) 
+	
+	
+	
+(classBodyDeclaration (memberDeclaration (classDeclaration class (identifier InnerClass) (classBody { 
+	(classBodyDeclaration 
+		(modifier (classOrInterfaceModifier public)) 
+		(memberDeclaration 
+			(methodDeclaration 
+			
+				(typeTypeOrVoid (typeType (classOrInterfaceType (typeIdentifier InnerClass)) [ ])) 
+				
+				(identifier main2) 
+				(formalParameters ( (formalParameterList (formalParameter (typeType (classOrInterfaceType (typeIdentifier String))) (variableDeclaratorId (identifier args))) , (formalParameter (typeType (classOrInterfaceType (typeIdentifier String))) (variableDeclaratorId (identifier abc)))) )) (methodBody (block { (blockStatement (localVariableDeclaration (typeType (classOrInterfaceType (typeIdentifier OuterClass))) (variableDeclarators (variableDeclarator (variableDeclaratorId (identifier myOuter)) = (variableInitializer (expression new (creator (createdName (identifier OuterClass)) (classCreatorRest (arguments ( ))))))))) ;) })))))
+})))) 
+
+
+
+
+
+
+
+
+\"CName\":- Person{\r\n}
+
+\r\n\"CName\":- OuterClass{\r\n  
+	\"Method\": {\"Type\":\"void\", \"Name\":\"main\"\r\n      
+	
+	\"Parameters\": [          
+		{\"Type\":\"String[]\"- args}\r\n          
+		{\"Type\":\"int- param}\r\n          
+		{\"Type\":\"Person- person}\r\n]\r\n)}\r\n
+	
+	- main\r\n      \"Parameters\": [          {\"Type\":\"String[]\"- args}\r\n          {\"Type\":\"int- param}\r\n          {\"Type\":\"Person- person}\r\n]\r\n)\"CName\":- InnerClass{\r\n  \"Method\": {\"Type\":\"InnerClass[]\", \"Name\":\"main2\"\r\n      \"Parameters\": [          {\"Type\":\"String- args}\r\n          {\"Type\":\"String- abc}\r\n]\r\n)}\r\n\"Type\":\"InnerClass[]\"- main2\r\n      \"Parameters\": [          {\"Type\":\"String- args}\r\n          {\"Type\":\"String- abc}\r\n]\r\n)}\r\n  \"Method\": {\"Type\":\"char, \"Name\":\"ToChar\"\r\n      \"Parameters\": [          {\"Type\":\"String[]\"- args}\r\n          {\"Type\":\"int- param}\r\n          {\"Type\":\"Person- person}\r\n]\r\n)}\r\n\"Type\":\"char- ToChar\r\n      \"Parameters\": [          {\"Type\":\"String[]\"- args}\r\n          {\"Type\":\"int- param}\r\n          {\"Type\":\"Person- person}\r\n]\r\n)}\r\n\"CName\":- Main{\r\n  \"Method\": {\"Type\":\"void\", \"Name\":\"main\"\r\n)}\r\n- main\r\n)}\r\n

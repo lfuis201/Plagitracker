@@ -1,6 +1,6 @@
 ﻿namespace PlagiTracker.Data.Requests
 {
-    public class TeacherUpdateRequest
+    public class TeacherUpdateRequest : BaseRequest
     {
         public Guid Id { get; set; }
 

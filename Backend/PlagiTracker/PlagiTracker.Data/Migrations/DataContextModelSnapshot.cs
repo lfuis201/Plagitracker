@@ -243,7 +243,7 @@ namespace PlagiTracker.Data.Migrations
                     b.ToTable("Exercises");
                 });
 
-            modelBuilder.Entity("PlagiTracker.Data.Entities.Function", b =>
+            modelBuilder.Entity("PlagiTracker.Data.Entities.Method", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -279,10 +279,10 @@ namespace PlagiTracker.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClassId", "Name", "Type", "ParameterTypes")
+                    b.HasIndex("ClassId", "Type", "Name", "ParameterTypes")
                         .IsUnique();
 
-                    b.ToTable("Functions");
+                    b.ToTable("Methods");
                 });
 
             modelBuilder.Entity("PlagiTracker.Data.Entities.Parameter", b =>
@@ -294,7 +294,7 @@ namespace PlagiTracker.Data.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
-                    b.Property<Guid>("FunctionId")
+                    b.Property<Guid>("MethodId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Name")
@@ -308,7 +308,7 @@ namespace PlagiTracker.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FunctionId", "Name", "Type")
+                    b.HasIndex("MethodId", "Type", "Name")
                         .IsUnique();
 
                     b.ToTable("Parameter");
@@ -559,7 +559,7 @@ namespace PlagiTracker.Data.Migrations
                     b.Navigation("Assignment");
                 });
 
-            modelBuilder.Entity("PlagiTracker.Data.Entities.Function", b =>
+            modelBuilder.Entity("PlagiTracker.Data.Entities.Method", b =>
                 {
                     b.HasOne("PlagiTracker.Data.Entities.Class", "Class")
                         .WithMany()
@@ -572,13 +572,13 @@ namespace PlagiTracker.Data.Migrations
 
             modelBuilder.Entity("PlagiTracker.Data.Entities.Parameter", b =>
                 {
-                    b.HasOne("PlagiTracker.Data.Entities.Function", "Function")
+                    b.HasOne("PlagiTracker.Data.Entities.Method", "Method")
                         .WithMany()
-                        .HasForeignKey("FunctionId")
+                        .HasForeignKey("MethodId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Function");
+                    b.Navigation("Method");
                 });
 
             modelBuilder.Entity("PlagiTracker.Data.Entities.Plagiarism", b =>

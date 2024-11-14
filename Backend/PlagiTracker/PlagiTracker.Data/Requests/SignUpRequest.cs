@@ -3,6 +3,9 @@
     /// <summary>
     /// Puede ser una petición del estudiante o del profesor
     /// </summary>
+    /// <remarks>
+    /// No requiere BaseRequest
+    /// </remarks>
     public class SignUpRequest
     {
         public string? FirstName { get; set; }

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// Ignore Spelling: Utils
+
 using Newtonsoft.Json;
-using PlagiTracker.CodeUtils.JCode.Responses;
+using PlagiTracker.Data.CodeUtilsData.JCode;
 
 namespace PlagiTracker.CodeUtils.JCode
 {

@@ -24,9 +24,9 @@ namespace PlagiTracker.Data.Entities
         /// <summary>
         /// </summary>
         [Required]
-        public Guid FunctionId { get; set; }
+        public Guid MethodId { get; set; }
 
-        [ForeignKey(nameof(FunctionId))]
-        public virtual Function? Function { get; set; }
+        [ForeignKey(nameof(MethodId))]
+        public virtual Method? Method { get; set; }
     }
 }

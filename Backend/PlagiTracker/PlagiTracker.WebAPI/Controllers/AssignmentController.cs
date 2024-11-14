@@ -1,13 +1,14 @@
 ﻿using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 using Hangfire;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using PlagiTracker.CodeUtils.GrammarFiles;
 using PlagiTracker.CodeUtils.JavaUtils;
-using PlagiTracker.CodeUtils.JCode.Responses;
 using PlagiTracker.Data;
+using PlagiTracker.Data.CodeUtilsData.JCode;
 using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Entities;
 using PlagiTracker.Data.Requests;
@@ -15,6 +16,8 @@ using PlagiTracker.Data.Responses;
 using PlagiTracker.Services.FileServices;
 using PlagiTracker.Services.SeleniumServices;
 using PlagiTracker.WebAPI.HangFire;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
@@ -28,41 +31,7 @@ namespace PlagiTracker.WebAPI.Controllers
         {
             _context = context ?? throw new ArgumentNullException(nameof(context), "Error: Data Base connection");
         }
-        //class OuterClass {   int x = 10;    class InnerClass {     int y = 5;          public void f1(String args, int b) {    }          public void f1(int b, String args) {    }   } }  public class Main {   public static void main(String[] args) {     OuterClass myOuter = new OuterClass();     OuterClass.InnerClass myInner = myOuter.new InnerClass();     System.out.println(myInner.y + myOuter.x);   } } 
-/*
-{
-  "clases": [
-    {
-      "claseNombre": "OuterClass",
-      "metodos": []
-    },
-    {
-      "claseNombre": "Main",
-      "metodos": [
-        {
-          "metodoNombre": "main",
-          "variables": [
-            {
-              "variableNombre": "myOuter",
-              "variableTipo": "OuterClass"
-            },
-            {
-    "variableNombre": "myInner",
-              "variableTipo": "OuterClass.InnerClass"
-            }
-          ],
-          "parametros": [
-            {
-              "parametroNombre": "args",
-              "parametroTipo": "String[]"
-            }
-          ]
-        }
-      ]
-    }
-  ]
-}
-*/
+
         [HttpPost]
         [Route("JCode")]
         public async Task<ActionResult> JCode([FromBody] string code)
@@ -77,7 +46,62 @@ namespace PlagiTracker.WebAPI.Controllers
             try
             {
                 result = await CodeUtils.JCode.JCodeClient.Execute(code);
-                return Ok(result);
+
+                if (result == null || result.Clases == null)
+                {
+                    return BadRequest("Error in JCode");
+                }
+
+                // Convertir el resultado a inglés y eliminar las variables
+                result.ToEnglish();
+                result.IgnoreVariables();
+
+                return Ok(result.Classes);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Error in JCode");
+            }
+        }
+
+        [HttpPost]
+        [Route("JCodeForFiles")]
+        public async Task<ActionResult> JCodeForFiles(IFormFileCollection files)
+        {
+            if (files == null || files.Count < 1)
+            {
+                return BadRequest("No files uploaded.");
+            }
+
+            StringBuilder filesContent = new();
+
+            foreach (var file in files)
+            {
+                if (file.Length > 0)
+                {
+                    using (var reader = new StreamReader(file.OpenReadStream()))
+                    {
+                        filesContent.AppendLine(await reader.ReadToEndAsync());
+                    }
+                }
+            }
+
+            JCodeResponse result;
+
+            try
+            {
+                result = await CodeUtils.JCode.JCodeClient.Execute(filesContent.ToString());
+
+                if (result == null || result.Clases == null)
+                {
+                    return BadRequest("Error in JCode");
+                }
+
+                // Convertir el resultado a inglés y eliminar las variables
+                result.ToEnglish();
+                result.IgnoreVariables();
+
+                return Ok(result.Classes);
             }
             catch (Exception ex)
             {
@@ -138,9 +162,11 @@ namespace PlagiTracker.WebAPI.Controllers
                             Column = t.Column
                         }).ToList())*/
                         Body = BodyGenerator.ParseSyntaxTree(tree),
-                        BodyJson = AssignmentRequest.ParseTextToClassRequests(BodyGenerator.ParseSyntaxTree(tree)),
+                        BodyJson = BodyGenerator.ParseClassInput(BodyGenerator.ParseSyntaxTree(tree)),
                     };
-
+                    //Console.WriteLine(result.SyntaxTree);
+                    Console.WriteLine(result.Body);
+                    //Console.WriteLine(JsonConvert.SerializeObject(result.BodyJson));
                     results.Add(result);
                 }
                 catch (Exception) 
@@ -152,99 +178,6 @@ namespace PlagiTracker.WebAPI.Controllers
             //return Ok(results);
 
             return Ok(results);
-
-            /*
-            return Ok(new ExerciseRequest
-            {
-                Name = "Exercise 1",
-                Description = "Description of Exercise 1",
-                HaveBody = true,
-                Classes = new List<ClassRequest>
-                {
-                    new ClassRequest
-                    {
-                        Name = "OuterClass",
-                        Description = "Description of OuterClass",
-                        Functions = new List<FunctionRequest>
-                        {
-                            new FunctionRequest
-                            {
-                                Name = "f1",
-                                Type = "void",
-                                Description = "Description of f1",
-                                Parameters = new List<ParameterRequest>
-                                {
-                                    new ParameterRequest
-                                    {
-                                        Name = "args",
-                                        Type = "String",
-                                        Description = "Description of args"
-                                    },
-                                    new ParameterRequest
-                                    {
-                                        Name = "b",
-                                        Type = "int",
-                                        Description = "Description of b"
-                                    }
-                                }
-                            }
-                        },
-                        ChildClass = new ClassRequest
-                        {
-                            Name = "InnerClass",
-                            Description = "Description of InnerClass",
-                            Functions = new List<FunctionRequest>
-                            {
-                                new FunctionRequest
-                                {
-                                    Name = "f1",
-                                    Type = "void",
-                                    Description = "Description of f1",
-                                    Parameters = new List<ParameterRequest>
-                                    {
-                                        new ParameterRequest
-                                        {
-                                            Name = "b",
-                                            Type = "int",
-                                            Description = "Description of b"
-                                        },
-                                        new ParameterRequest
-                                        {
-                                            Name = "args",
-                                            Type = "String",
-                                            Description = "Description of args"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    new ClassRequest
-                    {
-                        Name = "Main",
-                        Description = "Description of Main",
-                        Functions = new List<FunctionRequest>
-                        {
-                            new FunctionRequest
-                            {
-                                Name = "main",
-                                Type = "void",
-                                Description = "Description of main",
-                                Parameters = new List<ParameterRequest>
-                                {
-                                    new ParameterRequest
-                                    {
-                                        Name = "args",
-                                        Type = "String[]",
-                                        Description = "Description of args"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-            */
         }
 
         [HttpPost]
@@ -348,9 +281,15 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Analiza el código de una asignación
+        /// </summary>
+        /// <param name="baseRequest"></param>
+        /// <param name="assignmentId"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("Analyze")]
-        public async Task<ActionResult> Analyze(Guid assignmentId)
+        public async Task<ActionResult> Analyze(BaseRequest baseRequest, Guid assignmentId)
         {
             var assignment = await _context!.Assignments!.FindAsync(assignmentId);
 
@@ -420,6 +359,7 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet]
         [Route("GetAllByCourse")]
         public async Task<ActionResult> GetAllByCourse(Guid courseId)

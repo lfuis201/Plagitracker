@@ -14,10 +14,12 @@ namespace PlagiTracker.WebAPI.Controllers
     public class StudentController : ControllerBase, IUserController
     {
         private readonly DataContext _context;
+        private readonly IConfiguration _configuration;
 
-        public StudentController(DataContext context)
+        public StudentController(DataContext context, IConfiguration configuration)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context), "Error: Data Base connection");
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration), "Error: Error in configuration");
         }
 
         #region IUserController Implementation
@@ -133,13 +135,20 @@ namespace PlagiTracker.WebAPI.Controllers
                     }
 
                     await _context.SaveChangesAsync();
+                    string token = ((IUserController)this).GenerateJwtToken(_configuration, student.Email!);
+
+                    if (string.IsNullOrEmpty(token))
+                    {
+                        return BadRequest(new { message = "Error generating token." });
+                    }
 
                     return Ok(new LogInResponse
                     {
                         Id = student.Id,
                         FirstName = student.FirstName,
                         LastName = student.LastName,
-                        Email = student.Email
+                        Email = student.Email,
+                        Token = token,
                     });
                 }
             }

@@ -6,6 +6,7 @@ using System.Text;
 using Antlr4.Runtime.Tree;
 using PlagiTracker.CodeUtils.GrammarFiles;
 using Antlr4.Runtime;
+using PlagiTracker.Data.Requests;
 
 namespace PlagiTracker.CodeUtils.JavaUtils
 {
@@ -40,7 +41,19 @@ namespace PlagiTracker.CodeUtils.JavaUtils
             typeof(JavaParser.FormalParameterListContext),
             typeof(JavaParser.FormalParameterContext),
             typeof(JavaParser.FieldDeclarationContext),
+            typeof(JavaParser.TypeTypeContext),
         };
+
+        private const string
+            CLASS_DECLARATION = "class",
+            COMMA = ",",
+            LEFT_KEY = "{",
+            RIGHT_KEY = "}",
+            LEFT_PARENTHESIS = "(",
+            RIGHT_PARENTHESIS = ")",
+            LEFT_BRACKET = "[",
+            RIGHT_BRACKET = "]"
+            ;
 
         public enum StructureType
         {
@@ -48,79 +61,57 @@ namespace PlagiTracker.CodeUtils.JavaUtils
             Method,
             Parameter,
             None
-        } 
-        
-        public static string GenerateBody(List<TokenInfo> tokens)
+        }
+
+        private const string 
+            classRegex = @"""Name""\s*:\s*""(\w+)""\s*{",
+            classNameRegex = @"""Name""\s*:\s*""(\w+)""\s*{"
+            ;
+
+
+        public static List<ClassRequest> ParseClassInput(string inputText)
         {
-            StringBuilder body = new StringBuilder();
-            Stack<string> classStack = new Stack<string>(); // Para rastrear clases anidadas
-            bool isMethod = false;
-            string methodName = "";
-            bool isMethodArgs = false;
-            StringBuilder methodArgs = new StringBuilder();
-            int indentationLevel = 0;
+            List<ClassRequest> classes = [];
+            int currentClassLevel = 0;
 
-            foreach (var token in tokens)
+            int currentClassOpened = 0;
+            int currentClassClosed = 0;
+            ClassRequest? currentClass = null;
+            string currentTest = string.Empty;
+
+            foreach (var line in inputText.Split("\n"))
             {
-                // Detecta el nombre de la clase
-                if (token.Type == 9) // Tipo 'class'
+                
+                if (new Regex(classRegex).IsMatch(line))
                 {
-                    isMethod = false;
-                    methodArgs.Clear();
-
-                    // Buscar nombre de clase
-                    var nextTokenIndex = tokens.IndexOf(token) + 2;
-                    if (nextTokenIndex < tokens.Count && tokens[nextTokenIndex].Type == 128) // Tipo identificador
+                    if (currentClass == null)
                     {
-                        string className = tokens[nextTokenIndex].Text;
-                        classStack.Push(className);
-
-                        body.AppendLine($"{new string(' ', indentationLevel * 2)}{className} {{");
-                        indentationLevel++; // Aumenta la indentación para la siguiente clase o método
+                        currentClass = new();
+                        currentClassOpened++;
                     }
-                }
-                // Detecta métodos y su declaración
-                else if (token.Type == 48) // Tipo 'void'
-                {
-                    isMethod = true;
-                    methodName = tokens[tokens.IndexOf(token) + 2].Text; // El nombre del método viene después del tipo 'void'
-                }
-                else if (isMethod && token.Type == 78) // Tipo '(' inicio de argumentos
-                {
-                    isMethodArgs = true;
-                }
-                else if (isMethodArgs && token.Type != 79) // Mientras esté en los argumentos y no llegue a ')'
-                {
-                    methodArgs.Append(token.Text);
-                }
-                else if (isMethodArgs && token.Type == 79) // Fin de argumentos ')'
-                {
-                    isMethodArgs = false;
-                    body.AppendLine($"{new string(' ', indentationLevel * 2)}void {methodName}({methodArgs})");
-                    isMethod = false;
-                    methodArgs.Clear();
-                }
-                else if (token.Type == 81) // Fin de bloque '}'
-                {
-                    if (classStack.Count > 0)
+                    else if (currentClassOpened == currentClassClosed)
                     {
-                        classStack.Pop();
-                        indentationLevel--; // Disminuye la indentación al cerrar una clase
-                        body.AppendLine($"{new string(' ', indentationLevel * 2)}}}");
+                        classes.Add(currentClass);
+                        currentClass = new();
+                        currentClassClosed++;
                     }
+
+                    //Console.WriteLine(new Regex(classRegex).Match(line).Value);
+                    var className = new Regex(classRegex).Match(line).Groups[1].Value;
+                    currentClass.Name = className;
                 }
             }
 
-            return body.ToString();
+            return classes;
         }
+
 
         public static string ParseSyntaxTree(IParseTree parseTree, bool captureIdentifier = false, int count = 0, StructureType currentStructure = StructureType.None)
         {
             StringBuilder body = new();
             bool CaptureIdentifier = captureIdentifier;
-            StructureType CurrentStructure = currentStructure;
             int Count = count;
-
+            StructureType CurrentStructure = currentStructure;
             //  121 82 120 46 44
 
             for (int i = 0; i < parseTree.ChildCount; i++)
@@ -128,28 +119,93 @@ namespace PlagiTracker.CodeUtils.JavaUtils
                 IParseTree child = parseTree.GetChild(i);
                 if (child is TerminalNodeImpl terminalNode)
                 {
-                    if (RuleIdentifierIndexes.Contains(terminalNode.Parent.RuleContext.RuleIndex) && CaptureIdentifier)
+                    if(terminalNode.Symbol.Text == "void")
                     {
-                        //body.Append($"{terminalNode.Symbol.Text} ¿{CaptureIdentifier} {count} {Count}? ");
-                        body.Append($"{terminalNode.Symbol.Text} ");
+                        //Console.WriteLine($"{CaptureIdentifier}-{CurrentStructure}-{terminalNode.Parent.RuleContext.RuleIndex}");
+                        body.AppendLine($"  \"MType\":\"{terminalNode.Symbol.Text}\"");
+                    }
+
+                    else if (RuleIdentifierIndexes.Contains(terminalNode.Parent.RuleContext.RuleIndex) && CaptureIdentifier)
+                    {
+                        //Console.WriteLine($"¿{terminalNode.Symbol.Text}? ");
+                        if (CurrentStructure == StructureType.Method)
+                        {
+                            body.Append($"    \"MName\":\"{terminalNode.Symbol.Text}\"");
+                        }
+                        else if (CurrentStructure == StructureType.Parameter)
+                        {
+                            body.Append($"\"PName\":\"{terminalNode.Symbol.Text}\"");
+                        }
+                        else
+                        {
+                            //Console.WriteLine($"{CaptureIdentifier} {CurrentStructure}");
+                            body.AppendLine($"  \"CName\":\"{terminalNode.Symbol.Text}\"");
+                        }
+
                         CaptureIdentifier = false;
                     }
-                    else if (RuleDeclarationIndexes.Contains(terminalNode.Parent.RuleContext.RuleIndex) && terminalNode.Symbol.Text != "class" && !CaptureIdentifier)
+                    else if (RuleDeclarationIndexes.Contains(terminalNode.Parent.RuleContext.RuleIndex) 
+                        && terminalNode.Symbol.Text != "class" && terminalNode.Symbol.Text != "," && !CaptureIdentifier)
                     {
                         //body.Append($"{terminalNode.Symbol.Text} ¿{CaptureIdentifier} {count} {Count}? ");
-                        body.Append($"{terminalNode.Symbol.Text} ");
+                        body.Append($"{terminalNode.Symbol.Text}13");
                         CaptureIdentifier = true;
                     }
-                    else if (RuleDeclarationIndexes.Contains(terminalNode.Parent.RuleContext.RuleIndex) && terminalNode.Symbol.Text == "class")
+                    else if (RuleDeclarationIndexes.Contains(terminalNode.Parent.RuleContext.RuleIndex) 
+                        && (terminalNode.Symbol.Text == "class" || terminalNode.Symbol.Text == ","))
                     {
-                        //body.Append($"{terminalNode.Symbol.Text} ¿{CaptureIdentifier} {count} {Count}? ");
-                        body.Append($"\n{terminalNode.Symbol.Text} ");
+                        if (terminalNode.Symbol.Text == CLASS_DECLARATION)
+                        {
+                            body.AppendLine(LEFT_KEY);
+                        }
+                        else if (terminalNode.Symbol.Text == COMMA)
+                        {
+                            body.Append(terminalNode.Symbol.Text);
+                        }
                         CaptureIdentifier = true;
                     }
                     else if (RuleIndexes.Contains(terminalNode.Parent.RuleContext.RuleIndex) && CaptureIdentifier)
                     {
-                        //body.Append($"{terminalNode.Symbol.Text} ¿{CaptureIdentifier} {count} {Count}? ");
-                        body.Append($"{terminalNode.Symbol.Text} ");
+                        switch (terminalNode.Symbol.Text)
+                        {
+                            case LEFT_KEY:
+                                //body.AppendLine(LEFT_KEY);
+                                break;
+                            case RIGHT_KEY:
+                                body.AppendLine(RIGHT_KEY);
+                                break;
+                            case LEFT_PARENTHESIS:
+                                CurrentStructure = StructureType.Parameter;
+                                //body.AppendLine();
+                                break;
+                            case RIGHT_PARENTHESIS:
+                                //body.Append(RIGHT_PARENTHESIS);
+                                CurrentStructure = StructureType.None;
+                                break;
+                            case LEFT_BRACKET:
+                                body.Append(LEFT_BRACKET);
+                                //body.AppendLine();
+                                break;
+                            case RIGHT_BRACKET:
+                                body.Append($"{RIGHT_BRACKET}");
+                                break;
+                            default:
+                                if (CurrentStructure == StructureType.Method)
+                                {
+                                    //Console.WriteLine($"\"Type\":\"{terminalNode.Symbol.Text}\" 245");
+                                    body.Append($"{terminalNode.Symbol.Text}");
+                                }
+                                else if (CurrentStructure == StructureType.Parameter)
+                                {
+                                    body.Append($"{terminalNode.Symbol.Text}");
+                                }
+                                else
+                                {
+                                    //Console.WriteLine($"{terminalNode.Symbol.Text}\" 253");
+                                    body.Append($"{terminalNode.Symbol.Text}");
+                                }
+                                break;
+                        }
                     }
 
                     Count++;
@@ -161,24 +217,63 @@ namespace PlagiTracker.CodeUtils.JavaUtils
                         if (context.RuleIndex == JavaParser.RULE_methodDeclaration)
                         {
                             CaptureIdentifier = true;
+                            body.AppendLine($"  \"Method\": {{");
+                            body.AppendLine($"  {ParseSyntaxTree(child, CaptureIdentifier, Count, StructureType.Method)}}}");
+                        }
+                        else if (context.RuleIndex == JavaParser.RULE_formalParameterList)
+                        {
+                            CaptureIdentifier = true;
+                            body.AppendLine();
+                            body.AppendLine($"    \"Parameters\": [");
+                            body.AppendLine($"{ParseSyntaxTree(child, CaptureIdentifier, Count, CurrentStructure)}]");
                         }
                         else if (context.RuleIndex == JavaParser.RULE_formalParameter)
                         {
                             CaptureIdentifier = true;
+                            body.AppendLine($"      {{{ParseSyntaxTree(child, CaptureIdentifier, Count, StructureType.Parameter)}}}");
+
                         }
                         else if (context.RuleIndex == JavaParser.RULE_fieldDeclaration)
                         {
                             CaptureIdentifier = false;
                         }
+                        else if (context.RuleIndex == JavaParser.RULE_typeType)
+                        {
+                            CaptureIdentifier = true;
+                            if (CurrentStructure == StructureType.Method)
+                            {
+                                body.Append($"\"MType\":\"{ParseSyntaxTree(child, CaptureIdentifier, Count, CurrentStructure)}\",");
+                            }
+                            else
+                            {
+                                body.Append($"\"PType\":\"{ParseSyntaxTree(child, CaptureIdentifier, Count, CurrentStructure)}\",");
+                            }
+                            
+                        }
+                        else if (context.RuleIndex == JavaParser.RULE_typeTypeOrVoid)
+                        {
+                            CaptureIdentifier = true;
+                            if (CurrentStructure == StructureType.Method)
+                            {
+                                body.Append($"\"MType\":\"{ParseSyntaxTree(child, CaptureIdentifier, Count, CurrentStructure)}\",");
+                            }
+                        }
                         else if (context.RuleIndex == JavaParser.RULE_methodBody)
                         {
                             CaptureIdentifier = false;
                         }
+                        else
+                        {
+                            //body.Append(ParseSyntaxTree(child, CaptureIdentifier, Count, CurrentStructure));
+                        }
                     }
+                    else
+                    {
+                        body.Append(ParseSyntaxTree(child, CaptureIdentifier, Count, CurrentStructure));
+                    }
+                    //Console.WriteLine($"{child.Parent.GetText()} {0}");
 
-                    Console.WriteLine($"{child.Parent.GetText()} {0}");
-
-                    body.Append(ParseSyntaxTree(child, CaptureIdentifier, Count));
+                    //body.Append(ParseSyntaxTree(child, CaptureIdentifier, Count));
                 }
             }
 

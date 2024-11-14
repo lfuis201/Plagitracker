@@ -1,5 +1,6 @@
 ﻿namespace PlagiTracker.Data.Requests
 {
+    // No usa BaseRequest
     public class StudentRequest
     {
         public string? FirstName { get; set; }
