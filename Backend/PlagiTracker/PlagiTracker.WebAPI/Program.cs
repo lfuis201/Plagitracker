@@ -23,33 +23,26 @@ var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
 
 builder.Services.AddAuthorization();
-builder.Services.AddAuthentication("Bearer")
-/*
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-*/
 .AddJwtBearer(options =>
 {
     options.RequireHttpsMetadata = false;
-
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = false,
-        ValidateAudience = false,
-        //ValidateIssuer = true,
-        //ValidateAudience = true,
-        //ValidateLifetime = true,
-        //ValidateIssuerSigningKey = true,
-        //ValidIssuer = jwtSettings["Issuer"],
-        //ValidAudience = jwtSettings["Audience"],
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
 });
-
 
 // Añadir los controladores
 builder.Services.AddControllers();
@@ -61,14 +54,13 @@ builder.Services.AddDbContext<PlagiTracker.Data.DataAccess.DataContext>(opt =>
 
 builder.Services.AddScoped<HangFireServices>();
 
-
 // Add CORS policy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins", builder =>
-        {
-            builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-        });
+    {
+        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+    });
 });
 
 // Add Hangfire
@@ -108,6 +100,8 @@ app.UseHttpsRedirection();
 
 // Habilitar autenticación y autorización
 app.UseAuthentication();
+
+
 app.UseAuthorization();
 
 app.MapGet("/public", () => "Hello Public World!");
