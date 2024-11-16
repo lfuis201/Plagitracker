@@ -1,4 +1,5 @@
 ﻿using Hangfire;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PlagiTracker.Data.DataAccess;
@@ -61,6 +62,7 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("LogIn")]
         public async Task<ActionResult> LogIn(LogInRequest logInRequest)
