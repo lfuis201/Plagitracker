@@ -17,6 +17,8 @@ namespace PlagiTracker.Data.Entities
         /// </summary>
         [Required]
         [StringLength(60)]
+        [MinLength(60)]
+        [MaxLength(60)]
         public string? Url { get; set; }
 
         /// <summary>
@@ -46,9 +48,9 @@ namespace PlagiTracker.Data.Entities
 
     public enum UrlState
     {
-        NullOrEmpty,
-        Invalid,
-        NotCodiva,
-        Ok,
+        NullOrEmpty = 0,
+        Invalid = 1,
+        NotCodiva = 2,
+        Ok = 3,
     }
 }

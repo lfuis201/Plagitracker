@@ -17,7 +17,7 @@ namespace PlagiTracker.Tests.WebAPITests
         public void Setup()
         {
             _context = TestDbContextFactory.CreateInMemoryDbContext();
-            _controller = new StudentController(_context);
+            //_controller = new StudentController(_context, );
         }
 
         [TestMethod]

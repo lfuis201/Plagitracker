@@ -15,7 +15,8 @@ async function login(email, passwordHash) {
     }
 
     const data = await response.json();
-    return data.token; // Asumiendo que el token se devuelve en un campo llamado 'token'
+    console.log(data);
+    return data;
 }
 async function getAllByCourse(courseId, token) {
     const url = `https://localhost:9200/api/Assignment/GetAllByCourse?courseId=${courseId}`;
@@ -62,13 +63,12 @@ async function getAllByCourseWithOutToken(courseId) {
         console.error('Error fetching assignments:', error);
     }
 }
-const email = 'mmarmol@gmail.com'; // Reemplaza con tu email
+const email = 'pillanes@plagitracker.com'; // Reemplaza con tu email
 const passwordHash = "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg="; // Reemplaza con tu hash de contraseña
 const courseId = '5500125e-16f5-4b77-9220-cc4dab69c100'; // Reemplaza con el ID del curso
 
-login(email, passwordHash).then(token => {
-    console.log('Token JWT:', token);
-    return getAllByCourse(courseId, token);
+login(email, passwordHash).then(data => {
+    return getAllByCourse(courseId, data.token);
 }).then(data => {
     console.log('Assignments:', data);
 }).catch(error => {

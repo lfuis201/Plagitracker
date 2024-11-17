@@ -28,6 +28,7 @@ namespace PlagiTracker.WebAPI.Controllers
             await _context!.Courses!.AddAsync(new Course()
             {
                 Id = Guid.NewGuid(),
+                InvitationId = Guid.NewGuid(),
                 Name = courseRequest.Name,
                 TeacherId = courseRequest.TeacherId
             });
@@ -55,7 +56,6 @@ namespace PlagiTracker.WebAPI.Controllers
                 TeacherId = course.TeacherId
             });
         }
-
 
         [HttpGet]
         [Route("GetAllByAssignment")]
@@ -212,6 +212,37 @@ namespace PlagiTracker.WebAPI.Controllers
 
             await _context.SaveChangesAsync();
             return Ok();
+        }
+
+        [HttpPost]
+        [Route("UpdateInvitationLink")]
+        public async Task<ActionResult<string>> CreateInvitationLink(Guid courseId)
+        {
+            try
+            {
+                var course = await _context!.Courses!.FindAsync(courseId);
+
+                if (course == null)
+                {
+                    return NotFound("Course not found");
+                }
+
+                // Generar un nuevo identificador de invitación
+                course.InvitationId = Guid.NewGuid();
+
+                // Guardar los cambios en la base de datos
+                _context.Courses.Update(course);
+                await _context.SaveChangesAsync();
+
+                // Construir el enlace de invitación
+                var invitationLink = $"{Request.Scheme}://{Request.Host}/api/Course/Join/{course.InvitationId}";
+
+                return Ok(invitationLink);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
         }
 
         [HttpDelete]

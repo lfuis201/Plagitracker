@@ -15,7 +15,7 @@ namespace PlagiTracker.Data.Entities
         public Guid CourseId { get; set; }
 
         [Range(0, 20)]
-        public double Grade { get; set; }
+        public double Grade { get; set; } = 0;
 
         [ForeignKey(nameof(StudentId))]
         public virtual Student? Student { get; set; }

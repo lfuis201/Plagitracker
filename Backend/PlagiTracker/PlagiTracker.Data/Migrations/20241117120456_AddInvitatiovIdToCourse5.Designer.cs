@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PlagiTracker.Data.DataAccess;
@@ -11,9 +12,11 @@ using PlagiTracker.Data.DataAccess;
 namespace PlagiTracker.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20241117120456_AddInvitatiovIdToCourse5")]
+    partial class AddInvitatiovIdToCourse5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -152,7 +155,6 @@ namespace PlagiTracker.Data.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("InvitationId")
-                        .IsRequired()
                         .HasColumnType("uuid");
 
                     b.Property<bool>("IsArchived")
@@ -173,9 +175,6 @@ namespace PlagiTracker.Data.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("InvitationId")
-                        .IsUnique();
 
                     b.HasIndex("Name")
                         .IsUnique();

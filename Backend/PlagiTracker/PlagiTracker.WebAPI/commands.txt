@@ -1,45 +1,10 @@
-Add-Migration UrlStateAddedToSubmission -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
+Add-Migration AddInvitatiovIdToCourse -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 Update-Database -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 
 {
-  "firstName": "Pedro",
-  "lastName": "Picapiedra",
-  "email": "ppicapiedra@gmail.com",
-  "passwordHash": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg="
-}
-
-{
-  "firstName": "Ben",
-  "lastName": "Tennyson",
-  "email": "btennyson@gmail.com",
-  "passwordHash": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg="
-}
-
-{
-  "firstName": "Khvicha",
-  "lastName": "Kvaratskhelia",
-  "email": "kkvaratskhelia@gmail.com",
-  "passwordHash": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg="
-}
-
-{
-  "firstName": "Khabib ",
-  "lastName": "Nurmagomedov",
-  "email": "knurmagomedov@gmail.com",
-  "passwordHash": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg="
-}
-
-{
-  "firstName": "Ramzan",
-  "lastName": "Kadyrov",
-  "email": "rkadyrov@gmail.com",
-  "passwordHash": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg="
-}
-
-{
-  "firstName": "August",
-  "lastName": "von Kageneck",
-  "email": "avonkageneck@gmail.com",
+  "firstName": "Lionel Andrés",
+  "lastName": "Messi Cuccitini",
+  "email": "lmessic@plagitracker.com",
   "passwordHash": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg="
 }
 
@@ -251,3 +216,10 @@ ___________________________________________________________________
 		{\"Type\":\"Person- person}\r\n]\r\n)}\r\n
 	
 	- main\r\n      \"Parameters\": [          {\"Type\":\"String[]\"- args}\r\n          {\"Type\":\"int- param}\r\n          {\"Type\":\"Person- person}\r\n]\r\n)\"CName\":- InnerClass{\r\n  \"Method\": {\"Type\":\"InnerClass[]\", \"Name\":\"main2\"\r\n      \"Parameters\": [          {\"Type\":\"String- args}\r\n          {\"Type\":\"String- abc}\r\n]\r\n)}\r\n\"Type\":\"InnerClass[]\"- main2\r\n      \"Parameters\": [          {\"Type\":\"String- args}\r\n          {\"Type\":\"String- abc}\r\n]\r\n)}\r\n  \"Method\": {\"Type\":\"char, \"Name\":\"ToChar\"\r\n      \"Parameters\": [          {\"Type\":\"String[]\"- args}\r\n          {\"Type\":\"int- param}\r\n          {\"Type\":\"Person- person}\r\n]\r\n)}\r\n\"Type\":\"char- ToChar\r\n      \"Parameters\": [          {\"Type\":\"String[]\"- args}\r\n          {\"Type\":\"int- param}\r\n          {\"Type\":\"Person- person}\r\n]\r\n)}\r\n\"CName\":- Main{\r\n  \"Method\": {\"Type\":\"void\", \"Name\":\"main\"\r\n)}\r\n- main\r\n)}\r\n
+	
+	
+	
+	
+	
+	
+

@@ -49,6 +49,7 @@ namespace PlagiTracker.Data.DataAccess
             modelBuilder.Entity<Course>(builder =>
             {
                 builder.HasIndex(course => course.Name).IsUnique();
+                builder.HasIndex(course => course.InvitationId).IsUnique();
             });
 
             //Inscripción
@@ -64,7 +65,7 @@ namespace PlagiTracker.Data.DataAccess
                 builder.Property(enrollment => enrollment.Grade).HasColumnType("decimal(4, 2)");
             });
 
-            //Tarea
+            //Asignación
             modelBuilder.Entity<Assignment>().HasIndex(a => a.Title).IsUnique();
 
             //Entrega

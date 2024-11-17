@@ -15,7 +15,8 @@ async function login(email, passwordHash) {
     }
 
     const data = await response.json();
-    return data.token; // Asumiendo que el token se devuelve en un campo llamado 'token'
+    console.log(data);
+    return data;
 }
 async function getAllByCourse(courseId, token) {
     const url = `https://localhost:9200/api/Assignment/GetAllByCourse?courseId=${courseId}`;
@@ -40,13 +41,14 @@ async function getAllByCourse(courseId, token) {
         console.error('Error fetching assignments:', error);
     }
 }
-async function getAllByCourseWithOutToken(courseId) {
-    const url = `http://localhost:9100/api/Assignment/GetAllByCourse?courseId=${courseId}`;
+async function joinToCourse(invitationId, studentId, token) {
+    const url = `http://localhost:9100/api/Enrollment/Join/${invitationId}?studentId=${studentId}`;
 
     try {
         const response = await fetch(url, {
             method: 'GET',
             headers: {
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             }
         });
@@ -62,13 +64,13 @@ async function getAllByCourseWithOutToken(courseId) {
         console.error('Error fetching assignments:', error);
     }
 }
-const email = 'bschweinsteiger@plagitracker.com'; // Reemplaza con tu email
-const passwordHash = "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg="; // Reemplaza con tu hash de contraseña
-const courseId = '5500125e-16f5-4b77-9220-cc4dab69c100'; // Reemplaza con el ID del curso
+const email = 'elmerson30@plagitracker.com';
+const passwordHash = "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=";
+const courseId = '5500125e-16f5-4b77-9220-cc4dab69c100';
 
-login(email, passwordHash).then(token => {
-    console.log('Token JWT:', token);
-    return getAllByCourse(courseId, token);
+login(email, passwordHash).then(data => {
+    //return getAllByCourse(courseId, data.token);
+    return joinToCourse(courseId, data.id, data.token);
 }).then(data => {
     console.log('Assignments:', data);
 }).catch(error => {
