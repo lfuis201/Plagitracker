@@ -1,4 +1,4 @@
-Add-Migration ChangeNameFunctionToMethod -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
+Add-Migration UrlStateAddedToSubmission -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 Update-Database -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 
 {
@@ -45,6 +45,11 @@ Update-Database -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 
 password = "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg="
 123456789 = "FeKw08M4keuw8e9gnsQZQgwg4yDOlMZfvIwzEkSOsiU="
+
+{
+  "email": "lstindl@plagitracker.com",
+  "passwordHash": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg="
+}
 
 modelBuilder.Entity<User>(builder =>
 {

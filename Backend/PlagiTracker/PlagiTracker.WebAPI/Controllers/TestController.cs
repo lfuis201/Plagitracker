@@ -13,7 +13,7 @@ namespace PlagiTracker.WebAPI.Controllers
         public TestController(DataContext context) : base(context)
         {
         }
-
+        /*
         [HttpPost]
         [Route("ScrapeReplit")]
         public async Task<ActionResult> ScrapeReplit()
@@ -41,7 +41,7 @@ namespace PlagiTracker.WebAPI.Controllers
                 return BadRequest(e.Message);
             }
         }
-
+        */
         [HttpPost]
         [Route("DataBaseError")]
         public async Task<ActionResult> DataBaseError(Guid studentId)

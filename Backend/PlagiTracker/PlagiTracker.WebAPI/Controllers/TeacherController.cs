@@ -137,7 +137,7 @@ namespace PlagiTracker.WebAPI.Controllers
 
                     await _context.SaveChangesAsync();
 
-                    string token = ((IUserController)this).GenerateJwtToken(_configuration, teacher.Email!);
+                    string token = ((IUserController)this).GenerateJwtToken(_configuration, teacher.Id!, teacher.GetType());
 
                     if (string.IsNullOrEmpty(token))
                     {
@@ -305,7 +305,16 @@ namespace PlagiTracker.WebAPI.Controllers
         {
             try
             {
-                var verifyTokenResult = await VerifyToken(baseRequest);
+                string? scopeClaim = User.FindFirst("Scope")?.Value;
+
+                var verifyTokenResult = VerifyToken(scopeClaim, typeof(Teacher).Name);
+
+                if (!verifyTokenResult.Success)
+                {
+                    return Unauthorized(verifyTokenResult.Message);
+                }
+
+                var userIdClaim = User.FindFirst("Id")?.Value;
 
                 if (verifyTokenResult.Success)
                 {

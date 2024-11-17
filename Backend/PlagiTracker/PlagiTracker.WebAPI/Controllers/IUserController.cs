@@ -35,7 +35,7 @@ namespace PlagiTracker.WebAPI.Controllers
 
         Task<ActionResult> ResetPassword(ResetPasswordRequest resetPasswordRequest);
 
-        string GenerateJwtToken(IConfiguration _configuration, string email)
+        string GenerateJwtToken(IConfiguration _configuration, Guid userId, Type entityClass)
         {
             var jwtSettings = _configuration.GetSection("Jwt");
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!));
@@ -43,16 +43,17 @@ namespace PlagiTracker.WebAPI.Controllers
 
             var claims = new[]
             {
-            new Claim(JwtRegisteredClaimNames.Sub, email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
+                new Claim("Id", Guid.NewGuid().ToString()),
+                new Claim("Scope", entityClass.Name)
+            };
 
             var token = new JwtSecurityToken(
                 issuer: jwtSettings["Issuer"],
                 audience: jwtSettings["Audience"],
                 claims: claims,
                 expires: DateTime.Now.AddMinutes(double.Parse(jwtSettings["ExpireMinutes"]!)),
-                signingCredentials: creds);
+                signingCredentials: creds
+            );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }

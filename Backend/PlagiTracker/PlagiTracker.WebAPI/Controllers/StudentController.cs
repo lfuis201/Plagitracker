@@ -135,7 +135,7 @@ namespace PlagiTracker.WebAPI.Controllers
                     }
 
                     await _context.SaveChangesAsync();
-                    string token = ((IUserController)this).GenerateJwtToken(_configuration, student.Email!);
+                    string token = ((IUserController)this).GenerateJwtToken(_configuration, student.Id!, student.GetType());
 
                     if (string.IsNullOrEmpty(token))
                     {

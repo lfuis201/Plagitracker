@@ -16,22 +16,16 @@ using PlagiTracker.Data.Responses;
 using PlagiTracker.Services.FileServices;
 using PlagiTracker.Services.SeleniumServices;
 using PlagiTracker.WebAPI.HangFire;
-using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class AssignmentController : ControllerBase
+    public class AssignmentController(DataContext context) : CustomControllerBase(context)
     {
-        private readonly DataContext _context;
-
-        public AssignmentController(DataContext context)
-        {
-            _context = context ?? throw new ArgumentNullException(nameof(context), "Error: Data Base connection");
-        }
-
+        [AllowAnonymous]
         [HttpPost]
         [Route("JCode")]
         public async Task<ActionResult> JCode([FromBody] string code)
@@ -60,10 +54,11 @@ namespace PlagiTracker.WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("Error in JCode");
+                return BadRequest($"Error: JCode - {ex.Message}");
             }
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("JCodeForFiles")]
         public async Task<ActionResult> JCodeForFiles(IFormFileCollection files)
@@ -105,10 +100,11 @@ namespace PlagiTracker.WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("Error in JCode");
+                return BadRequest($"Error: JCode - {ex.Message}");
             }
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("ValidateAssignmentBodyST")]
         public async Task<ActionResult> ValidateAssignmentBodyST(List<string> codes)
@@ -180,8 +176,13 @@ namespace PlagiTracker.WebAPI.Controllers
             return Ok(results);
         }
 
+        /// <summary>
+        /// Valida el código Java con un parser personalizado
+        /// </summary>
+        /// <param name="codes"></param>
+        /// <returns></returns>
         [HttpPost]
-        [Route("ValidateJavaCode")]
+        [Route("ValidateJavaCodeWithCustomParser")]
         public ActionResult ValidateJavaCode(List<string> codes)
         {
             if (codes == null || codes.Count < 1)
@@ -189,7 +190,7 @@ namespace PlagiTracker.WebAPI.Controllers
                 return BadRequest("There are not enough codes to analyze.");
             }
 
-            List<Result> results = [];
+            List<Result<object[]>> results = [];
 
             foreach (var code in codes)
             {
@@ -219,13 +220,24 @@ namespace PlagiTracker.WebAPI.Controllers
                     if(isValid)
                     {
                         // Crear un resultado con el árbol de sintaxis
-                        results.Add(new Result(true));
+                        results.Add(new 
+                        (
+                            true,
+                            "Success",
+                            new object[]
+                            {
+                                tree.ToStringTree(parser),
+                                BodyGenerator.ParseSyntaxTree(tree),
+                                BodyGenerator.ParseClassInput(BodyGenerator.ParseSyntaxTree(tree))
+                            }
+                        ));
                     }
                     else
                     {
                         if(lexerErrorListener.Errors.Count > 0 && parserErrorListener.Errors.Count > 0)
                         {
-                            results.Add(new Result(
+                            results.Add(new
+                            (
                                 false, 
                                 "Error: Lexer and Parser errors", 
                                 [lexerErrorListener.Errors, parserErrorListener.Errors]
@@ -233,17 +245,32 @@ namespace PlagiTracker.WebAPI.Controllers
                         }
                         else if(lexerErrorListener.Errors.Count > 0)
                         {
-                            results.Add(new Result(false, "Error: Lexer errors", [lexerErrorListener.Errors]));
+                            results.Add(new
+                            (
+                                false, 
+                                "Error: Lexer errors", 
+                                [lexerErrorListener.Errors])
+                            );
                         }
                         else if(parserErrorListener.Errors.Count > 0)
                         {
-                            results.Add(new Result(false, "Error: Parser errors", [parserErrorListener.Errors]));
+                            results.Add(new
+                            (
+                                false, 
+                                "Error: Parser errors", 
+                                [parserErrorListener.Errors])
+                            );
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    results.Add(new (false, ex.Message));
+                    results.Add(new 
+                    (
+                        false,
+                        $"Error: {ex.Message}",
+                        []
+                    ));
                 }
             }
 
@@ -359,13 +386,21 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
-        [Authorize]
         [HttpGet]
         [Route("GetAllByCourse")]
         public async Task<ActionResult> GetAllByCourse(Guid courseId)
         {
             try
             {
+                var verifyTokenResult = VerifyToken(User.FindFirst("Scope")?.Value! , typeof(Teacher).Name);
+
+                if (!verifyTokenResult.Success)
+                {
+                    return Unauthorized(verifyTokenResult.Message);
+                }
+
+                var userIdClaim = User.FindFirst("Id")?.Value;
+
                 var course = await _context!.Courses!.FindAsync(courseId);
                 if (course == null)
                 {

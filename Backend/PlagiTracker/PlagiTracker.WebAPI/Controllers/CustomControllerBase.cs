@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PlagiTracker.Data;
 using PlagiTracker.Data.DataAccess;
+using PlagiTracker.Data.Entities;
 using PlagiTracker.Data.Requests;
 
 namespace PlagiTracker.WebAPI.Controllers
@@ -14,58 +15,24 @@ namespace PlagiTracker.WebAPI.Controllers
             _context = context ?? throw new ArgumentNullException(nameof(context), "Error: Error in Data Base connection");
         }
 
-        protected async Task<Result> VerifyToken(BaseRequest baseRequest)
+        protected Result VerifyToken(string scopeClaim, string scopeClassName)
         {
             try
             {
-                if(baseRequest == null)
+                if (string.IsNullOrEmpty(scopeClaim))
                 {
-                    return new Result
-                    {
-                        Message = "The request is null",
-                        Success = false
-                    };
+                    return new(false, "Error in Scope Token");
                 }
-                else if(baseRequest?.UserId == null)
+                else if (scopeClaim != scopeClassName)
                 {
-                    return new Result
-                    {
-                        Message = "The User Id is null",
-                        Success = false
-                    };
-                }
-                else if (_context == null)
-                {
-                    return new Result
-                    {
-                        Message = "Error: Error in Data Base connection",
-                        Success = false
-                    };
+                    return new(false, "Error in Scope Token");
                 }
 
-                var user = await _context!.Users!.FindAsync(baseRequest.UserId);
-
-                if(user == null)
-                {
-                    return new Result
-                    {
-                        Message = "User not found",
-                        Success = false
-                    };
-                }
-
-                return new Result
-                {
-                    Success = true
-                };
+                return new(true, "Token Verified");
             }
             catch (Exception ex)
             {
-                return new Result
-                {
-                    Message = ex.Message,
-                    Success = false
-                }; ;
+                return new(false, $"Error: {ex.Message}");
             }
         }
     }
