@@ -11,11 +11,11 @@ namespace PlagiTracker.WebAPI.Controllers
     [ApiController]
     public class SubmissionController : ControllerBase
     {
-        /*
-Message = "23505: duplicate key value violates unique constraint \"IX_Submissions_StudentId_AssignmentId\"\r\n\r\nDETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information."
-
-*/
-
+        // Mensaje de excepción cuando el estudiante ya hizo una entrega para la misma asignación
+        const string STUDENT_ALREADY_SUBMITTED_EXCEPTION_MESSAGE_1 = "23505: duplicate key value violates unique constraint";
+        const string STUDENT_ALREADY_SUBMITTED_EXCEPTION_MESSAGE_2 = "IX_Submissions_StudentId_AssignmentId";
+        
+        // Mensaje de excepción cuando la URL ya fue usada
         const string URL_ALREADY_USED_EXCEPTION_MESSAGE_1 = "23505: duplicate key value violates unique constraint";
         const string URL_ALREADY_USED_EXCEPTION_MESSAGE_2 = "IX_Submissions_Url";
 
@@ -26,6 +26,15 @@ Message = "23505: duplicate key value violates unique constraint \"IX_Submission
             _context = context ?? throw new ArgumentNullException(nameof(context), "Error: Data Base connection");
         }
 
+        /// <summary>
+        /// Crea una Entrega para una Asignación
+        /// </summary>
+        /// <remarks>
+        /// Este EndPoint sólo lo usa el Estudiante
+        /// </remarks>
+        /// <param name="submissionRequest"></param>
+        /// 
+        /// <returns></returns>
         [HttpPost]
         [Route("Create")]
         public async Task<ActionResult> Create(SubmissionRequest submissionRequest)
@@ -75,6 +84,14 @@ Message = "23505: duplicate key value violates unique constraint \"IX_Submission
             catch (Exception ex)
             {
                 if (
+                    ex.InnerException != null
+                    && ex.InnerException.Message.Contains(STUDENT_ALREADY_SUBMITTED_EXCEPTION_MESSAGE_1)
+                    && ex.InnerException.Message.Contains(STUDENT_ALREADY_SUBMITTED_EXCEPTION_MESSAGE_2)
+                )
+                {
+                    return Conflict(new { message = "Student already submitted" });
+                }
+                else if (
                     ex.InnerException != null
                     && ex.InnerException.Message.Contains(URL_ALREADY_USED_EXCEPTION_MESSAGE_1)
                     && ex.InnerException.Message.Contains(URL_ALREADY_USED_EXCEPTION_MESSAGE_2)

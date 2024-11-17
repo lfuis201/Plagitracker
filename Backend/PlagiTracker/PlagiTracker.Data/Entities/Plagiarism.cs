@@ -45,10 +45,10 @@ namespace PlagiTracker.Data.Entities
 
         public enum AlgorithmType
         {
-            Jaccard,
-            Levenshtein,
-            Semantic,
-            Coincidences
+            Jaccard = 0,
+            Levenshtein = 1,
+            Semantic = 2,
+            Coincidences = 3,
         }
     }
 }

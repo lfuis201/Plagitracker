@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.InteropServices.Marshalling;
 
 namespace PlagiTracker.Data.Entities
 {
@@ -22,10 +23,24 @@ namespace PlagiTracker.Data.Entities
         [MaxLength(50)]
         public string? LastName { get; set; }
 
+        private string? _email = string.Empty;
+
         [Required]
         [MinLength(5)]
         [MaxLength(50)]
-        public string? Email { get; set; }
+        public string? Email { 
+            get
+            {
+                return _email;
+            }
+            set
+            {
+                if (!string.IsNullOrEmpty(value))
+                {
+                    _email = value.ToLower();
+                }
+            } 
+        }
 
         [Required]
         public byte[]? PasswordHash { get; set; }

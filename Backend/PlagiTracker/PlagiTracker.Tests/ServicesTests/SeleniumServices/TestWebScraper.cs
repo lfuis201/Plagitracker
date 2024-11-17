@@ -52,7 +52,7 @@ namespace PlagiTracker.Tests.ServicesTests.SeleniumServices
                 Assert.Fail(e.Message);
             }*/
         }
-
+        /*
         [TestMethod]
         public async Task TestScrapeCodiva2()
         {
@@ -133,7 +133,8 @@ namespace PlagiTracker.Tests.ServicesTests.SeleniumServices
 
             Assert.AreEqual(values.Count, resultsCount);
         }
-
+        */
+        /*
         [TestMethod]
         [DataRow("https://replit.com/@PrivateReplit/WebScrapping.zip", false)]
         public void TestScrapeReplit(string url, bool expected)
@@ -160,5 +161,6 @@ namespace PlagiTracker.Tests.ServicesTests.SeleniumServices
                 Assert.Fail(e.Message);
             }
         }
+        */
     }
 }

@@ -320,6 +320,79 @@ namespace PlagiTracker.Services.SeleniumServices
             return StudentSubmissionResults;
         }
 
+        /// <summary>
+        /// Obtiene el código de la Entrega de un estudiante. Usa Selenium para navegar a la URL de Codiva y obtener el código fuente.
+        /// </summary>
+        /// <param name="submission"></param>
+        /// <returns></returns>
+        public async Task<Result<(Submission submission, Dictionary<string, string> codes)>> GetCode(Submission submission)
+        {
+            Submission newSubmission = submission;
+            Dictionary<string, string> codes = [];
+            
+            if (Driver == null)
+            {
+                return new(false, "Error: Driver is NULL", (newSubmission, codes));
+            }
+
+            var ignorePatterns = new List<string>
+            {
+                "System.out.println(\"Hello Codiva\");"
+            };
+
+            try
+            {
+                if (string.IsNullOrEmpty(submission.Url))
+                {
+                    newSubmission.UrlState = UrlState.NullOrEmpty;
+                    return new (false, "Error: The URL is null or empty", (newSubmission, codes));
+                }
+                else if (!IsCodivaUrl(submission.Url))
+                {
+                    newSubmission.UrlState = UrlState.NotCodiva;
+                    return new (false, "Error: The URL is not from Codiva", (newSubmission, codes));
+                }
+                else if (!await UrlExists(submission.Url))
+                {
+                    newSubmission.UrlState = UrlState.Invalid;
+                    return new (false, "Error: The URL does not exist", (newSubmission, codes));
+                }
+
+                newSubmission.UrlState = UrlState.Ok;
+
+                Driver.Navigate().GoToUrl(newSubmission.Url);
+                Thread.Sleep(1000);
+
+                var labels = Driver.FindElements(By.XPath("//label[starts-with(@for, 'tab-java-')]"));
+
+                foreach (var label in labels)
+                {
+                    string className = label.GetAttribute("title");
+                    var tabElement = Driver.FindElement(By.XPath($"//label[@title='{className}']"));
+                    tabElement.Click();
+
+                    Thread.Sleep(1000);
+
+                    var codeElements = Driver.FindElements(By.XPath("//div[contains(@class,'CodeMirror-code')]//pre"));
+
+                    string codeContent = string.Join("\n", codeElements.Select(e => e.Text).Select(c => c.Trim()));
+
+                    codes.TryAdd(className, codeContent);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new (false, $"Error: {ex.Message}", (newSubmission, codes));
+            }
+            finally
+            {
+                Driver.Quit();
+            }
+
+            return new (true, "Success", (newSubmission, codes));
+        }
+
+        /*
         public (Result result, Dictionary<string, string>) ScrapeCodiva(string url)
         {
             Result result = new();
@@ -361,7 +434,7 @@ namespace PlagiTracker.Services.SeleniumServices
                     continue;
                 }
                 */
-                
+                /*
                 var fileData = new Dictionary<string, string>
                 {
                     { "nombre", $"{className}" },
@@ -384,7 +457,9 @@ namespace PlagiTracker.Services.SeleniumServices
 
             return (result, codes);
         }
+        */
     
+        /*
         public Result ScrapeReplit(string url)
         {
             Result result = new();
@@ -472,7 +547,7 @@ namespace PlagiTracker.Services.SeleniumServices
             }
             return result;
         }
-
+        */
         public static bool IsFileDownloaded(string filePath)
         {
             return File.Exists(filePath);

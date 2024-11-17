@@ -12,12 +12,16 @@ namespace PlagiTracker.Data.Entities
         public Guid Id { get; set; }
 
         [Required]
+        [MinLength(10)]
         [MaxLength(50)]
         public string? Name { get; set; }
 
         [Required]
         public string? Description { get; set; }
 
+        /// <summary>
+        /// Propiedad para saber si el ejercicio tiene cuerpo (estructura)
+        /// </summary>
         [Required]
         public bool HaveBody { get; set; } = false;
 

@@ -67,6 +67,66 @@ namespace PlagiTracker.WebAPI.Controllers
         }
 
         [HttpGet]
+        [Route("Join/{invitationId}")]
+        public async Task<ActionResult> JoinCourse(Guid invitationId, [FromQuery] Guid studentId)
+        {
+            try
+            {
+                // Buscar el curso por el identificador de invitación
+                var course = await _context.Courses!.FirstOrDefaultAsync(c => c.InvitationId == invitationId);
+                if (course == null)
+                {
+                    return NotFound("Invalid invitation link");
+                }
+
+                // Verificar si el estudiante existe
+                var student = await _context.Students!.FindAsync(studentId);
+                if (student == null)
+                {
+                    return NotFound("Student not found");
+                }
+
+                // Verificar si el estudiante ya está inscrito en el curso
+                var enrollment = await _context.Enrollments!
+                    .FirstOrDefaultAsync(e => e.CourseId == course.Id && e.StudentId == studentId);
+                if (enrollment != null)
+                {
+                    return BadRequest("Student is already enrolled in the course");
+                }
+
+                // Inscribir al estudiante en el curso
+                await _context.Enrollments!.AddAsync(new Enrollment
+                {
+                    CourseId = course.Id,
+                    StudentId = studentId,
+                });
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    Message = "Successfully joined the course",
+                });
+            }
+            catch (Exception ex)
+            {
+                if (
+                    ex.InnerException != null
+                    && ex.InnerException.Message.Contains("23505: duplicate key value violates unique constraint")
+                )
+                {
+                    return Conflict(new
+                    {
+                        title = "Enrollment Failed",
+                        message = "You are already enrolled in this course"
+                    });
+                }
+
+                return BadRequest(ex.ToString());
+            }
+        }
+
+        [HttpGet]
         [Route("Get")]
         public async Task<ActionResult> Get(Guid id)
         {
