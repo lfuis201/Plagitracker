@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿// Ignore Spelling: Dolos
+
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlagiTracker.Data.Entities
@@ -32,6 +34,10 @@ namespace PlagiTracker.Data.Entities
         public DateTime AnalysisDate { get; set; } = DateTime.MinValue;
 
         public bool IsAnalyzed { get; set; } = false;
+
+        [MinLength(15)]
+        [MaxLength(20)]
+        public string? DolosURLId { get; set; }
 
         [Required]
         public Guid CourseId { get; set; }

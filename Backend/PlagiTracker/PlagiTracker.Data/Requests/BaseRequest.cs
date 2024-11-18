@@ -7,6 +7,6 @@
         /// actúa como un token de autenticación,
         /// restringe el acceso y modificación de los datos.
         /// </summary>
-        public Guid UserId { get; set; }
+        //public Guid UserId { get; set; }
     }
 }

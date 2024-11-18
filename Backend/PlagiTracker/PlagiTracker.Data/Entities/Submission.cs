@@ -16,8 +16,7 @@ namespace PlagiTracker.Data.Entities
         /// Url de la entrega
         /// </summary>
         [Required]
-        [StringLength(60)]
-        [MinLength(60)]
+        [MinLength(35)]
         [MaxLength(60)]
         public string? Url { get; set; }
 
@@ -28,7 +27,10 @@ namespace PlagiTracker.Data.Entities
         public DateTime SubmissionDate { get; set; }
 
         [Range(0, 20)]
-        public double Grade { get; set; }
+        public double Grade { get; set; } = 0;
+
+        [Required]
+        public UrlCompilerType Compiler { get; set; }
 
         public UrlState UrlState { get; set; }
 
@@ -46,11 +48,24 @@ namespace PlagiTracker.Data.Entities
         public virtual Assignment? Assignment { get; set; }
     }
 
+    /// <summary>
+    /// Estado de la URL
+    /// </summary>
     public enum UrlState
     {
         NullOrEmpty = 0,
-        Invalid = 1,
-        NotCodiva = 2,
+        NotExists = 1,
+        Invalid = 2,
         Ok = 3,
+    }
+
+    /// <summary>
+    /// Tipo de compilador de URL
+    /// </summary>
+    public enum UrlCompilerType
+    {
+        Codiva = 0,
+        OnlineGDB = 1,
+        Replit = 2
     }
 }

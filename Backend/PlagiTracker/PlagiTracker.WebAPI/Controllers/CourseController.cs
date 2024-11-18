@@ -214,9 +214,18 @@ namespace PlagiTracker.WebAPI.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Actualiza el enlace de invitación de un curso
+        /// </summary>
+        /// <param name="courseId">
+        /// Identificador del curso
+        /// </param>
+        /// <returns>
+        /// Enlace de invitación actualizado
+        /// </returns>
         [HttpPost]
         [Route("UpdateInvitationLink")]
-        public async Task<ActionResult<string>> CreateInvitationLink(Guid courseId)
+        public async Task<ActionResult<string>> UpdateInvitationLink(Guid courseId)
         {
             try
             {
@@ -235,7 +244,8 @@ namespace PlagiTracker.WebAPI.Controllers
                 await _context.SaveChangesAsync();
 
                 // Construir el enlace de invitación
-                var invitationLink = $"{Request.Scheme}://{Request.Host}/api/Course/Join/{course.InvitationId}";
+                //var invitationLink = $"{Request.Scheme}://{Request.Host}/api/Course/Join/{course.InvitationId}";
+                var invitationLink = $"http://127.0.0.1:5713/InvitationLink/{course.InvitationId}";
 
                 return Ok(invitationLink);
             }

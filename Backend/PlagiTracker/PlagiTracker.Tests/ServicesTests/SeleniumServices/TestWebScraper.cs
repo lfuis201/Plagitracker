@@ -1,9 +1,10 @@
 ﻿// Ignore Spelling: Codiva Replit
 
+using PlagiTracker.Data.Entities;
 using PlagiTracker.Services.FileServices.Replit;
 using PlagiTracker.Services.SeleniumServices;
 
-//[assembly: Parallelize(Workers = 5, Scope = ExecutionScope.MethodLevel)]
+[assembly: Parallelize(Workers = 5, Scope = ExecutionScope.MethodLevel)]
 namespace PlagiTracker.Tests.ServicesTests.SeleniumServices
 {
     [TestClass]
@@ -134,6 +135,41 @@ namespace PlagiTracker.Tests.ServicesTests.SeleniumServices
             Assert.AreEqual(values.Count, resultsCount);
         }
         */
+
+        [TestMethod]
+        //[DataRow("https://www.codiva.io/p/a8dca7f2-31b9-4550-9a1d-c92f4ba76fff", 1)]
+        [DataRow("https://www.onlinegdb.com/cky2lPU84", 3)]
+        public async Task TestGetCodes(string url, int expected)
+        {
+            try
+            {
+                WebScraping webScraping = new();
+                try
+                {
+                    var submission = new Submission()
+                    {
+                        Url = url,
+                    };
+                    var result = await webScraping!.GetCodes2(submission);
+                    Assert.AreEqual(expected, result.Data.codes.Count);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Error in Test: {e.Message}");
+                    Assert.Fail(e.Message);
+                }
+                finally
+                {
+                    webScraping!.Driver!.Dispose();
+                }
+            }
+            catch (Exception e)
+            { 
+                Console.WriteLine($"Error in Test: {e.Message}");
+                Assert.Fail(e.Message);
+            }
+        }
+
         /*
         [TestMethod]
         [DataRow("https://replit.com/@PrivateReplit/WebScrapping.zip", false)]

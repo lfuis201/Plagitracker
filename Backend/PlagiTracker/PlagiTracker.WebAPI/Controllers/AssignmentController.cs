@@ -20,12 +20,12 @@ using System.Text;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AssignmentController(DataContext context) : CustomControllerBase(context)
     {
-        [AllowAnonymous]
+        //[AllowAnonymous]
         [HttpPost]
         [Route("JCode")]
         public async Task<ActionResult> JCode([FromBody] string code)
@@ -58,7 +58,7 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
-        [AllowAnonymous]
+        //[AllowAnonymous]
         [HttpPost]
         [Route("JCodeForFiles")]
         public async Task<ActionResult> JCodeForFiles(IFormFileCollection files)
@@ -104,7 +104,7 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
-        [AllowAnonymous]
+        //[AllowAnonymous]
         [HttpPost]
         [Route("ValidateAssignmentBodyST")]
         public async Task<ActionResult> ValidateAssignmentBodyST(List<string> codes)
@@ -295,7 +295,7 @@ namespace PlagiTracker.WebAPI.Controllers
                     Description = assignmentRequest.Description,
                     Title = assignmentRequest.Title,
                     //Tiempo universal coordinado (UTC)
-                    SubmissionDate = assignmentRequest.SubmissionDate,
+                    SubmissionDate = assignmentRequest.SubmissionDate.ToUniversalTime(),
                     CourseId = assignmentRequest.CourseId
                 });
 
@@ -316,7 +316,7 @@ namespace PlagiTracker.WebAPI.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("Analyze")]
-        public async Task<ActionResult> Analyze(BaseRequest baseRequest, Guid assignmentId)
+        public async Task<ActionResult> Analyze(Guid assignmentId)
         {
             var assignment = await _context!.Assignments!.FindAsync(assignmentId);
 
@@ -384,6 +384,71 @@ namespace PlagiTracker.WebAPI.Controllers
 
                 return File(pdfBytes, "application/pdf", $"PlagiarismReport-{assignmentId}.pdf");
             }
+        }
+
+        [HttpPost]
+        [Route("AnalyzeWithDolos")]
+        public async Task<ActionResult> AnalyzeWithDolos(Guid assignmentId)
+        {
+            var assignment = await _context!.Assignments!.FindAsync(assignmentId);
+
+            if (assignment == null)
+            {
+                return NotFound("The assignment not exist.");
+            }
+
+            var studentsSubmissions = await _context!.Submissions!
+                .Where(submission => submission.AssignmentId == assignmentId)
+                .Include(submission => submission.Student)
+                .Select(submission => new Submission
+                {
+                    Id = submission.Id,
+                    Url = submission.Url,
+                    SubmissionDate = submission.SubmissionDate,
+                    StudentId = submission.StudentId,
+                    Student = new Student
+                    {
+                        FirstName = submission.Student!.FirstName,
+                        LastName = submission.Student!.LastName
+                    },
+                })
+                .ToListAsync();
+
+            // Verificar que haya al menos 2 entregas
+            if (studentsSubmissions == null || studentsSubmissions.Count < 2)
+            {
+                return BadRequest("There are not enough submissions to analyze.");
+            }
+
+            // Verificar que todos los Student no sean nulos
+            if (studentsSubmissions.Any(submission => submission.Student == null))
+            {
+                return BadRequest("Error in DataBase");
+            }
+
+            Dictionary<Guid, List<(string fileName, string content)>> studentFiles = [];
+
+            foreach(var studentsSubmission in studentsSubmissions)
+            {
+                var codes = await _context!.Codes!
+                    .Where(code => code.SubmissionId == studentsSubmission.Id)
+                    .Select(code => new Code
+                    {
+                        FileName = code.FileName,
+                        Content = code.Content
+                    })
+                    .ToListAsync();
+
+                studentFiles.Add(studentsSubmission.StudentId, new List<(string fileName, string content)>
+                (
+                    codes.Select(code => (code.FileName, code.Content)).ToList()!
+                ));
+            }
+
+            var data = await DolosZipGenerator.GenerateAssignmentFolder(assignmentId, studentFiles);
+
+            return Ok(data);
+
         }
 
         [HttpGet]

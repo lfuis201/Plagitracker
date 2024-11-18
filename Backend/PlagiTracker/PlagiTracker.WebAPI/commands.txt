@@ -1,4 +1,4 @@
-Add-Migration AddInvitatiovIdToCourse -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
+Add-Migration AddUrlCompilerTypeToSubmission -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 Update-Database -Project PlagiTracker.Data -StartupProject PlagiTracker.WebAPI
 
 {

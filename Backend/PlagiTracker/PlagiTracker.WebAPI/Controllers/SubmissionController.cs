@@ -32,8 +32,9 @@ namespace PlagiTracker.WebAPI.Controllers
         /// <remarks>
         /// Este EndPoint sólo lo usa el Estudiante
         /// </remarks>
-        /// <param name="submissionRequest"></param>
-        /// 
+        /// <param name="submissionRequest">
+        /// Petición de Entrega.
+        /// </param>
         /// <returns></returns>
         [HttpPost]
         [Route("Create")]
@@ -41,7 +42,7 @@ namespace PlagiTracker.WebAPI.Controllers
         {
             try
             {
-                //Buscando la asignación
+                // Buscando la Asignación
                 var assignment = await _context!.Assignments!.FirstOrDefaultAsync(c => c.Id == submissionRequest.AssignmentId);
 
                 if (assignment == null)
@@ -52,9 +53,9 @@ namespace PlagiTracker.WebAPI.Controllers
                 {
                     return BadRequest("The URL is required");
                 }
-                else if(!WebScraping.IsCodivaUrl(submissionRequest.Url))
+                else if(!WebScraping.IsSupportedURL(submissionRequest.Compiler, submissionRequest.Url))
                 {
-                    return BadRequest("The URL is not from Codiva");
+                    return BadRequest("The URL is not supported");
                 }
                 else if(!await WebScraping.UrlExists(submissionRequest.Url))
                 {
@@ -67,18 +68,46 @@ namespace PlagiTracker.WebAPI.Controllers
                         return UnprocessableEntity("The submit time has ended");
                     }
 
-                    await _context!.Submissions!.AddAsync(new Submission()
+                    Submission submission = new()
                     {
                         Id = Guid.NewGuid(),
                         Url = submissionRequest.Url,
                         SubmissionDate = submissionRequest.SubmissionDate,
                         StudentId = submissionRequest.StudentId,
                         AssignmentId = submissionRequest.AssignmentId
-                    });
+                    };
+
+                    var result= await new WebScraping().GetCodes2(submission);
+
+                    if(result == null)
+                    {
+                        return BadRequest("Error getting the codes");
+                    }
+                    else if (!result.Success)
+                    {
+                        return BadRequest(result.Message);
+                    }
+
+                    submission = result.Data.submission;
+                    await _context!.Submissions!.AddAsync(submission);
+                    
+                    foreach (var code in result.Data.codes)
+                    {
+                        await _context!.Codes!.AddAsync(new Code
+                        {
+                            Id = Guid.NewGuid(),
+                            SubmissionId = submission.Id,
+                            FileName = code.Key,
+                            Content = code.Value,
+                        });
+                    }
 
                     await _context.SaveChangesAsync();
 
-                    return Ok();
+                    return Ok(new
+                    {
+                        Message = "Success"
+                    });
                 }
             }
             catch (Exception ex)
