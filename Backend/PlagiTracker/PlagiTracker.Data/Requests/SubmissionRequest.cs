@@ -1,8 +1,12 @@
-﻿namespace PlagiTracker.Data.Requests
+﻿using PlagiTracker.Data.Entities;
+
+namespace PlagiTracker.Data.Requests
 {
-    public class SubmissionRequest : BaseRequest
+    public class SubmissionRequest
     {
         public string? Url { get; set; }
+
+        public UrlCompilerType Compiler { get; set; }
 
         public Guid StudentId { get; set; }
 

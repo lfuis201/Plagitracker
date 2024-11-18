@@ -7,14 +7,10 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
 using PlagiTracker.Analyzer.PlagiDetector;
 using PlagiTracker.Data.Entities;
-using System.Collections.Generic;
-using OpenQA.Selenium.DevTools;
-using System.Reflection.Emit;
 using PlagiTracker.Data;
-using OpenQA.Selenium.Support.UI;
-using SeleniumExtras.WaitHelpers;
-using OpenQA.Selenium.Interactions;
 using System.IO.Compression;
+using System.Reflection.Emit;
+using System.Text.RegularExpressions;
 
 namespace PlagiTracker.Services.SeleniumServices
 {
@@ -75,11 +71,13 @@ namespace PlagiTracker.Services.SeleniumServices
 
     public class WebScraping
     {
-
         private static readonly string DownloadPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Downloads\");
 
         //driver.Manage().Window.Size = new System.Drawing.Size(1500, 2000);
         public IWebDriver? Driver;
+
+        public const string CODIVA_PATTERN = @"^https:\/\/www\.codiva\.io\/p\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
+        public const string ONLINE_GDB_PATTERN = @"^https:\/\/www\.onlinegdb\.com\/[a-zA-Z0-9]+$";
 
         public WebScraping()
         {
@@ -196,11 +194,26 @@ namespace PlagiTracker.Services.SeleniumServices
         }
 
         /// <summary>
-        /// true si la URL es de Codiva, false en caso contrario
+        /// Verifica si la URL es de Codiva, OnlineGDB o Replit
         /// </summary>
-        public static bool IsCodivaUrl(string url)
+        public static bool IsSupportedURL(UrlCompilerType urlCompilerType, string url)
         {
-            return url.Contains("codiva.io");
+            if (urlCompilerType == UrlCompilerType.Codiva)
+            {
+                return Regex.IsMatch(url, CODIVA_PATTERN);
+            }
+            else if (urlCompilerType == UrlCompilerType.OnlineGDB)
+            {
+                return Regex.IsMatch(url, ONLINE_GDB_PATTERN);
+            }
+            else if (urlCompilerType == UrlCompilerType.Replit)
+            {
+                return url.Contains("replit.com");
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public async Task<Dictionary<Guid, StudentSubmission>> StartScraping(List<Submission> studentsSubmissions)
@@ -234,7 +247,7 @@ namespace PlagiTracker.Services.SeleniumServices
                         StudentSubmissionResults[studentsSubmission.StudentId].State = StudentSubmission.UrlState.NullOrEmpty;
                         continue;
                     }
-                    else if (!IsCodivaUrl(studentsSubmission.Url))
+                    else if (!IsSupportedURL(studentsSubmission.Compiler, studentsSubmission.Url))
                     {
                         StudentSubmissionResults[studentsSubmission.StudentId].State = StudentSubmission.UrlState.NotCodiva;
                         continue;
@@ -323,9 +336,11 @@ namespace PlagiTracker.Services.SeleniumServices
         /// <summary>
         /// Obtiene el código de la Entrega de un estudiante. Usa Selenium para navegar a la URL de Codiva y obtener el código fuente.
         /// </summary>
-        /// <param name="submission"></param>
+        /// <param name="submission">
+        /// Entrega del estudiante
+        /// </param>
         /// <returns></returns>
-        public async Task<Result<(Submission submission, Dictionary<string, string> codes)>> GetCode(Submission submission)
+        public async Task<Result<(Submission submission, Dictionary<string, string> codes)>> GetCodes(Submission submission)
         {
             Submission newSubmission = submission;
             Dictionary<string, string> codes = [];
@@ -347,14 +362,14 @@ namespace PlagiTracker.Services.SeleniumServices
                     newSubmission.UrlState = UrlState.NullOrEmpty;
                     return new (false, "Error: The URL is null or empty", (newSubmission, codes));
                 }
-                else if (!IsCodivaUrl(submission.Url))
+                else if (!IsSupportedURL(submission.Compiler, submission.Url))
                 {
-                    newSubmission.UrlState = UrlState.NotCodiva;
-                    return new (false, "Error: The URL is not from Codiva", (newSubmission, codes));
+                    newSubmission.UrlState = UrlState.Invalid;
+                    return new (false, "Error: The URL is Invalid", (newSubmission, codes));
                 }
                 else if (!await UrlExists(submission.Url))
                 {
-                    newSubmission.UrlState = UrlState.Invalid;
+                    newSubmission.UrlState = UrlState.NotExists;
                     return new (false, "Error: The URL does not exist", (newSubmission, codes));
                 }
 
@@ -367,6 +382,7 @@ namespace PlagiTracker.Services.SeleniumServices
 
                 foreach (var label in labels)
                 {
+                    Console.WriteLine($"Label: {label.GetAttribute("title")}");
                     string className = label.GetAttribute("title");
                     var tabElement = Driver.FindElement(By.XPath($"//label[@title='{className}']"));
                     tabElement.Click();
@@ -390,6 +406,79 @@ namespace PlagiTracker.Services.SeleniumServices
             }
 
             return new (true, "Success", (newSubmission, codes));
+        }
+
+        public async Task<Result<(Submission submission, Dictionary<string, string> codes)>> GetCodes2(Submission submission)
+        {
+            Submission newSubmission = submission;
+            Dictionary<string, string> codes = [];
+
+            if (Driver == null)
+            {
+                return new(false, "Error: Driver is NULL", (newSubmission, codes));
+            }
+
+            var ignorePatterns = new List<string>
+            {
+                "System.out.println(\"Hello Codiva\");"
+            };
+
+            try
+            {
+                if (string.IsNullOrEmpty(submission.Url))
+                {
+                    newSubmission.UrlState = UrlState.NullOrEmpty;
+                    return new(false, "Error: The URL is null or empty", (newSubmission, codes));
+                }
+                /*else if (!IsCodivaUrl(submission.Url))
+                {
+                    newSubmission.UrlState = UrlState.NotCodiva;
+                    return new(false, "Error: The URL is not from Codiva", (newSubmission, codes));
+                }*/
+                else if (!await UrlExists(submission.Url))
+                {
+                    newSubmission.UrlState = UrlState.Invalid;
+                    return new(false, "Error: The URL does not exist", (newSubmission, codes));
+                }
+
+                newSubmission.UrlState = UrlState.Ok;
+                
+                Driver.Navigate().GoToUrl(newSubmission.Url);
+                Thread.Sleep(1000);
+                Console.WriteLine("GetCodes2");
+                //var labels = Driver.FindElements(By.XPath("//label[starts-with(@for, 'tab-java-')]"));
+                var labels = Driver.FindElements(By.XPath("//span[contains(@class,'filename')]"));
+                //
+                Console.WriteLine($"Labels: {labels.Count}");
+
+                int count = 1;
+                foreach (var label in labels)
+                {
+                    Console.WriteLine($"Label: {label.Text}");
+                    string className = label.Text;
+                    var tabElement = Driver.FindElement(By.XPath($"//*[@id=\"multi_editor_container\"]/div[1]/ul/li[{count}]/a"));
+                    tabElement.Click();
+                    // //*[@id="editor_2"]/div[2]/div/div[3]/div[1]
+                    Thread.Sleep(1000);
+
+                    var codeElements = Driver.FindElements(By.XPath($"//*[@id=\"editor_{count}\"]/div[2]/div/div[3]/div"));
+
+                    string codeContent = string.Join("\n", codeElements.Select(e => e.Text).Select(c => c.Trim()));
+
+                    codes.TryAdd(className, codeContent);
+                    count++;
+                }
+            }
+            catch (Exception ex)
+            {
+                return new(false, $"Error: {ex.Message}", (newSubmission, codes));
+            }
+            finally
+            {
+                Driver.Quit();
+            }
+
+            return new(true, "Success", (newSubmission, codes));
         }
 
         /*
@@ -434,31 +523,31 @@ namespace PlagiTracker.Services.SeleniumServices
                     continue;
                 }
                 */
-                /*
-                var fileData = new Dictionary<string, string>
-                {
-                    { "nombre", $"{className}" },
-                    { "contenido", codeContent }
-                };
-                
-                studentFiles.Add(fileData);
-            }
+        /*
+        var fileData = new Dictionary<string, string>
+        {
+            { "nombre", $"{className}" },
+            { "contenido", codeContent }
+        };
 
-            Driver.Quit();
+        studentFiles.Add(fileData);
+    }
 
-            if (studentFiles.Count <= 0)
-            {
-                result = new Result(false, "Error: No files found");
-            }
+    Driver.Quit();
 
-            Console.WriteLine($"Code Elements: {studentFiles.Count}");
-            
-            result = new Result(true, "Success");
+    if (studentFiles.Count <= 0)
+    {
+        result = new Result(false, "Error: No files found");
+    }
 
-            return (result, codes);
-        }
-        */
-    
+    Console.WriteLine($"Code Elements: {studentFiles.Count}");
+
+    result = new Result(true, "Success");
+
+    return (result, codes);
+}
+*/
+
         /*
         public Result ScrapeReplit(string url)
         {

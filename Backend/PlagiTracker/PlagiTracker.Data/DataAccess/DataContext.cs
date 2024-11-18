@@ -76,10 +76,8 @@ namespace PlagiTracker.Data.DataAccess
                 {
                     s.StudentId, 
                     s.AssignmentId,
+                    s.Url,
                 }).IsUnique();
-
-                // Configura la Url como única 
-                builder.HasIndex(s => s.Url).IsUnique();
                 
                 // Configura la columna como decimal con 2 valores enteros y con 2 decimales
                 builder.Property(s => s.Grade).HasColumnType("decimal(4, 2)");
