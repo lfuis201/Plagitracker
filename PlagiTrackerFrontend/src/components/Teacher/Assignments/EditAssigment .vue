@@ -84,7 +84,17 @@ const emit = defineEmits(['close'])
 const isSubmitting = ref(false)
 const errorMessage = ref('')
 
-
+// Computed property para manejar la fecha en el formato adecuado
+const formattedSubmissionDate = computed({
+  get: () => {
+    // Convierte la fecha a formato YYYY-MM-DDTHH:mm
+    return new Date(assignment.value.submissionDate).toISOString().slice(0, 16)
+  },
+  set: (value) => {
+    // Cuando se cambia el valor, se convierte a ISO para guardar en el assignment
+    assignment.value.submissionDate = new Date(value).toISOString()
+  }
+})
 const assignmentStore = useAssignmentStore()
 const route = useRoute() // Acceder a los parámetros de la ruta
 
@@ -112,17 +122,6 @@ watch(
   }
 )
 
-// Computed property para manejar la fecha en el formato adecuado
-const formattedSubmissionDate = computed({
-  get: () => {
-    // Convierte la fecha a formato YYYY-MM-DDTHH:mm
-    return new Date(assignment.value.submissionDate).toISOString().slice(0, 16)
-  },
-  set: (value) => {
-    // Cuando se cambia el valor, se convierte a ISO para guardar en el assignment
-    assignment.value.submissionDate = new Date(value).toISOString()
-  }
-})
 
 // Función para cerrar el modal y emitir el evento 'close'
 const handleClose = () => {

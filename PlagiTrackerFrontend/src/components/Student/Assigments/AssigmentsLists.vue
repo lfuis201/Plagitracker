@@ -3,6 +3,8 @@ import { ref, onMounted } from 'vue';
 import AssigmentCard from './AssigmentCard.vue';
 import AssignmentService from '@/services/AssigmentService';
 import type { Assignment } from '@/types/Assigment';
+import { useUserStore } from '@/stores/userStore';
+import SubmissionService from '@/services/SubmissionService';
 
 // Definir la prop para recibir el ID del curso
 const props = defineProps({
@@ -16,6 +18,7 @@ const props = defineProps({
 const assignments = ref<Assignment[]>([]);
 const isLoading = ref(false);
 const errorMessage = ref('');
+const userStore = useUserStore();
 
 // Función para obtener las asignaciones del curso usando el servicio
 const fetchAssignments = async () => {
@@ -31,10 +34,35 @@ const fetchAssignments = async () => {
   }
 };
 
+
+// Method to verify submissions for all assignments
+const verifySubmissionsForAllAssignments = async () => {
+  const studentId = userStore.getUser?.id;
+
+  // Iterate through all assignments and verify submission for each one
+  for (const assignment of assignments.value) {
+    try {
+      const exists = await SubmissionService.verifySubmission(assignment.id, studentId);
+      
+      // Add a `submitted` property to the assignment based on the verification result
+      assignment.submitted = exists.submissionExists;  // `submitted` is true if exists, false otherwise
+    } catch (error) {
+      console.error(`Error verifying submission for assignment: ${assignment.title}`, error);
+      assignment.submitted = false; // Assume not submitted if there's an error
+    }
+  }
+
+  // Log each assignment with the `submitted` status
+  console.log('Updated Assignments:', assignments.value);
+};
+
 // Ejecutar la función cuando el componente se monte
-onMounted(() => {
-  fetchAssignments();
+onMounted(async () => {
+  await fetchAssignments();
+  verifySubmissionsForAllAssignments();
 });
+
+
 </script>
 
 <template>

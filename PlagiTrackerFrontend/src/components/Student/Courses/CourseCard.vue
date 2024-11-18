@@ -63,25 +63,9 @@ const handleDelete = async (courseId: string, studentId: string) => {
 
       <div class="flex space-x-2">
       <!-- Botón de borrar -->
-      <p class="text-sm text-muted-foreground">Tasks: {{ props.course.taskCount }}</p>
+      <p class="text-sm text-muted-foreground">Assignments: {{ props.course.taskCount }}</p>
 
-      <button
-        @click="handleDelete(props.course.id, user.id)"
-        aria-label="Files"
-        @click.stop
-        class="text-muted hover:text-red transition-colors duration-200"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
-          <path
-            fill="none"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M4 7h16m-10 4v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"
-          />
-        </svg>
-      </button>
+     
 
       
     </div>

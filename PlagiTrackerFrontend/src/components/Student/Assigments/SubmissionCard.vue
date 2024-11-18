@@ -38,10 +38,9 @@
         <button
           @click="submitLink"
           :disabled="isSubmissionClosed"
-          :class="isSubmissionClosed ? 'bg-blue-300 text-white cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600'"
-          class="px-4 py-2 rounded-md"
+          class="px-4 py-2 mt-2 rounded-md bg-blue-500 text-white"
         >
-          Mark as Completed
+          {{ submitted ? 'Update Submission' : 'Mark as Completed' }}
         </button>
       </div>
 
@@ -73,6 +72,7 @@ const assignmentId = route.params.id as string
 const router = useRouter()
 // Input for submission URL
 const submissionUrl = ref('')
+const existingSubmission = ref<Submission | null>(null)
 
 // Assignment details
 const assignmentTitle = ref<string>('')
@@ -81,18 +81,19 @@ const assignmentSubmissionDate = ref<string>('')
 
 // Track whether the assignment submission date has passed
 const isSubmissionClosed = ref(false)
+const submitted = ref(false)
 
 // Error tracking
 const error = ref<boolean>(false)
 const assignmentNotFound = ref<boolean>(false)
-  const errorMessage = ref('')
+const errorMessage = ref('')
 
 // Function to load assignment details
 const loadAssignmentDetails = async () => {
   try {
     const assignment: Assignment = await AssignmentService.getAssignmentById(assignmentId)
     assignmentTitle.value = assignment.title
-    assignmentDescription.value = assignment.description;
+    assignmentDescription.value = assignment.description
 
     const submissionDate = new Date(assignment.submissionDate)
     assignmentSubmissionDate.value = submissionDate.toLocaleString('en-US', {
@@ -112,6 +113,8 @@ const loadAssignmentDetails = async () => {
 
     error.value = false
     assignmentNotFound.value = false
+
+    await checkIfSubmitted()
   } catch (err: any) {
     if (err.response && err.response.data && err.response.data.errors.id) {
       assignmentNotFound.value = true
@@ -122,28 +125,69 @@ const loadAssignmentDetails = async () => {
   }
 }
 
+const checkIfSubmitted = async () => {
+  try {
+    const exists = await SubmissionService.verifySubmission(assignmentId, user.value.id)
+    submitted.value = exists.submissionExists
+
+    // If the assignment has already been submitted, fetch the existing submission data
+    if (submitted.value) {
+      existingSubmission.value = await SubmissionService.getSubmissionByAssignmentAndStudent(assignmentId, user.value.id)
+      submissionUrl.value = existingSubmission.value.url // Populate the submission URL input field with the existing URL
+    }
+  } catch (error) {
+    console.error('Error checking submission status:', error)
+  }
+}
+
+
 // Function to handle submission
 const submitLink = async () => {
+  // Check if the URL input is empty
   if (!submissionUrl.value) {
     Swal.fire({
       title: 'Error!',
-      text: 'Please enter a valid URL.',
+      text: 'Empty shipments are not allowed.',
       icon: 'warning',
       confirmButtonText: 'OK'
-    });
-    return;
+    })
+    return
+  }
+
+
+  // Check if the URL is too long
+  if (submissionUrl.value.length > 80) {
+    Swal.fire({
+      title: 'Error!',
+      text: 'The URL is too long. Please enter a URL of 80 characters or fewer.',
+      icon: 'warning',
+      confirmButtonText: 'OK'
+    })
+    return
+  }
+
+
+  // Check if the updated URL is the same as the existing submission URL
+  if (submitted.value && existingSubmission.value && submissionUrl.value === existingSubmission.value.url) {
+    Swal.fire({
+      title: 'Error!',
+      text: 'The URL was not changed.',
+      icon: 'warning',
+      confirmButtonText: 'OK'
+    })
+    return
   }
 
   // Validate the URL
-  const isCodivaUrl = submissionUrl.value.startsWith("https://www.codiva.io/");
+  const isCodivaUrl = submissionUrl.value.startsWith('https://www.codiva.io/')
   if (!isCodivaUrl) {
     Swal.fire({
       title: 'Invalid URL!',
       text: 'Please enter a URL that starts with "https://www.codiva.io/".',
       icon: 'warning',
       confirmButtonText: 'OK'
-    });
-    return;
+    })
+    return
   }
 
   try {
@@ -152,28 +196,46 @@ const submitLink = async () => {
       studentId: user.value.id,
       assignmentId: assignmentId,
       submissionDate: new Date()
-    };
+    }
 
-    await SubmissionService.createSubmission(submission);
-    Swal.fire({
-      title: 'Success!',
-      text: 'Submission uploaded successfully!',
-      icon: 'success',
-      confirmButtonText: 'OK'
-    }).then(() => {
-      router.push('/student/courses')  // Redirige a la página de cursos después de la confirmación
-    });
+    if (submitted.value) {
+      // If already submitted, update the existing submission
+      await SubmissionService.updateSubmission(submission, new Date())
+      Swal.fire({
+        title: 'Success!',
+        text: 'Submission updated successfully!',
+        icon: 'success',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        // Redirect only after confirmation
+        router.push('/student/courses')
+      })
+    } else {
+      // If not submitted, create a new submission
+      await SubmissionService.createSubmission(submission)
+      Swal.fire({
+        title: 'Success!',
+        text: 'Submission uploaded successfully!',
+        icon: 'success',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        // Redirect only after confirmation
+        router.push('/student/courses')
+      })
+    }
 
-
-    router.push('/student/courses')
 
   } catch (error: any) {
-    console.error('Error submitting link:', error);
+    console.error('Error submitting link:', error)
 
-    if (error.response && error.response.status === 409 && error.response.data.message === "URL already used.") {
-      errorMessage.value = 'URL already used. Please submit a different link.';
+    if (
+      error.response &&
+      error.response.status === 409 &&
+      error.response.data.message === 'URL already used.'
+    ) {
+      errorMessage.value = 'URL already used. Please submit a different link.'
     } else {
-      errorMessage.value = 'There was an issue submitting your link.';
+      errorMessage.value = 'There was an issue submitting your link.'
     }
 
     Swal.fire({
@@ -181,10 +243,9 @@ const submitLink = async () => {
       text: errorMessage.value,
       icon: 'warning',
       confirmButtonText: 'OK'
-    });
+    })
   }
-};
-
+}
 
 // Fetch assignment details on component mount
 onMounted(() => {

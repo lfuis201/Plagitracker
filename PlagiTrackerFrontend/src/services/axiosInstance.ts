@@ -1,39 +1,57 @@
-import axios from 'axios'
-import router from '@/router/index' // Importa directamente el router creado
+import axios from 'axios';
+import { useUserStore } from '@/stores/userStore'; // Import your Pinia store
+import router from '@/router/index';
 
-// Obtener la URL del backend desde las variables de entorno
-const backendUrl = process.env.PLAGITRACKER_BACKEND_URL
+// Get the backend URL from environment variables
+const backendUrl = process.env.PLAGITRACKER_BACKEND_URL;
 
-// Crear una instancia de Axios
+// Create an Axios instance
 const axiosInstance = axios.create({
-  baseURL: backendUrl, // URL base de la API
+  baseURL: backendUrl, // Base URL for the API
   headers: {
     'Content-Type': 'application/json'
   }
-})
+});
 
-// Interceptor para manejar errores
-axiosInstance.interceptors.response.use(
-  (response) => {
-    // Si la respuesta es exitosa, simplemente la retornamos
-    return response
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const userStore = useUserStore(); 
+
+    const token = userStore.getToken;
+    //console.log(token)
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    return config;
   },
   (error) => {
-    const statusCode = error.response ? error.response.status : null
-
-
-    // Manejar errores específicos del servidor (5xx)
-    if (statusCode >= 500) {
-      router.push({ name: 'ServerError' }) // Redirigir a la vista de error del servidor
-    }
-
-    // Manejar la falta de conexión o error de red
-    if (error.message === 'Network Error' || error.code === 'ERR_CONNECTION_REFUSED') {
-      router.push({ name: 'ServerError' }) // Redirigir a la vista de error del servidor
-    }
-
-    // Retornar una promesa rechazada para manejar el error más adelante
-    return Promise.reject(error)
+    // Handle request errors
+    return Promise.reject(error);
   }
-)
-export default axiosInstance
+);
+
+// Interceptor to handle errors in the response
+axiosInstance.interceptors.response.use(
+  (response) => {
+    return response; // Simply return the response if successful
+  },
+  (error) => {
+    const statusCode = error.response ? error.response.status : null;
+
+    // Handle server errors (5xx)
+    if (statusCode >= 500) {
+      router.push({ name: 'ServerError' }); // Redirect to server error page
+    }
+
+    // Handle network errors or connection issues
+    if (error.message === 'Network Error' || error.code === 'ERR_CONNECTION_REFUSED') {
+      router.push({ name: 'ServerError' }); // Redirect to server error page
+    }
+
+    // Return a rejected promise to handle the error elsewhere
+    return Promise.reject(error);
+  }
+);
+
+export default axiosInstance;

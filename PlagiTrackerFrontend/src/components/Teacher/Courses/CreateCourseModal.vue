@@ -11,7 +11,7 @@
               type="text"
               id="courseName"
               v-model="course.name"
-              maxlength="256"
+              maxlength="40"
               class="border rounded w-full px-3 py-2"
               required
             />

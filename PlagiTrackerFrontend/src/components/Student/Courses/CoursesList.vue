@@ -4,6 +4,7 @@ import { useUserStore } from '@/stores/userStore';
 import CourseCard from './CourseCard.vue';
 import CourseService from '@/services/CourseService';
 import type { Course } from '@/types/Course';
+import SubmissionService from '@/services/SubmissionService';
 
 // Estado reactivo para almacenar los cursos
 const courses = ref<Course[]>([]); 
@@ -33,6 +34,9 @@ const fetchCourses = async () => {
     console.error('User not authenticated or ID not available.');
   }
 };
+
+
+
 
 // Llama a fetchCourses al montar el componente
 onMounted(() => {

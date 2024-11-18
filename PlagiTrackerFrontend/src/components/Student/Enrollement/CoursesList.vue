@@ -5,6 +5,8 @@ import CourseService from '@/services/CourseService'
 import EnrollmentService from '@/services/EnrollmentService'
 import Swal from 'sweetalert2' // Import SweetAlert2
 import router from '@/router'
+import SubmissionService from '@/services/SubmissionService'
+import type { Course } from '@/types/Course'
 
 // Estado reactivo para almacenar los cursos
 const courses = ref<Course[]>([])
@@ -81,16 +83,6 @@ const enrollInCourse = async () => {
 }
 
 
-const verifyCourse = () => {
-  const userId = userStore.getUser?.id;
-  const courseExists = courses.value.some(course => course.id === courseId.value && course.userId === userId);
-
-  if (courseExists) {
-    console.log('You are already enrolled in this course.');
-  } else {
-    console.log('No enrollment found for this course.');
-  }
-};
 
 // Llama a fetchCourses al montar el componente
 onMounted(() => {
@@ -111,6 +103,8 @@ onMounted(() => {
           id="courseId"
           v-model="courseId"
           minlength="1"
+          maxlength="50"
+
           type="text"
           class="border border-gray-300 rounded-md p-2 w-full"
           placeholder="Enter course ID"

@@ -9,11 +9,13 @@ import type { Student } from '@/types/Student'
 export const useUserStore = defineStore('user', () => {
   // Estado reactivo para almacenar el usuario (puede ser Teacher o Student)
   const user = ref<any>(JSON.parse(localStorage.getItem('user') || 'null')) // Cargar el usuario desde localStorage
-  const role = ref<string | null>(JSON.parse(localStorage.getItem('role') || 'null')); // Cargar el rol desde localStorage
+  const role = ref<string | null>(JSON.parse(localStorage.getItem('role') || 'null')) // Cargar el rol desde localStorage
+  const token = ref<string | null>(localStorage.getItem('token'))
 
   // Getter para acceder al usuario
   const getUser = computed(() => user.value)
   const getRole = computed(() => role.value)
+  const getToken = computed(() => token.value)
 
   // Setter para actualizar el usuario
   const setUser = (newUser: any) => {
@@ -21,11 +23,17 @@ export const useUserStore = defineStore('user', () => {
     localStorage.setItem('user', JSON.stringify(newUser)) // Guardar el usuario en localStorage
   }
 
- // Setter para el rol
- const setRole = (newRole: string) => {
-  role.value = newRole;
-  localStorage.setItem('role', JSON.stringify(newRole)); // Guardar el rol en localStorage
-};
+  // Setter para el rol
+  const setRole = (newRole: string) => {
+    role.value = newRole
+    localStorage.setItem('role', JSON.stringify(newRole)) // Guardar el rol en localStorage
+  }
+
+  // Setter to update the token
+  const setToken = (newToken: string) => {
+    token.value = newToken
+    localStorage.setItem('token', newToken) // Save the token in localStorage
+  }
 
   // Acción para iniciar sesión (puede ser Teacher o Student)
   const login = async (email: string, password: string, userType: 'teacher' | 'student') => {
@@ -33,13 +41,14 @@ export const useUserStore = defineStore('user', () => {
     try {
       let response
       if (userType === 'teacher') {
-        response = await TeacherService.loginTeacher(email, password);
-        setRole('teacher'); 
+        response = await TeacherService.loginTeacher(email, password)
+        setRole('teacher')
       } else if (userType === 'student') {
-        response = await StudentService.loginStudent(email, password);
-        setRole('student');
+        response = await StudentService.loginStudent(email, password)
+        setRole('student')
       }
       setUser(response.data) // Usa el setter para guardar la información del usuario
+      setToken(response.data.token);
       return response
     } catch (error) {
       throw error
@@ -63,19 +72,24 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  // Acción para limpiar el estado del usuario
   const clearUser = () => {
     user.value = null;
-    role.value = null; // Limpiar el rol también
-    localStorage.removeItem('user'); // Limpiar el localStorage
-    localStorage.removeItem('role'); // Limpiar el localStorage del rol
+    role.value = null;
+    token.value = null; // Clear the token
+    localStorage.removeItem('user'); // Clear from localStorage
+    localStorage.removeItem('role'); // Clear from localStorage
+    localStorage.removeItem('token'); // Clear the token from localStorage
   };
+
   return {
     getUser,
     getRole,
+    getToken,
     setUser,
+    setRole,
+    setToken,
     login,
     register,
     clearUser
-  }
+  };
 })

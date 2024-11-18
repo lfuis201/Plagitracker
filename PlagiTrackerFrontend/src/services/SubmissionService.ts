@@ -158,6 +158,27 @@ class SubmissionService {
       throw error;
     }
   }
+
+   /**
+   * Obtiene una entrega (submission) por su assignmentId y studentId.
+   *
+   * @param {Guid} assignmentId - El ID de la tarea (assignment).
+   * @param {Guid} studentId - El ID del estudiante (student).
+   * @returns {Promise<Submission>} - Una promesa que se resuelve con los datos de la entrega.
+   * @throws {Error} - Lanza un error si ocurre algún problema al obtener la entrega.
+   */
+   static async getSubmissionByAssignmentAndStudent(
+    assignmentId: string,
+    studentId: string
+  ): Promise<Submission> {
+    try {
+      const response = await axiosInstance.get(`${API_ENDPOINT}/GetByAssignment/${assignmentId}/${studentId}`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching submission by assignment and student:', error)
+      throw error
+    }
+  }
   
 }
 
