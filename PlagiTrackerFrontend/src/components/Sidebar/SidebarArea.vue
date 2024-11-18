@@ -428,9 +428,12 @@ const menuGroups = ref([
   >
     <!-- SIDEBAR HEADER -->
     <div class="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
-      <div class="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
+      <div class="flex items-center justify-between gap-2 px-6 py-4 lg:py-6.5">
         <router-link to="/" class="flex items-center justify-center">
-          <span class="text-xl text-white font-bold">PlagiTracker</span>
+
+          <img src="../../assets/images/logo.png" alt="Logo" class="h-32 w-auto mr-2" /> <!-- Adjust the size with h-8 or your desired size -->
+
+
         </router-link>
       </div>
 
