@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// Ignore Spelling: Dolos
 
 namespace PlagiTracker.Analyzer.Dolos
 {
     public class DolosResponse
     {
-        public string id { get; set; }
-        public string html_url { get; set; }
+        public string? Id { get; set; }
+        public string? HTML_URL { get; set; }
     }
 }

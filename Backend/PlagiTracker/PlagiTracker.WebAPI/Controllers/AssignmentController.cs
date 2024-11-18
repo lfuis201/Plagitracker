@@ -1,4 +1,6 @@
-﻿using Antlr4.Runtime;
+﻿// Ignore Spelling: Dolos
+
+using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
@@ -390,7 +392,8 @@ namespace PlagiTracker.WebAPI.Controllers
         [Route("AnalyzeWithDolos")]
         public async Task<ActionResult> AnalyzeWithDolos(Guid assignmentId)
         {
-            var assignment = await _context!.Assignments!.FindAsync(assignmentId);
+            var assignment = await _context!.Assignments!.Include(a => a.Course).FirstOrDefaultAsync(a => a.Id == assignmentId);
+
 
             if (assignment == null)
             {
@@ -426,7 +429,7 @@ namespace PlagiTracker.WebAPI.Controllers
                 return BadRequest("Error in DataBase");
             }
 
-            Dictionary<Guid, List<(string fileName, string content)>> studentFiles = [];
+            Dictionary<string, List<(string fileName, string content)>> studentFiles = [];
 
             foreach(var studentsSubmission in studentsSubmissions)
             {
@@ -439,16 +442,28 @@ namespace PlagiTracker.WebAPI.Controllers
                     })
                     .ToListAsync();
 
-                studentFiles.Add(studentsSubmission.StudentId, new List<(string fileName, string content)>
+                studentFiles.Add($"{studentsSubmission.Student!.FirstName}-{studentsSubmission.Student.LastName}", new List<(string fileName, string content)>
                 (
                     codes.Select(code => (code.FileName, code.Content)).ToList()!
                 ));
             }
 
-            var data = await DolosZipGenerator.GenerateAssignmentFolder(assignmentId, studentFiles);
+            var result = await DolosZipGenerator.GenerateAssignmentFolder(assignment, studentFiles);
 
-            return Ok(data);
+            if (result == null)
+            {
+                return BadRequest("Error: There was a problem with the fetch operation");
+            }
+            else if (!result.Success)
+            {
+                return BadRequest($"Error: {result.Message}");
+            }
 
+            assignment.DolosURLId = result.Data!.Id;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(result);
         }
 
         [HttpGet]
