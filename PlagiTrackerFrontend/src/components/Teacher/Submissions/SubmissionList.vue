@@ -2,7 +2,7 @@
 import SubmissionService from '@/services/SubmissionService'
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router' // Import useRoute
-
+import DolosFrame from '../DolosFrame.vue';
 // Use the useRoute to get route parameters
 const route = useRoute()
 const assignmentId = ref(route.params.id) // Assuming your route is set up to pass an 'id' parameter
@@ -95,6 +95,9 @@ onMounted(() => {
           </tr>
         </tbody>
       </table>
+
+      <DolosFrame/>
+
     </div>
   </div>
 </template>
