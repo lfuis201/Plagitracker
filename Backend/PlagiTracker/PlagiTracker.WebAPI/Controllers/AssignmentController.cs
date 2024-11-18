@@ -18,6 +18,7 @@ using PlagiTracker.Data.Responses;
 using PlagiTracker.Services.FileServices;
 using PlagiTracker.Services.SeleniumServices;
 using PlagiTracker.WebAPI.HangFire;
+using System;
 using System.Text;
 
 namespace PlagiTracker.WebAPI.Controllers
@@ -442,10 +443,13 @@ namespace PlagiTracker.WebAPI.Controllers
                     })
                     .ToListAsync();
 
-                studentFiles.Add($"{studentsSubmission.Student!.FirstName}-{studentsSubmission.Student.LastName}", new List<(string fileName, string content)>
-                (
-                    codes.Select(code => (code.FileName, code.Content)).ToList()!
-                ));
+                studentFiles.Add(
+                    $"{studentsSubmission.SubmissionDate:yyyy-MM-dd-HH-mm}_{studentsSubmission.Student!.FirstName}-{studentsSubmission.Student.LastName}", 
+                    new List<(string fileName, string content)>
+                    (
+                        codes.Select(code => (code.FileName, code.Content)).ToList()!
+                    )
+                );
             }
 
             var result = await DolosZipGenerator.GenerateAssignmentFolder(assignment, studentFiles);

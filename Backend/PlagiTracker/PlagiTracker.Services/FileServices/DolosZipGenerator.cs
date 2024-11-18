@@ -44,7 +44,14 @@ namespace PlagiTracker.Services.FileServices
 
                     foreach (var file in student.Value)
                     {
-                        string filePath = Path.Combine(studentFolder, $"{file.fileName}");
+                        string fileName = file.fileName;
+
+                        if (!fileName.EndsWith(".java"))
+                        {
+                            fileName += ".java";
+                        }
+
+                        string filePath = Path.Combine(studentFolder, $"{fileName}");
                         File.WriteAllText(filePath, file.content);
                     }
                 }

@@ -31,7 +31,7 @@ namespace PlagiTracker.Analyzer.Dolos
 
                         if (!response.IsSuccessStatusCode)
                         {
-                            return new (false, "Error: Network response was not ok");
+                            return new (false, "Network response was not ok");
                         }
 
                         var responseData = await response.Content.ReadAsStringAsync();
@@ -46,7 +46,7 @@ namespace PlagiTracker.Analyzer.Dolos
                     }
                     catch (Exception ex)
                     {
-                        return new (false, $"Error: There was a problem with the fetch operation: {ex.Message}");
+                        return new (false, $"There was a problem with the fetch operation: {ex.Message}");
                     }
                 }
             }

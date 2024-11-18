@@ -77,7 +77,7 @@ namespace PlagiTracker.WebAPI.Controllers
                         AssignmentId = submissionRequest.AssignmentId
                     };
 
-                    var result= await new WebScraping().GetCodes2(submission);
+                    var result= await new WebScraping().GetCodes(submission);
 
                     if(result == null)
                     {
@@ -106,7 +106,8 @@ namespace PlagiTracker.WebAPI.Controllers
 
                     return Ok(new
                     {
-                        Message = "Success"
+                        Message = "Success",
+                        Data = result.Data.codes.Keys
                     });
                 }
             }

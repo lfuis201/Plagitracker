@@ -100,7 +100,7 @@ namespace PlagiTracker.WebAPI.Controllers
                         Url = url,
                     };
 
-                    var result = await new WebScraping().GetCodes2(submission);
+                    var result = await new WebScraping().GetCodes(submission);
 
                     if (result == null)
                     {
