@@ -195,6 +195,7 @@ const submitLink = async () => {
       url: submissionUrl.value,
       studentId: user.value.id,
       assignmentId: assignmentId,
+      compiler: 0,
       submissionDate: new Date()
     }
 

@@ -8,6 +8,8 @@ export interface Submission {
 
   submissionDate: Date
 
+  compiler: number
+
   studentId: string
 
   assignmentId: string
