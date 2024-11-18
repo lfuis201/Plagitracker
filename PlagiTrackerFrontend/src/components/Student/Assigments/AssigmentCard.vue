@@ -53,15 +53,7 @@ const isOverdue = computed(() => {
       <p :class="{ 'text-gray': isOverdue, 'text-muted-foreground': !isOverdue }" class="text-sm">
         <strong>Fecha de entrega:</strong>
         {{
-          new Date(assignment.submissionDate).toLocaleString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true
-          })
+         assignment.submissionDate
         }}
       </p>
     </div>

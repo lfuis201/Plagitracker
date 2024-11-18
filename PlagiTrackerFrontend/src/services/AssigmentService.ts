@@ -76,14 +76,14 @@ class AssignmentService {
     }
   }
 
-   /**
+  /**
    * Obtiene una asignación por su ID.
    *
    * @param {string} assignmentId - El ID de la asignación que se va a obtener.
    * @returns {Promise<Assignment>} - La asignación obtenida del servidor.
    * @throws {Error} - Lanza un error si ocurre algún problema al obtener la asignación.
    */
-   static async getAssignmentById(assignmentId: string): Promise<Assignment> {
+  static async getAssignmentById(assignmentId: string): Promise<Assignment> {
     try {
       const response = await axiosInstance.get(`${API_ENDPOINT}/GetById`, {
         params: { id: assignmentId }
@@ -109,27 +109,50 @@ class AssignmentService {
         `${API_ENDPOINT}/Analyze?assignmentId=${assignmentId}`,
         {},
         {
-          responseType: 'blob', // Indica que esperamos un archivo binario (PDF)
+          responseType: 'blob' // Indica que esperamos un archivo binario (PDF)
         }
-      );
+      )
 
       // Creamos un Blob con los datos del PDF
-      const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+      const pdfBlob = new Blob([response.data], { type: 'application/pdf' })
 
       // Creamos una URL para el Blob y forzamos la descarga del archivo
-      const downloadUrl = window.URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = `PlagiarismReport-${assignmentId}.pdf`; // Nombre del archivo
-      document.body.appendChild(link);
-      link.click();
+      const downloadUrl = window.URL.createObjectURL(pdfBlob)
+      const link = document.createElement('a')
+      link.href = downloadUrl
+      link.download = `PlagiarismReport-${assignmentId}.pdf` // Nombre del archivo
+      document.body.appendChild(link)
+      link.click()
 
       // Limpiar el DOM después de la descarga
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(downloadUrl);
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(downloadUrl)
     } catch (error) {
-      console.error('Error analyzing assignment:', error);
-      throw error;
+      console.error('Error analyzing assignment:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Obtiene todas las asignaciones y envíos asociados a un curso y estudiante.
+   *
+   * @param {string} studentId - El ID del estudiante.
+   * @param {string} courseId - El ID del curso.
+   * @returns {Promise<AssignmentSubmissionResponse[]>} - Una lista de respuestas que incluyen asignaciones y envíos.
+   * @throws {Error} - Lanza un error si ocurre algún problema al obtener los datos.
+   */
+  static async getAllByCourseForStudent(
+    studentId: string,
+    courseId: string
+  ): Promise<Assignment[]> {
+    try {
+      const response = await axiosInstance.get(`${API_ENDPOINT}/GetAllByCourseForStudent`, {
+        params: { studentId, courseId }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error getting assignments and submissions:', error)
+      throw error
     }
   }
 }

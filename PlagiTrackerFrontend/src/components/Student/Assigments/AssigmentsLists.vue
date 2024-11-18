@@ -24,7 +24,15 @@ const userStore = useUserStore();
 const fetchAssignments = async () => {
   try {
     isLoading.value = true;
-    assignments.value = await AssignmentService.getAssignmentsByCourse(props.courseId);
+
+    const user = userStore.getUser;
+    const studentId = user.id;
+
+
+   // assignments.value = await AssignmentService.getAssignmentsByCourse(props.courseId);
+   const response =await AssignmentService.getAllByCourseForStudent(studentId, props.courseId);
+
+    assignments.value = response.map(item => item.assignment);
     console.log(assignments.value);
   } catch (error) {
     console.error('Error fetching assignments:', error);
@@ -59,7 +67,6 @@ const verifySubmissionsForAllAssignments = async () => {
 // Ejecutar la función cuando el componente se monte
 onMounted(async () => {
   await fetchAssignments();
-  verifySubmissionsForAllAssignments();
 });
 
 
