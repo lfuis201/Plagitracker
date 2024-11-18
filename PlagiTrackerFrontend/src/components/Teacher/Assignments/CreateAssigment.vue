@@ -72,11 +72,7 @@
               />
 
               <label class="block mb-2 mt-4">Has Body?</label>
-              <input
-                type="checkbox"
-                v-model="exercise.haveBody"
-                class="mr-2"
-              />
+              <input type="checkbox" v-model="exercise.haveBody" class="mr-2" />
               <span>{{ exercise.haveBody ? 'Yes' : 'No' }}</span>
 
               <!-- Classes Section -->
@@ -90,7 +86,11 @@
                   Add Class
                 </button>
 
-                <div v-for="(cls, classIndex) in exercise.classes" :key="classIndex" class=" p-2 mb-2">
+                <div
+                  v-for="(cls, classIndex) in exercise.classes"
+                  :key="classIndex"
+                  class="p-2 mb-2"
+                >
                   <label class="block mb-1">Class Name</label>
                   <input
                     type="text"
@@ -117,7 +117,11 @@
                       Add Method
                     </button>
 
-                    <div v-for="(method, methodIndex) in cls.methods" :key="methodIndex" class=" p-2 mb-1">
+                    <div
+                      v-for="(method, methodIndex) in cls.methods"
+                      :key="methodIndex"
+                      class="p-2 mb-1"
+                    >
                       <label class="block mb-1">Method Name</label>
                       <input
                         type="text"
@@ -151,7 +155,11 @@
                           Add Parameter
                         </button>
 
-                        <div v-for="(param, paramIndex) in method.parameters" :key="paramIndex" class=" p-2  mb-1">
+                        <div
+                          v-for="(param, paramIndex) in method.parameters"
+                          :key="paramIndex"
+                          class="p-2 mb-1"
+                        >
                           <label class="block mb-1">Parameter Name</label>
                           <input
                             type="text"
@@ -187,7 +195,11 @@
                           Add Variable
                         </button>
 
-                        <div v-for="(variable, varIndex) in method.variables" :key="varIndex" class=" p-2  mb-1">
+                        <div
+                          v-for="(variable, varIndex) in method.variables"
+                          :key="varIndex"
+                          class="p-2 mb-1"
+                        >
                           <label class="block mb-1">Variable Name</label>
                           <input
                             type="text"
@@ -215,7 +227,10 @@
         <button
           type="submit"
           :disabled="isSubmitting"
-          :class="[ 'mt-4 block w-full rounded p-3 text-white', isSubmitting ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600' ]"
+          :class="[
+            'mt-4 block w-full rounded p-3 text-white',
+            isSubmitting ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
+          ]"
         >
           {{ isSubmitting ? 'Creating...' : 'Create Assignment' }}
         </button>
@@ -227,7 +242,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import ModalLayout from '@/layouts/ModalLayout.vue'
-import type { Assignment,Exercise, Class, Method } from '@/types/Assigment'
+import type { Assignment, Exercise, Class, Method } from '@/types/Assigment'
 import AssignmentService from '@/services/AssigmentService'
 import Swal from 'sweetalert2'
 import { useAssignmentStore } from '@/stores/assigmentStore'
@@ -269,14 +284,14 @@ const exercises = ref<Exercise[]>([])
 const handleClose = () => {
   emit('close')
   assignment.value = {
-      id: '',
-      title: '',
-      description: '',
-      submissionDate: '',
-      courseId: props.courseId
-    }
-    exercises.value = []
-    formattedSubmissionDate.value = ''
+    id: '',
+    title: '',
+    description: '',
+    submissionDate: '',
+    courseId: props.courseId
+  }
+  exercises.value = []
+  formattedSubmissionDate.value = ''
 }
 
 const handleSubmit = async () => {
@@ -287,7 +302,7 @@ const handleSubmit = async () => {
     assignment.value.exercises = exercises.value
 
     const createdAssignment = await AssignmentService.createAssignment(assignment.value)
-    console.log('Assignment Created:',  assignment.value)
+    console.log('Assignment Created:', assignment.value)
 
     assignment.value = {
       id: '',
@@ -299,8 +314,6 @@ const handleSubmit = async () => {
     exercises.value = []
     formattedSubmissionDate.value = ''
 
-
-
     handleClose()
 
     Swal.fire({
@@ -310,12 +323,16 @@ const handleSubmit = async () => {
       confirmButtonText: 'Ok'
     })
     await assignmentStore.fetchAssignmentsByCourse(props.courseId)
-
-
-   
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Error creating assignment:', error)
     handleClose()
-    errorMessage.value = 'An unexpected error occurred. Please try again later.'
+    if (error.response && error.response.status === 409) {
+      errorMessage.value = 'There is already a course with the same name'
+    } else {
+      // Si es cualquier otro error, mostrar un mensaje genérico
+      errorMessage.value = 'An unexpected error occurred. Please try again later.'
+    }
+
     Swal.fire({
       title: 'Assignment Creation Failed',
       text: errorMessage.value,
@@ -323,7 +340,7 @@ const handleSubmit = async () => {
       confirmButtonText: 'Try Again'
     })
   } finally {
-    isSubmitting.value = false
+    isSubmitting.value = false // Habilita el botón nuevamente
   }
 }
 
@@ -368,8 +385,6 @@ const addVariable = (exerciseIndex: number, classIndex: number, methodIndex: num
     type: ''
   })
 }
-
-
 </script>
 
 <style scoped>
