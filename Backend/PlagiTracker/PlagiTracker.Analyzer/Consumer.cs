@@ -45,7 +45,6 @@ namespace PlagiTracker.Analyzer
                 }
                 else
                 {
-                    Console.WriteLine($"Error en la solicitud: { response.StatusCode }");
                     return new();
                 }
             }

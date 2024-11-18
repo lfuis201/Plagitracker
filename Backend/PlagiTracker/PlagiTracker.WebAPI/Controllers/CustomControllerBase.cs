@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Antlr4.Runtime.Misc;
+using Microsoft.AspNetCore.Mvc;
 using PlagiTracker.Data;
 using PlagiTracker.Data.DataAccess;
-using PlagiTracker.Data.Entities;
-using PlagiTracker.Data.Requests;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
@@ -15,7 +14,7 @@ namespace PlagiTracker.WebAPI.Controllers
             _context = context ?? throw new ArgumentNullException(nameof(context), "Error: Error in Data Base connection");
         }
 
-        protected Result VerifyToken(string scopeClaim, string scopeClassName)
+        protected Result<NullableAttribute> VerifyToken(string scopeClaim, string scopeClassName)
         {
             try
             {

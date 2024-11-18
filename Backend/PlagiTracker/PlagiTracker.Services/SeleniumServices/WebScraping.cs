@@ -1,4 +1,4 @@
-﻿// Ignore Spelling: Codiva Replit
+﻿// Ignore Spelling: Codiva Replit ONLINE GDB
 
 using OpenQA.Selenium;
 using PlagiTracker.Analyzer;
@@ -69,7 +69,7 @@ namespace PlagiTracker.Services.SeleniumServices
         }
     }
 
-    public class WebScraping
+    public partial class WebScraping
     {
         private static readonly string DownloadPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Downloads\");
 
@@ -78,6 +78,7 @@ namespace PlagiTracker.Services.SeleniumServices
 
         public const string CODIVA_PATTERN = @"^https:\/\/www\.codiva\.io\/p\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
         public const string ONLINE_GDB_PATTERN = @"^https:\/\/www\.onlinegdb\.com\/[a-zA-Z0-9]+$";
+        public const string ONLINE_GDB_PATTERN2 = @"^https:\/\/onlinegdb\.com\/[a-zA-Z0-9]+$";
 
         public WebScraping()
         {
@@ -198,22 +199,13 @@ namespace PlagiTracker.Services.SeleniumServices
         /// </summary>
         public static bool IsSupportedURL(UrlCompilerType urlCompilerType, string url)
         {
-            if (urlCompilerType == UrlCompilerType.Codiva)
-            {
-                return Regex.IsMatch(url, CODIVA_PATTERN);
-            }
-            else if (urlCompilerType == UrlCompilerType.OnlineGDB)
-            {
-                return Regex.IsMatch(url, ONLINE_GDB_PATTERN);
-            }
-            else if (urlCompilerType == UrlCompilerType.Replit)
-            {
-                return url.Contains("replit.com");
-            }
-            else
+            if (!Regex.IsMatch(url, CODIVA_PATTERN) && !Regex.IsMatch(url, ONLINE_GDB_PATTERN)
+                && !Regex.IsMatch(url, ONLINE_GDB_PATTERN2) //&& !url.Contains("replit.com")
+                )
             {
                 return false;
             }
+            return true;
         }
 
         public async Task<Dictionary<Guid, StudentSubmission>> StartScraping(List<Submission> studentsSubmissions)
@@ -342,6 +334,32 @@ namespace PlagiTracker.Services.SeleniumServices
         /// <returns></returns>
         public async Task<Result<(Submission submission, Dictionary<string, string> codes)>> GetCodes(Submission submission)
         {
+            // Verificar si la URL es válida
+            if(string.IsNullOrEmpty(submission.Url))
+            {                 
+                return new(false, "The URL is null or empty");
+            }
+            else if (!await UrlExists(submission.Url))
+            {
+                return new(false, "The URL does not exist");
+            }
+
+            if(Regex.IsMatch(submission.Url, CODIVA_PATTERN))
+            {
+                return await GetCodesForCodiva(submission);
+            }
+            else if(Regex.IsMatch(submission.Url, ONLINE_GDB_PATTERN) || Regex.IsMatch(submission.Url, ONLINE_GDB_PATTERN2))
+            {
+                return await GetCodesForOnlineGDB(submission);
+            }
+            else
+            {
+                return new(false, "The URL is not supported");
+            }
+        }
+
+        public async Task<Result<(Submission submission, Dictionary<string, string> codes)>> GetCodesForCodiva(Submission submission)
+        {
             Submission newSubmission = submission;
             Dictionary<string, string> codes = [];
             
@@ -382,7 +400,6 @@ namespace PlagiTracker.Services.SeleniumServices
 
                 foreach (var label in labels)
                 {
-                    Console.WriteLine($"Label: {label.GetAttribute("title")}");
                     string className = label.GetAttribute("title");
                     var tabElement = Driver.FindElement(By.XPath($"//label[@title='{className}']"));
                     tabElement.Click();
@@ -408,7 +425,7 @@ namespace PlagiTracker.Services.SeleniumServices
             return new (true, "Success", (newSubmission, codes));
         }
 
-        public async Task<Result<(Submission submission, Dictionary<string, string> codes)>> GetCodes2(Submission submission)
+        public async Task<Result<(Submission submission, Dictionary<string, string> codes)>> GetCodesForOnlineGDB(Submission submission)
         {
             Submission newSubmission = submission;
             Dictionary<string, string> codes = [];
