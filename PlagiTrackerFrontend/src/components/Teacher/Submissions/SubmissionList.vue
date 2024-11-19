@@ -95,9 +95,6 @@ onMounted(() => {
           </tr>
         </tbody>
       </table>
-
-      <DolosFrame/>
-
     </div>
   </div>
 </template>

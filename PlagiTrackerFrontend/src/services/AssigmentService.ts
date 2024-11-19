@@ -155,6 +155,27 @@ class AssignmentService {
       throw error
     }
   }
+
+
+  /**
+   * Analiza una asignación usando Dolos.
+   *
+   * @param {string} assignmentId - El ID de la asignación que se va a analizar.
+   * @returns {Promise<any>} - Una promesa que se resuelve con la respuesta del servidor en caso de éxito.
+   * @throws {Error} - Lanza un error si ocurre algún problema durante el análisis.
+   */
+  static async analyzeWithDolos(assignmentId: string): Promise<any> {
+    try {
+      const response = await axiosInstance.post(`${API_ENDPOINT}/AnalyzeWithDolos`, null, {
+        params: { assignmentId },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error analyzing with Dolos:', error);
+      throw error;
+    }
+  }
+
 }
 
 export default AssignmentService

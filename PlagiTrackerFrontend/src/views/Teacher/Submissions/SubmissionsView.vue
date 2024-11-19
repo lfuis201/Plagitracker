@@ -7,7 +7,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import AssignmentService from '@/services/AssigmentService' // Importa el AssignmentService
 import Swal from 'sweetalert2' // Importa SweetAlert2
-
+import DolosFrame from '@/components/Teacher/DolosFrame.vue'
 const pageTitle = ref('Submissions')
 
 // Obtener el id del curso desde la ruta
@@ -16,6 +16,7 @@ const loading = ref(false) // Estado de carga para el botón
 
 const AssigmentId = route.params.id // Acceder al id de la ruta
 const assignmentNotFound = ref<boolean>(false) // Track whether the assignment is not found
+const dolosUrl = ref<string | null>(null); // Ref to hold the Dolos URL
 
 console.log(AssigmentId)
 // Función para realizar el análisis del curso
@@ -27,8 +28,10 @@ const analyzeCourse = async () => {
     console.log('analizyng...')
 
     //console.log(AssigmentId)
-    const result = await AssignmentService.analyzeAssignment(AssigmentId)
+    const result = await AssignmentService.analyzeWithDolos(AssigmentId)
     // Si la respuesta es exitosa, muestra un mensaje de éxito
+     dolosUrl.value = result.data.htmL_URL;
+     console.log(dolosUrl.value)
     // Si la respuesta es exitosa, muestra un mensaje de éxito con SweetAlert2
     await Swal.fire({
       title: 'Analysis Complete',
@@ -155,6 +158,9 @@ onMounted(async () => {
       <!-- Componente para la lista de entregas -->
       <SubmissionList />
     </template>
+
+    <DolosFrame v-if="dolosUrl" :url="dolosUrl" />
+
   </DefaultLayout>
 </template>
 
