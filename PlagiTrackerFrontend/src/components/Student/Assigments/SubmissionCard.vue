@@ -132,14 +132,16 @@ const checkIfSubmitted = async () => {
 
     // If the assignment has already been submitted, fetch the existing submission data
     if (submitted.value) {
-      existingSubmission.value = await SubmissionService.getSubmissionByAssignmentAndStudent(assignmentId, user.value.id)
+      existingSubmission.value = await SubmissionService.getSubmissionByAssignmentAndStudent(
+        assignmentId,
+        user.value.id
+      )
       submissionUrl.value = existingSubmission.value.url // Populate the submission URL input field with the existing URL
     }
   } catch (error) {
     console.error('Error checking submission status:', error)
   }
 }
-
 
 // Function to handle submission
 const submitLink = async () => {
@@ -154,7 +156,6 @@ const submitLink = async () => {
     return
   }
 
-
   // Check if the URL is too long
   if (submissionUrl.value.length > 80) {
     Swal.fire({
@@ -166,9 +167,12 @@ const submitLink = async () => {
     return
   }
 
-
   // Check if the updated URL is the same as the existing submission URL
-  if (submitted.value && existingSubmission.value && submissionUrl.value === existingSubmission.value.url) {
+  if (
+    submitted.value &&
+    existingSubmission.value &&
+    submissionUrl.value === existingSubmission.value.url
+  ) {
     Swal.fire({
       title: 'Error!',
       text: 'The URL was not changed.',
@@ -178,12 +182,14 @@ const submitLink = async () => {
     return
   }
 
-  // Validate the URL
-  const isCodivaUrl = submissionUrl.value.startsWith('https://www.codiva.io/')
+  const urlPattern = /^https:\/\/www\.codiva\.io\/p\/[a-f0-9\-]{36}$/;
+
+  const isCodivaUrl = urlPattern.test(submissionUrl.value)
+
   if (!isCodivaUrl) {
     Swal.fire({
       title: 'Invalid URL!',
-      text: 'Please enter a URL that starts with "https://www.codiva.io/".',
+      text: 'Please enter a valid URL that starts with "https://www.codiva.io/p/<valid-uuid>".',
       icon: 'warning',
       confirmButtonText: 'OK'
     })
@@ -224,8 +230,6 @@ const submitLink = async () => {
         router.push('/student/courses')
       })
     }
-
-
   } catch (error: any) {
     console.error('Error submitting link:', error)
 
