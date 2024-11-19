@@ -29,7 +29,7 @@ const fetchAssignments = async () => {
     const studentId = user.id;
 
 
-   // assignments.value = await AssignmentService.getAssignmentsByCourse(props.courseId);
+   //assignments.value = await AssignmentService.getAssignmentsByCourse(props.courseId);
    const response =await AssignmentService.getAllByCourseForStudent(studentId, props.courseId);
 
     assignments.value = response.map(item => item.assignment);
@@ -67,6 +67,7 @@ const verifySubmissionsForAllAssignments = async () => {
 // Ejecutar la función cuando el componente se monte
 onMounted(async () => {
   await fetchAssignments();
+  verifySubmissionsForAllAssignments();
 });
 
 
