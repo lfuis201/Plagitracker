@@ -1,4 +1,4 @@
-﻿// Ignore Spelling: Codiva Replit ONLINE GDB
+﻿// Ignore Spelling: Codiva Replit ONLINE GDB Screenshot
 
 using OpenQA.Selenium;
 using PlagiTracker.Analyzer;
@@ -77,8 +77,8 @@ namespace PlagiTracker.Services.SeleniumServices
         public IWebDriver? Driver;
 
         public const string CODIVA_PATTERN = @"^https:\/\/www\.codiva\.io\/p\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
-        public const string ONLINE_GDB_PATTERN = @"^https:\/\/www\.onlinegdb\.com\/[a-zA-Z0-9]+$";
-        public const string ONLINE_GDB_PATTERN2 = @"^https:\/\/onlinegdb\.com\/[a-zA-Z0-9]+$";
+        public const string ONLINE_GDB_PATTERN = @"^https:\/\/www\.onlinegdb\.com\/[a-zA-Z0-9_-]+$";
+        public const string ONLINE_GDB_PATTERN2 = @"^https:\/\/onlinegdb\.com\/[a-zA-Z0-9_-]+$";
 
         public WebScraping()
         {
@@ -496,6 +496,42 @@ namespace PlagiTracker.Services.SeleniumServices
             }
 
             return new(true, "Success", (newSubmission, codes));
+        }
+
+        public async Task<Result<byte[]>> TakeScreenshot(string url)
+        {
+            if (Driver == null)
+            {
+                return new (false, "Driver is NULL");
+            }
+
+            Screenshot screenshot;
+
+            try
+            {
+                Driver.Navigate().GoToUrl(url);
+
+                Thread.Sleep(5000);
+
+                ITakesScreenshot? screenshotDriver = Driver as ITakesScreenshot;
+
+                if (screenshotDriver == null)
+                {
+                    return new (false, "Screenshot driver is NULL");
+                }
+
+                screenshot = screenshotDriver.GetScreenshot();
+            }
+            catch (Exception ex)
+            {
+                return new (false, ex.Message);
+            }
+            finally
+            {
+                Driver.Quit();
+            }
+            
+            return new (true, "Success", screenshot.AsByteArray);
         }
 
         /*

@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Entities;
 using PlagiTracker.Data.Requests;
+using PlagiTracker.Services.EmailServices;
 using PlagiTracker.Services.SeleniumServices;
 
 namespace PlagiTracker.WebAPI.Controllers
@@ -121,6 +122,42 @@ namespace PlagiTracker.WebAPI.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.ToString());
+            }
+        }
+
+
+        [HttpPost]
+        [Route("AssignmentDolosAnalysisEmail")]
+        public async Task<ActionResult> AssignmentDolosAnalysisEmail(string url)
+        {
+            try
+            {
+                WebScraping webScraping = new();
+                try
+                {
+                    var result = await webScraping!.TakeScreenshot(url);
+
+                    if (!result.Success || result.Data == null)
+                    {
+                        return BadRequest(result.Message);
+                    }
+
+                    //EmailAssignmentNotification.AssignmentDolosAnalysisEmail("asd", "asd", "asd",result.Data);
+
+                    return Ok();
+                }
+                catch (Exception e)
+                {
+                    return BadRequest($"Error in Test: {e.Message}");
+                }
+                finally
+                {
+                    webScraping!.Driver!.Dispose();
+                }
+            }
+            catch (Exception e)
+            {
+                return BadRequest($"Error in Test: {e.Message}");
             }
         }
     }

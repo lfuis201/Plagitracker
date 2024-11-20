@@ -393,7 +393,10 @@ namespace PlagiTracker.WebAPI.Controllers
         [Route("AnalyzeWithDolos")]
         public async Task<ActionResult> AnalyzeWithDolos(Guid assignmentId)
         {
-            var assignment = await _context!.Assignments!.Include(a => a.Course).FirstOrDefaultAsync(a => a.Id == assignmentId);
+            var assignment = await _context!.Assignments!
+                .Include(a => a.Course)
+                .ThenInclude(c => c!.Teacher)
+                .FirstOrDefaultAsync(a => a.Id == assignmentId);
 
 
             if (assignment == null)
@@ -432,7 +435,7 @@ namespace PlagiTracker.WebAPI.Controllers
 
             Dictionary<string, List<(string fileName, string content)>> studentFiles = [];
 
-            foreach(var studentsSubmission in studentsSubmissions)
+            foreach (var studentsSubmission in studentsSubmissions)
             {
                 var codes = await _context!.Codes!
                     .Where(code => code.SubmissionId == studentsSubmission.Id)
@@ -444,7 +447,7 @@ namespace PlagiTracker.WebAPI.Controllers
                     .ToListAsync();
 
                 studentFiles.Add(
-                    $"{studentsSubmission.SubmissionDate:yyyy-MM-dd-HH-mm}_{studentsSubmission.Student!.FirstName}-{studentsSubmission.Student.LastName}", 
+                    $"{studentsSubmission.SubmissionDate:yyyy-MM-dd-HH-mm}_{studentsSubmission.Student!.FirstName}-{studentsSubmission.Student.LastName}",
                     new List<(string fileName, string content)>
                     (
                         codes.Select(code => (code.FileName, code.Content)).ToList()!
@@ -466,6 +469,19 @@ namespace PlagiTracker.WebAPI.Controllers
             assignment.DolosURLId = result.Data!.Id;
 
             await _context.SaveChangesAsync();
+
+            BackgroundJob.Schedule(() =>
+                    HttpContext.RequestServices
+                        .GetRequiredService<HangFireServices>()
+                        .AssignmentDolosAnalysisEmail(
+                        result.Data.HTML_URL!, 
+                        assignment.Course!.Teacher!.Email!, 
+                        $"{assignment.Course!.Teacher!.FirstName} {assignment.Course.Teacher.LastName}",
+                        assignment.Course!.Name!,
+                        assignment.Title!
+                    ),
+                    new DateTimeOffset(DateTime.UtcNow)
+                );
 
             return Ok(result);
         }

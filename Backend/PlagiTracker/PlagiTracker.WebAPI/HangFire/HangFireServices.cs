@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using PlagiTracker.Analyzer.PlagiDetector;
 using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Entities;
+using PlagiTracker.Services.EmailServices;
 using PlagiTracker.Services.SeleniumServices;
 using System.Text;
 using static PlagiTracker.Data.Entities.Plagiarism;
@@ -189,6 +191,29 @@ namespace PlagiTracker.WebAPI.HangFire
                 assignment.AnalysisDate = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task AssignmentDolosAnalysisEmail(string url, string toEmail, string displayName, string courseName, string assignmentTitle)
+        {
+            WebScraping? webScraping;
+
+            try
+            { 
+                webScraping = new();
+                
+                var result = await webScraping!.TakeScreenshot(url);
+
+                if (!result.Success || result.Data == null)
+                {
+                     Console.WriteLine(result.Message);
+                }
+
+                EmailAssignmentNotification.AssignmentDolosAnalysisEmail(url, toEmail, displayName, courseName, assignmentTitle, result.Data);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error in Test: {e.Message}");
             }
         }
     }
