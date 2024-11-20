@@ -1,6 +1,7 @@
 ﻿// Ignore Spelling: Codiva Replit
 
 using PlagiTracker.Data.Entities;
+using PlagiTracker.Services.EmailServices;
 using PlagiTracker.Services.FileServices.Replit;
 using PlagiTracker.Services.SeleniumServices;
 
@@ -150,7 +151,7 @@ namespace PlagiTracker.Tests.ServicesTests.SeleniumServices
                     {
                         Url = url,
                     };
-                    var result = await webScraping!.GetCodes2(submission);
+                    var result = await webScraping!.GetCodes(submission);
                     Assert.AreEqual(expected, result.Data.codes.Count);
                 }
                 catch (Exception e)
@@ -165,6 +166,43 @@ namespace PlagiTracker.Tests.ServicesTests.SeleniumServices
             }
             catch (Exception e)
             { 
+                Console.WriteLine($"Error in Test: {e.Message}");
+                Assert.Fail(e.Message);
+            }
+        }
+
+        [TestMethod]
+        [DataRow("https://dolos.ugent.be/server/#/share/1304387187490617071", 3)]
+        public async Task TestDolosEmail(string url, int expected)
+        {
+            try
+            {
+                WebScraping webScraping = new();
+                try
+                {
+                    var result = await webScraping!.TakeScreenshot(url);
+
+                    if (!result.Success || result.Data == null)
+                    {
+                        Assert.Fail(result.Message);
+                    }
+
+                    //EmailAssignmentNotification.AssignmentDolosAnalysisEmail("asd", "asd", "asd",result.Data);
+
+                    Assert.AreEqual(expected, 1);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Error in Test: {e.Message}");
+                    Assert.Fail(e.Message);
+                }
+                finally
+                {
+                    webScraping!.Driver!.Dispose();
+                }
+            }
+            catch (Exception e)
+            {
                 Console.WriteLine($"Error in Test: {e.Message}");
                 Assert.Fail(e.Message);
             }
