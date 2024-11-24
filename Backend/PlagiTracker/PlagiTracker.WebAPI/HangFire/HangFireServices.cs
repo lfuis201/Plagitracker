@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿// Ignore Spelling: Dolos
+
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using PlagiTracker.Analyzer.PlagiDetector;
 using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Entities;
 using PlagiTracker.Services.EmailServices;
 using PlagiTracker.Services.SeleniumServices;
+using System;
 using System.Text;
 using static PlagiTracker.Data.Entities.Plagiarism;
 
@@ -15,10 +15,12 @@ namespace PlagiTracker.WebAPI.HangFire
     public class HangFireServices
     {
         private readonly DataContext _context;
+        private readonly EmailAssignmentNotification _emailAssignmentNotification;
 
-        public HangFireServices(DataContext context)
+        public HangFireServices(DataContext context, EmailAssignmentNotification emailAssignmentNotification)
         {
             _context = context;
+            _emailAssignmentNotification = emailAssignmentNotification;
         }
 
         public async Task SavePlagiarismReport(Guid assignmentId, string analysisResultJson, Dictionary<Guid, StudentSubmission> analysisResult)
@@ -214,6 +216,29 @@ namespace PlagiTracker.WebAPI.HangFire
             catch (Exception e)
             {
                 Console.WriteLine($"Error in Test: {e.Message}");
+            }
+        }
+
+        public async Task AssignmentDolosAnalysisEmail(string url, string toEmail, string courseName, string assignmentTitle)
+        {
+            WebScraping? webScraping;
+
+            try
+            {
+                webScraping = new();
+
+                var result = await webScraping!.TakeScreenshot(url);
+
+                if (!result.Success || result.Data == null)
+                {
+                    Console.WriteLine(result.Message);
+                }
+
+                _emailAssignmentNotification.AssignmentDolosAnalysisEmail(url, toEmail, courseName, assignmentTitle, result.Data);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error: {e.Message}");
             }
         }
     }
