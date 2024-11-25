@@ -8,18 +8,42 @@ import { useRoute } from 'vue-router'
 import AssignmentService from '@/services/AssigmentService' // Importa el AssignmentService
 import Swal from 'sweetalert2' // Importa SweetAlert2
 import DolosFrame from '@/components/Teacher/DolosFrame.vue'
+import { useUserStore } from '@/stores/userStore'
+import ShareLink from '@/components/Teacher/Submissions/ShareLink.vue'
 const pageTitle = ref('Submissions')
+const userStore = useUserStore()
 
 // Obtener el id del curso desde la ruta
 const route = useRoute()
 const loading = ref(false) // Estado de carga para el botón
 
-const AssigmentId = route.params.id // Acceder al id de la ruta
-const assignmentNotFound = ref<boolean>(false) // Track whether the assignment is not found
-const dolosUrl = ref<string | null>(null); // Ref to hold the Dolos URL
+const showShareLink = ref(false)
 
-console.log(AssigmentId)
+
+const AssigmentId = route.params.id // Acceder al id de la ruta
+const assignmentNotFound = ref<boolean>(false)
+const dolosUrl = ref<string | null>(null)
+const dolosFrameRef = ref({})
+console.log(userStore.getUser.email)
 // Función para realizar el análisis del curso
+
+const scrollToDolosFrame = () => {
+  const element = document.getElementById('dolos-frame-container')
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}
+
+// Función para abrir el modal
+const openModal = () => {
+  showShareLink.value = true
+}
+
+// Función para cerrar el modal
+const handleModalClose = () => {
+  showShareLink.value = false
+}
+
 const analyzeCourse = async () => {
   try {
     // Llama a la función analyzeAssignment pasando el id del curso como parámetro
@@ -28,17 +52,20 @@ const analyzeCourse = async () => {
     console.log('analizyng...')
 
     //console.log(AssigmentId)
-    const result = await AssignmentService.analyzeWithDolos(AssigmentId)
+    const result = await AssignmentService.analyzeWithDolos(AssigmentId, userStore.getUser.email)
     // Si la respuesta es exitosa, muestra un mensaje de éxito
-     dolosUrl.value = result.data.htmL_URL;
-     console.log(dolosUrl.value)
+    dolosUrl.value = result.data.htmL_URL
+    console.log(dolosUrl.value)
     // Si la respuesta es exitosa, muestra un mensaje de éxito con SweetAlert2
     await Swal.fire({
       title: 'Analysis Complete',
       text: 'Your report is downloading now!',
       icon: 'success',
       confirmButtonText: 'Great'
-    });
+    })
+
+    scrollToDolosFrame()
+
   } catch (error) {
     // Si ocurre un error, muestra un mensaje de alerta
     console.error('Error during assignment analysis:', error)
@@ -59,16 +86,14 @@ const checkAssignmentExists = async (): Promise<boolean> => {
     // Llamar al servicio para obtener la tarea por ID
     const assignment = await AssignmentService.getAssignmentById(AssigmentId)
     console.log('Assignment exists:', assignment)
-
   } catch (error: any) {
     console.error('Error fetching assignment:', error)
 
     // Manejar el error 400 específicamente para el assignmentId inválido
-     // Check if the error is a 400 Bad Request
-     if (error.response && error.response.status === 400) {
+    // Check if the error is a 400 Bad Request
+    if (error.response && error.response.status === 400) {
       assignmentNotFound.value = true // Mark as not found
     }
-
   }
   return false // La tarea no existe o hubo un error
 }
@@ -159,7 +184,12 @@ onMounted(async () => {
       <SubmissionList />
     </template>
 
-    <DolosFrame v-if="dolosUrl" :url="dolosUrl" />
+    <div id="dolos-frame-container" class="mt-4">
+      <DolosFrame v-if="dolosUrl" :url="dolosUrl" />
+    </div>
+
+    <ShareLink :modalOpen="showShareLink" :course-id="AssigmentId" @close="handleModalClose"/>
+
 
   </DefaultLayout>
 </template>

@@ -164,17 +164,25 @@ class AssignmentService {
    * @returns {Promise<any>} - Una promesa que se resuelve con la respuesta del servidor en caso de éxito.
    * @throws {Error} - Lanza un error si ocurre algún problema durante el análisis.
    */
-  static async analyzeWithDolos(assignmentId: string): Promise<any> {
+  static async analyzeWithDolos(assignmentId: string, email: string): Promise<any> {
     try {
-      const response = await axiosInstance.post(`${API_ENDPOINT}/AnalyzeWithDolos`, null, {
-        params: { assignmentId },
-      });
+      const response = await axiosInstance.post(
+        `${API_ENDPOINT}/DolosAnalysisCustomEmail`,
+        null,
+        {
+          params: {
+            assignmentId,
+            email,
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       console.error('Error analyzing with Dolos:', error);
       throw error;
     }
   }
+  
 
 }
 

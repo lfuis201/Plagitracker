@@ -1,17 +1,11 @@
 <template>
   <div class="iframe-container">
-    <iframe
-      :src="url"
-      width="100%"
-      height="600px"
-      frameborder="0"
-      allowfullscreen
-    ></iframe>
+    <iframe :src="url" width="100%" height="600px" frameborder="0" allowfullscreen></iframe>
   </div>
 </template>
 
 <script setup>
-import { defineProps } from 'vue';
+import { defineProps } from 'vue'
 
 // Define the props the component will receive
 const props = defineProps({
@@ -19,7 +13,7 @@ const props = defineProps({
     type: String,
     required: true
   }
-});
+})
 </script>
 
 <style scoped>
