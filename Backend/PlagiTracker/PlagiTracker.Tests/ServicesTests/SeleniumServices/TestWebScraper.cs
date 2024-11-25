@@ -3,6 +3,7 @@
 using PlagiTracker.Data.Entities;
 using PlagiTracker.Services.EmailServices;
 using PlagiTracker.Services.FileServices.Replit;
+using PlagiTracker.Services.GitHubServices;
 using PlagiTracker.Services.SeleniumServices;
 
 [assembly: Parallelize(Workers = 5, Scope = ExecutionScope.MethodLevel)]
@@ -236,5 +237,33 @@ namespace PlagiTracker.Tests.ServicesTests.SeleniumServices
             }
         }
         */
+
+        [TestMethod]
+        [DataRow("https://github.com/DAOBLUR/ASP.Net-Core-Demo/blob/main/StackHub.Demo.Services/Controllers/AdministratorController.cs", 1)]
+        [DataRow("https://github.com/lfuis201/Plagitracker/blob/Backend/DataBase/PlagiTrakcerQueries.sql", 1)]
+        [DataRow("https://github.com/DAOBLUR/ASP.Net-Core-Demo/tree/main/StackHub.Demo.Services/Controllers", 3)]
+        public async Task TestGetCode(string url, int expected)
+        {
+            try
+            {
+                var result = await GitHubCodeExtractor.GetCodes(url);
+
+                if (!result.Success || result.Data == null)
+                {
+                    Assert.Fail(result.Message);
+                }
+
+                result.Data.ForEach(code =>
+                {
+                    Console.WriteLine(code.Name!);
+                });
+
+                Assert.AreEqual(expected, result.Data.Count);
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
     }
 }
