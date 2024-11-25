@@ -76,6 +76,7 @@ builder.Services.AddHangfireServer();
 // Registrar EmailService
 var emailPassword = builder.Configuration["EmailSettings:Password"];
 builder.Services.AddSingleton(new EmailAssignmentNotification(emailPassword!));
+builder.Services.AddSingleton(new EmailSubmissionNotification(emailPassword!));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

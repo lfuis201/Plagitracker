@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Hangfire;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Entities;
 using PlagiTracker.Data.Requests;
+using PlagiTracker.Services.EmailServices;
 using PlagiTracker.Services.SeleniumServices;
+using PlagiTracker.WebAPI.HangFire;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
@@ -42,12 +45,22 @@ namespace PlagiTracker.WebAPI.Controllers
         {
             try
             {
+                // Buscando el Estudiante
+                var student = await _context!.Students!.FindAsync(submissionRequest.StudentId);
+                
+                if (student == null)
+                {
+                    return NotFound("Student not found.");
+                }
+
                 // Buscando la Asignación
-                var assignment = await _context!.Assignments!.FirstOrDefaultAsync(c => c.Id == submissionRequest.AssignmentId);
+                var assignment = await _context!.Assignments!
+                    .Include(a => a.Course)
+                    .FirstOrDefaultAsync(c => c.Id == submissionRequest.AssignmentId);
 
                 if (assignment == null)
                 {
-                    return NotFound();
+                    return NotFound("Assignment not found.");
                 }
                 else if (string.IsNullOrEmpty(submissionRequest.Url))
                 {
@@ -77,7 +90,7 @@ namespace PlagiTracker.WebAPI.Controllers
                         AssignmentId = submissionRequest.AssignmentId
                     };
 
-                    var result= await new WebScraping().GetCodes(submission);
+                    var result = await new WebScraping().GetCodes(submission);
 
                     if(result == null)
                     {
@@ -103,6 +116,19 @@ namespace PlagiTracker.WebAPI.Controllers
                     }
 
                     await _context.SaveChangesAsync();
+
+                    BackgroundJob.Schedule(() =>
+                        HttpContext.RequestServices
+                        .GetRequiredService<EmailSubmissionNotification>()
+                        .SubmittedAssignmentEmail(
+                            student.Email!, 
+                            $"{student.FirstName} {student.LastName}",
+                            assignment.Course!.Name!,
+                            assignment.Title!,
+                            result.Data.codes.Keys.ToList()
+                        ),
+                        new DateTimeOffset(DateTime.UtcNow)
+                    );
 
                     return Ok(new
                     {
@@ -173,33 +199,98 @@ namespace PlagiTracker.WebAPI.Controllers
         public async Task<ActionResult> Update(SubmissionRequest submissionRequest)
         {
             try
-            {
-                var submission = await _context!.Submissions!.Where(submission => 
-                    submission.AssignmentId == submissionRequest.AssignmentId
-                    && submission.StudentId == submissionRequest.StudentId
-                ).FirstOrDefaultAsync();
+            {   
+                if (string.IsNullOrEmpty(submissionRequest.Url))
+                {
+                    return BadRequest("The URL is required");
+                }
+
+                var submission = await _context!.Submissions!
+                    .Include(s => s.Student)
+                    .Include(s => s.Assignment)
+                    .ThenInclude(a => a!.Course)
+                    .Where(s => s.AssignmentId == submissionRequest.AssignmentId && s.StudentId == submissionRequest.StudentId)
+                    .FirstOrDefaultAsync();
 
                 if (submission == null)
                 {
-                    return NotFound();
+                    return NotFound("Submission not found.");
                 }
-
-                var assignment = await _context!.Assignments!.FindAsync(submissionRequest.AssignmentId);
-
-                if (assignment == null)
+                else if (submission.Assignment == null)
                 {
-                    return NotFound();
+                    return NotFound("Assignment not found.");
+                }
+                else if (submission.Assignment!.SubmissionDate.ToUniversalTime() <= submissionRequest.SubmissionDate.ToUniversalTime())
+                {
+                    return UnprocessableEntity("The submit time has ended");
+                }
+                else if (!WebScraping.IsSupportedURL(submissionRequest.Compiler, submissionRequest.Url))
+                {
+                    return BadRequest("The URL is not supported");
+                }
+                else if (!await WebScraping.UrlExists(submissionRequest.Url))
+                {
+                    return BadRequest("The URL does not exist");
                 }
                 else
                 {
-                    if (assignment.SubmissionDate.ToUniversalTime() < submissionRequest.SubmissionDate.ToUniversalTime())
+                    submission!.Url = submissionRequest.Url;
+                    submission.UpdatedAt = submissionRequest.SubmissionDate.ToUniversalTime();
+
+                    var result = await new WebScraping().GetCodes(submission);
+
+                    if (result == null)
                     {
-                        return UnprocessableEntity("The submit time has ended");
+                        return BadRequest("Error getting the codes");
                     }
+                    else if (!result.Success)
+                    {
+                        return BadRequest($"Error: {result.Message}");
+                    }
+
+                    submission = result.Data.submission;
+
+                    var codes = await _context!.Codes!.Where(c => c.SubmissionId == submission.Id).ToListAsync();
+
+                    if(codes != null && codes.Count > 0)
+                    {
+                        // Eliminar los códigos anteriores
+                        codes.ForEach(c => _context!.Codes!.Remove(c));
+                    }
+
+                    // Agregar los nuevos códigos
+                    result.Data.codes.ToList().ForEach(async code =>
+                    {
+                        await _context!.Codes!.AddAsync(new Code
+                        {
+                            Id = Guid.NewGuid(),
+                            SubmissionId = submission.Id,
+                            FileName = code.Key,
+                            Content = code.Value,
+                        });
+                    });
+                    
+                    await _context.SaveChangesAsync();
+
+                    BackgroundJob.Schedule(() =>
+                        HttpContext.RequestServices
+                        .GetRequiredService<EmailSubmissionNotification>()
+                        .SubmittedAssignmentEmail(
+                            submission.Student!.Email!,
+                            $"{submission.Student!.FirstName} {submission.Student!.LastName}",
+                            submission.Assignment!.Course!.Name!,
+                            submission.Assignment.Title!,
+                            result.Data.codes.Keys.ToList()
+                        ),
+                        new DateTimeOffset(DateTime.UtcNow)
+                    );
+
+                    return Ok(new
+                    {
+                        Message = "Success",
+                        Data = result.Data.codes.Keys
+                    });
                 }
-                submission!.Url = submissionRequest.Url;
-                await _context.SaveChangesAsync();
-                return Ok();
             }
             catch (Exception ex)
             {
@@ -211,7 +302,7 @@ namespace PlagiTracker.WebAPI.Controllers
                 {
                     return Conflict(new { message = "URL already used." });
                 }
-                return BadRequest(ex.ToString());
+                return BadRequest($"Error: {ex.Message}");
             }
         }
 

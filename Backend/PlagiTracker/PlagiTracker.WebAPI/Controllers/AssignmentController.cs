@@ -487,6 +487,12 @@ namespace PlagiTracker.WebAPI.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Análisis del plagio de una asignación usando Dolos. Se envía a un correo especificado.
+        /// </summary>
+        /// <param name="assignmentId">Id de la Asignación.</param>
+        /// <param name="email">Dirección de email donde se envía la notificación.</param>
+        /// <returns></returns>
         [HttpPost]
         [Route("DolosAnalysisCustomEmail")]
         public async Task<ActionResult> DolosAnalysisCustomEmail(Guid assignmentId, string email)

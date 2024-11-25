@@ -61,10 +61,14 @@ namespace PlagiTracker.Services.EmailServices
 
             string subject = $"{courseName} - Assignment Analysis";
             StringBuilder body = new();
-            body.Append($"Dear {toEmail},\n\n");
-            body.Append($"The analysis of the assignment {assignmentTitle} has been completed.\n\n");
-            body.Append($"You can view the results at the following link: {url}\n\n");
-            body.Append("Thank you, PlagiTracker.");
+            body.Append($"<p>Dear {toEmail}</p>");
+            body.Append($"<p>The analysis of the assignment {assignmentTitle} has been completed.</p>");
+            
+            // iframe
+            body.Append($"<iframe src=\"{url}\"></iframe>");
+
+            body.Append($"<p>You can view the results at the following link: {url}. <b>This link expires in 30 days.</b></p>");
+            body.Append("<p>Thank you, PlagiTracker.</p>");
 
             var smtpClient = new SmtpClient
             {
@@ -80,6 +84,7 @@ namespace PlagiTracker.Services.EmailServices
             {
                 Subject = subject,
                 Body = body.ToString(),
+                IsBodyHtml = true
             };
 
             if (screenshot != null && screenshot.Length > 0)
