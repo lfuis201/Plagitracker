@@ -15,6 +15,7 @@ using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Entities;
 using PlagiTracker.Data.Requests;
 using PlagiTracker.Data.Responses;
+using PlagiTracker.Services.EmailServices;
 using PlagiTracker.Services.FileServices;
 using PlagiTracker.Services.SeleniumServices;
 using PlagiTracker.WebAPI.HangFire;
@@ -390,8 +391,8 @@ namespace PlagiTracker.WebAPI.Controllers
         }
 
         [HttpPost]
-        [Route("AnalyzeWithDolos")]
-        public async Task<ActionResult> AnalyzeWithDolos(Guid assignmentId)
+        [Route("DolosAnalysis")]
+        public async Task<ActionResult> DolosAnalysis(Guid assignmentId)
         {
             var assignment = await _context!.Assignments!
                 .Include(a => a.Course)
@@ -482,6 +483,107 @@ namespace PlagiTracker.WebAPI.Controllers
                     ),
                     new DateTimeOffset(DateTime.UtcNow)
                 );
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Análisis del plagio de una asignación usando Dolos. Se envía a un correo especificado.
+        /// </summary>
+        /// <param name="assignmentId">Id de la Asignación.</param>
+        /// <param name="email">Dirección de email donde se envía la notificación.</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("DolosAnalysisCustomEmail")]
+        public async Task<ActionResult> DolosAnalysisCustomEmail(Guid assignmentId, string email)
+        {
+            var assignment = await _context!.Assignments!
+                .Include(a => a.Course)
+                .FirstOrDefaultAsync(a => a.Id == assignmentId);
+
+
+            if (assignment == null)
+            {
+                return NotFound("The assignment not exist.");
+            }
+
+            var studentsSubmissions = await _context!.Submissions!
+                .Where(submission => submission.AssignmentId == assignmentId)
+                .Include(submission => submission.Student)
+                .Select(submission => new Submission
+                {
+                    Id = submission.Id,
+                    Url = submission.Url,
+                    SubmissionDate = submission.SubmissionDate,
+                    StudentId = submission.StudentId,
+                    Student = new Student
+                    {
+                        FirstName = submission.Student!.FirstName,
+                        LastName = submission.Student!.LastName
+                    },
+                })
+                .ToListAsync();
+
+            // Verificar que haya al menos 2 entregas
+            if (studentsSubmissions == null || studentsSubmissions.Count < 2)
+            {
+                return BadRequest("There are not enough submissions to analyze.");
+            }
+
+            // Verificar que todos los Student no sean nulos
+            if (studentsSubmissions.Any(submission => submission.Student == null))
+            {
+                return BadRequest("Error in DataBase");
+            }
+
+            Dictionary<string, List<(string fileName, string content)>> studentFiles = [];
+
+            foreach (var studentsSubmission in studentsSubmissions)
+            {
+                var codes = await _context!.Codes!
+                    .Where(code => code.SubmissionId == studentsSubmission.Id)
+                    .Select(code => new Code
+                    {
+                        FileName = code.FileName,
+                        Content = code.Content
+                    })
+                    .ToListAsync();
+
+                studentFiles.Add(
+                    $"{studentsSubmission.SubmissionDate:yyyy-MM-dd-HH-mm}_{studentsSubmission.Student!.FirstName}-{studentsSubmission.Student.LastName}",
+                    new List<(string fileName, string content)>
+                    (
+                        codes.Select(code => (code.FileName, code.Content)).ToList()!
+                    )
+                );
+            }
+
+            var result = await DolosZipGenerator.GenerateAssignmentFolder(assignment, studentFiles);
+
+            if (result == null)
+            {
+                return BadRequest("Error: There was a problem with the fetch operation");
+            }
+            else if (!result.Success)
+            {
+                return BadRequest($"Error: {result.Message}");
+            }
+
+            assignment.DolosURLId = result.Data!.Id;
+
+            await _context.SaveChangesAsync();
+            BackgroundJob.Schedule(() =>
+                HttpContext.RequestServices
+                .GetRequiredService<HangFireServices>()
+                .AssignmentDolosAnalysisEmail
+                (
+                    result.Data.HTML_URL!,
+                    email,
+                    assignment.Course!.Name!,
+                    assignment.Title!
+                ),
+                new DateTimeOffset(DateTime.UtcNow)
+            );
 
             return Ok(result);
         }

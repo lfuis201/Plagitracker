@@ -2,11 +2,10 @@ using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using PlagiTracker.Services.EmailServices;
 using PlagiTracker.WebAPI.Extensions;
 using PlagiTracker.WebAPI.HangFire;
-using SixLabors.ImageSharp;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -73,6 +72,11 @@ builder.Services.AddHangfire(config =>
 });
 
 builder.Services.AddHangfireServer();
+
+// Registrar EmailService
+var emailPassword = builder.Configuration["EmailSettings:Password"];
+builder.Services.AddSingleton(new EmailAssignmentNotification(emailPassword!));
+builder.Services.AddSingleton(new EmailSubmissionNotification(emailPassword!));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
