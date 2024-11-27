@@ -41,6 +41,37 @@
           class="px-4 py-2 mt-2 rounded-md bg-blue-500 text-white"
         >
           {{ submitted ? 'Update Submission' : 'Mark as Completed' }}
+
+        
+          <svg
+              v-if="isLoading"
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              class="ml-4"
+            >
+              <path
+                fill="none"
+                stroke="#ffffff"
+                stroke-dasharray="16"
+                stroke-dashoffset="16"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 3c4.97 0 9 4.03 9 9"
+              >
+                <animate fill="freeze" attributeName="stroke-dashoffset" dur="0.2s" values="16;0" />
+                <animateTransform
+                  attributeName="transform"
+                  dur="1.5s"
+                  repeatCount="indefinite"
+                  type="rotate"
+                  values="0 12 12;360 12 12"
+                />
+              </path>
+            </svg>
+
         </button>
       </div>
 
@@ -78,6 +109,7 @@ const existingSubmission = ref<Submission | null>(null)
 const assignmentTitle = ref<string>('')
 const assignmentDescription = ref<string>('')
 const assignmentSubmissionDate = ref<string>('')
+  const isLoading = ref<boolean>(false)
 
 // Track whether the assignment submission date has passed
 const isSubmissionClosed = ref(false)
@@ -146,6 +178,8 @@ const checkIfSubmitted = async () => {
 // Function to handle submission
 const submitLink = async () => {
   // Check if the URL input is empty
+  isLoading.value = true
+
   if (!submissionUrl.value) {
     Swal.fire({
       title: 'Error!',
@@ -230,6 +264,9 @@ const submitLink = async () => {
         router.push('/student/courses')
       })
     }
+
+    isLoading.value = false // Detener el spinner
+
   } catch (error: any) {
     console.error('Error submitting link:', error)
 
