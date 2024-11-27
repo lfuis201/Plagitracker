@@ -38,7 +38,7 @@
         <button
           @click="submitLink"
           :disabled="isSubmissionClosed"
-          class="px-4 py-2 mt-2 rounded-md bg-blue-500 text-white"
+          class="flex px-4 py-2 mt-2 rounded-md bg-blue-500 text-white"
         >
           {{ submitted ? 'Update Submission' : 'Mark as Completed' }}
 
@@ -173,6 +173,8 @@ const checkIfSubmitted = async () => {
   } catch (error) {
     console.error('Error checking submission status:', error)
   }
+  isLoading.value = false
+
 }
 
 // Function to handle submission
@@ -187,6 +189,9 @@ const submitLink = async () => {
       icon: 'warning',
       confirmButtonText: 'OK'
     })
+    isLoading.value = false
+
+
     return
   }
 
@@ -198,6 +203,9 @@ const submitLink = async () => {
       icon: 'warning',
       confirmButtonText: 'OK'
     })
+
+    isLoading.value = false
+
     return
   }
 
@@ -213,6 +221,9 @@ const submitLink = async () => {
       icon: 'warning',
       confirmButtonText: 'OK'
     })
+
+    isLoading.value = false
+
     return
   }
 
@@ -227,6 +238,9 @@ const submitLink = async () => {
       icon: 'warning',
       confirmButtonText: 'OK'
     })
+
+    isLoading.value = false
+
     return
   }
 
@@ -286,7 +300,12 @@ const submitLink = async () => {
       icon: 'warning',
       confirmButtonText: 'OK'
     })
+
+
   }
+
+  isLoading.value = false
+
 }
 
 // Fetch assignment details on component mount
