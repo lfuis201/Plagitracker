@@ -62,7 +62,7 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
-        [AllowAnonymous]
+        //[AllowAnonymous]
         [HttpPost]
         [Route("LogIn")]
         public async Task<ActionResult> LogIn(LogInRequest logInRequest)
