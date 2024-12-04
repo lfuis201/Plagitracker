@@ -1,1 +1,1 @@
-{"resources":{"PlagiTrakcerQueries.sql":{"default-datasource":"postgres-jdbc-193602464c2-36e7e4ef83a8c2ca"}}}
+{"resources":{"PlagiTrakcerQueries.sql":{"default-schema":"public","default-datasource":"postgres-jdbc-18f9e55b751-3511dd445c5720a","default-catalog":"postgres"}}}
