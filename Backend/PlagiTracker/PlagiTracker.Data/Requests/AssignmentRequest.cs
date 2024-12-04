@@ -1,6 +1,6 @@
 ﻿namespace PlagiTracker.Data.Requests
 {
-    public class AssignmentRequest : BaseRequest
+    public class AssignmentRequest
     {
         public string? Description { get; set; }
 

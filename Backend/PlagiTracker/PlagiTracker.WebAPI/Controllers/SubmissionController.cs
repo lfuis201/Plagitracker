@@ -182,16 +182,49 @@ namespace PlagiTracker.WebAPI.Controllers
 
         [HttpGet]
         [Route("GetAllByStudent")]
-        public async Task<ActionResult> GetAllByStudent(Guid studentId)
+        public async Task<ActionResult> GetAllByStudent(Guid studentId, bool archived)
         {
-            var submissions = await _context!.Submissions!.Where(s => s.StudentId == studentId).ToListAsync();
-
-            if (submissions == null)
+            try
             {
-                return NotFound();
-            }
+                var enrollments = await _context!.Enrollments!
+                    .Where(e => e.StudentId == studentId && e.Course != null && e.Course.IsArchived == archived)
+                    .Include(e => e.Course)
+                    .ThenInclude(c => c.Teacher)
+                    .Include(e => e.Course)
+                    .Select(e => new
+                    {
+                        e.Grade,
+                        Course = new
+                        {
+                            e.Course!.Id,
+                            e.Course.Name,
+                            e.Course.TeacherId,
+                            Teacher = new
+                            {
+                                e.Course.Teacher!.Id,
+                                e.Course.Teacher.FirstName,
+                                e.Course.Teacher.LastName,
+                                e.Course.Teacher.Email,
+                            },
+                            // Contar las asignaciones (tareas) asociadas a este curso
+                            TaskCount = _context!.Assignments!.Count(a => a.CourseId == e.Course.Id)
+                        },
+                    })
+                    .ToListAsync();
 
-            return Ok(submissions);
+                if (enrollments == null || enrollments.Count < 1)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    return Ok(enrollments);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut]
@@ -352,6 +385,32 @@ namespace PlagiTracker.WebAPI.Controllers
                 StudentLastName = s.Student.LastName,
                 StudentEmail = s.Student.Email
             }));
+        }
+
+        [HttpGet("VerifySubmission")]
+        public async Task<ActionResult> SubmissionExists(Guid assignmentId, Guid studentId)
+        {
+            var exists = await _context.Submissions
+                .AnyAsync(s => s.AssignmentId == assignmentId && s.StudentId == studentId);
+
+            // Return a JSON object with a descriptive key
+            return Ok(new { submissionExists = exists });
+        }
+
+        [HttpGet("GetByAssignment/{assignmentId}/{studentId}")]
+        public async Task<ActionResult<Submission>> GetByAssignment(Guid assignmentId, Guid studentId)
+        {
+            var submission = await _context.Submissions
+                .Include(s => s.Student)  // Include related Student entity if needed
+                .Include(s => s.Assignment)  // Include related Assignment entity
+                .FirstOrDefaultAsync(s => s.AssignmentId == assignmentId && s.StudentId == studentId);
+
+            if (submission == null)
+            {
+                return NotFound(new { Message = "Submission not found for this assignment and student" });
+            }
+
+            return Ok(submission);
         }
     }
 }

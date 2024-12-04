@@ -112,4 +112,12 @@ app.MapGet("/public", () => "Hello Public World!");
 app.MapGet("/protected", () => "Hello Protected World!").RequireAuthorization();
 
 app.MapControllers();
+
+// Verificar y aplicar migraciones
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<PlagiTracker.Data.DataAccess.DataContext>();
+    dbContext.Database.Migrate();
+}
+
 app.Run();
