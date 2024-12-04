@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121.
+-->
+<Project>
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <_PublishTargetUrl>E:\UNI\semester-9\Configuration and Change Management\Plagitracker\Backend\Release</_PublishTargetUrl>
+    <History>True|2024-12-03T10:17:15.3836944Z;True|2024-10-11T23:29:29.1605505-05:00;True|2024-10-11T23:29:16.0496994-05:00;True|2024-10-11T23:25:00.1757680-05:00;True|2024-10-11T23:14:05.7376055-05:00;True|2024-10-11T22:13:10.7757655-05:00;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+  <ItemGroup>
+    <DestinationConnectionStrings Include="DatabaseConnection">
+      <Value>Server=localhost%3bPort=5000%3bDatabase=PlagiTracker%3bUser Id=postgres%3bPassword=admin%3b</Value>
+    </DestinationConnectionStrings>
+  </ItemGroup>
+  <ItemGroup>
+    <EFMigrations Include="PlagiTracker.Data.DataAccess.DataContext">
+      <Value>Server=localhost%3bPort=5000%3bDatabase=PlagiTracker%3bUser Id=postgres%3bPassword=admin%3b</Value>
+    </EFMigrations>
+  </ItemGroup>
+</Project>

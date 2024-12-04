@@ -1,0 +1,25 @@
+# No ignorar los archivos generados por ANTLR4
+!JavaLexer.cs
+!JavaLexer.tokens
+!JavaParser.cs
+!JavaParser.tokens
+!JavaParserBaseListener.cs
+!JavaParserBaseVisitor.cs
+!JavaParserListener.cs
+!JavaParserVisitor.cs
+
+# Ignorar otros archivos y carpetas comunes
+bin/
+obj/
+.vscode/
+.vs/
+*.log
+*.tlog
+*.ide
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+ref/
+refint/

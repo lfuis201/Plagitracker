@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="FirstMethodName\**" />
+    <Compile Remove="SecondMethodName\**" />
+    <Compile Remove="ThirdMethodName\**" />
+    <EmbeddedResource Remove="FirstMethodName\**" />
+    <EmbeddedResource Remove="SecondMethodName\**" />
+    <EmbeddedResource Remove="ThirdMethodName\**" />
+    <None Remove="FirstMethodName\**" />
+    <None Remove="SecondMethodName\**" />
+    <None Remove="ThirdMethodName\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PlagiTracker.Data\PlagiTracker.Data.csproj" />
+  </ItemGroup>
+
+</Project>
