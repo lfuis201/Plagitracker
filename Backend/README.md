@@ -30,7 +30,11 @@ PlagiTracker is a Web API built with ASP.Net Core. It uses Entity Framework for 
 5. Configure the PostgreSQL connection string in the `appsettings.json` file.
 6. Run the API:
    ```shell
-   dotnet PlagiTracker.WebAPI.exe
+   dotnet PlagiTracker.WebAPI.dll
+   ```
+   or execute
+   ```shell
+   PlagiTracker.WebAPI.exe
    ```
 
 ### Ubuntu
