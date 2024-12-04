@@ -42,3 +42,5 @@ select * from "__EFMigrationsHistory" eh ;
 
 
 
+DROP DATABASE "PlagiTracker2";
+
