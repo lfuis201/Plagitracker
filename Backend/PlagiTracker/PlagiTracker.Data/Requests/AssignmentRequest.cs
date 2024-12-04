@@ -10,6 +10,6 @@
 
         public DateTime SubmissionDate { get; set; }
 
-        public List<ExerciseRequest>? Exercises { get; set; }
+        public List<ExerciseRequest>? Exercises { get; set; }    
     }
 }

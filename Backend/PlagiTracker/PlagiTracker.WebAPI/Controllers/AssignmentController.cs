@@ -753,6 +753,6 @@ namespace PlagiTracker.WebAPI.Controllers
                 SubmissionDate = assignment.SubmissionDate,
                 CourseId = assignment.CourseId
             });
-        }
+        }   
     }
 }
