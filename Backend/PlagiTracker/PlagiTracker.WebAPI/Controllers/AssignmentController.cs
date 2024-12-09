@@ -306,7 +306,11 @@ namespace PlagiTracker.WebAPI.Controllers
                 var verifyTokenResult = VerifyToken(scopeClaim!, typeof(Teacher).Name);
                 if (!verifyTokenResult.Success)
                 {
-                    return Unauthorized(verifyTokenResult.Message);
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = verifyTokenResult.Message!
+                    });
                 }
 
                 Guid userIdClaim = Guid.Parse(User.FindFirst("Id")?.Value!);
@@ -315,12 +319,20 @@ namespace PlagiTracker.WebAPI.Controllers
                 // Verificar si el id del token pertenece a un usuario
                 if (user == null)
                 {
-                    return Unauthorized("Invalid token id");
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Invalid token id"
+                    });
                 }
                 // Verificar si el usuario no está eliminado
                 else if (!user.IsEnabled)
                 {
-                    return Unauthorized("Account is deleted");
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Account is deleted"
+                    });
                 }
                 #endregion
 
@@ -329,7 +341,11 @@ namespace PlagiTracker.WebAPI.Controllers
                 // Verificar que la fecha de entrega sea menor a la fecha actual
                 if (assignmentRequest.SubmissionDate.ToUniversalTime() < DateTime.UtcNow)
                 {
-                    return BadRequest("The submission date must be greater than the current date.");
+                    return BadRequest(new
+                    {
+                        Success = false,
+                        Message = "The submission date must be greater than the current date"
+                    });
                 }
 
                 var course = await _context!.Courses!.FindAsync(assignmentRequest.CourseId);
@@ -337,17 +353,28 @@ namespace PlagiTracker.WebAPI.Controllers
                 // Verificar que el curso exista.
                 if (course == null)
                 {
-                    return NotFound("Course not exist");
+                    return NotFound(new
+                    {
+                        Success = false,
+                        Message = "The course not exist"
+                    });
                 }
                 // Verificar que el curso no esté archivado.
                 else if (course.IsArchived)
                 {
-                    return BadRequest("The course is archived");
+                    return BadRequest(new {
+                        Success = false,
+                        Message = "The course is archived"
+                    });
                 }
                 // Verificar que el usuario sea el profesor del curso
                 else if (course.TeacherId != userIdClaim)
                 {
-                    return Unauthorized("You are not the teacher of this course");
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "You are not the teacher of this course"
+                    });
                 }
 
                 var id = Guid.NewGuid();
@@ -393,6 +420,7 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
+        // MEJORAR PARA JWT
         /// <summary>
         /// Analiza el código de una asignación
         /// </summary>
@@ -471,109 +499,196 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Análisis del plagio de una asignación usando Dolos. Se envía un correo al profesor.
+        /// </summary>
+        /// <param name="assignmentId">Id de la Asignación.</param>
+        /// <returns></returns>
         [HttpPost]
         [Route("DolosAnalysis")]
         public async Task<ActionResult> DolosAnalysis(Guid assignmentId)
         {
-            var assignment = await _context!.Assignments!
-                .Include(a => a.Course)
-                .ThenInclude(c => c!.Teacher)
-                .FirstOrDefaultAsync(a => a.Id == assignmentId);
-
-
-            if (assignment == null)
+            try
             {
-                return NotFound("The assignment not exist.");
-            }
+                #region Token Verification
+                string? scopeClaim = User.FindFirst("Scope")?.Value;
 
-            var studentsSubmissions = await _context!.Submissions!
-                .Where(submission => submission.AssignmentId == assignmentId)
-                .Include(submission => submission.Student)
-                .Select(submission => new Submission
+                // Verificar scope token
+                var verifyTokenResult = VerifyToken(scopeClaim!, typeof(Teacher).Name);
+                if (!verifyTokenResult.Success)
                 {
-                    Id = submission.Id,
-                    Url = submission.Url,
-                    SubmissionDate = submission.SubmissionDate,
-                    StudentId = submission.StudentId,
-                    Student = new Student
+                    return Unauthorized(new
                     {
-                        FirstName = submission.Student!.FirstName,
-                        LastName = submission.Student!.LastName
-                    },
-                })
-                .ToListAsync();
+                        Success = false,
+                        Message = verifyTokenResult.Message!
+                    });
+                }
 
-            // Verificar que haya al menos 2 entregas
-            if (studentsSubmissions == null || studentsSubmissions.Count < 2)
-            {
-                return BadRequest("There are not enough submissions to analyze.");
-            }
+                Guid userIdClaim = Guid.Parse(User.FindFirst("Id")?.Value!);
+                var user = await _context!.Users!.FindAsync(userIdClaim);
 
-            // Verificar que todos los Student no sean nulos
-            if (studentsSubmissions.Any(submission => submission.Student == null))
-            {
-                return BadRequest("Error in DataBase");
-            }
-
-            Dictionary<string, List<(string fileName, string content)>> studentFiles = [];
-
-            foreach (var studentsSubmission in studentsSubmissions)
-            {
-                var codes = await _context!.Codes!
-                    .Where(code => code.SubmissionId == studentsSubmission.Id)
-                    .Select(code => new Code
+                // Verificar si el id del token pertenece a un usuario
+                if (user == null)
+                {
+                    return Unauthorized(new
                     {
-                        FileName = code.FileName,
-                        Content = code.Content
+                        Success = false,
+                        Message = "Invalid token id"
+                    });
+                }
+                // Verificar si el usuario no está eliminado
+                else if (!user.IsEnabled)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Account is deleted"
+                    });
+                }
+                #endregion
+
+                // Analizar la asignación con Dolos
+
+                var assignment = await _context!.Assignments!
+                    .Include(a => a.Course)
+                    .ThenInclude(c => c!.Teacher)
+                    .FirstOrDefaultAsync(a => a.Id == assignmentId);
+
+                // Verificar que la asignación exista
+                if (assignment == null)
+                {
+                    return NotFound(new
+                    {
+                        Success = false,
+                        Message = "The assignment not exist."
+                    });
+                }
+                // Verificar que el usuario sea el profesor del curso
+                else if (assignment.Course!.TeacherId != userIdClaim)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "You are not the teacher of this course."
+                    });
+                }
+
+                var studentsSubmissions = await _context!.Submissions!
+                    .Where(submission => submission.AssignmentId == assignmentId)
+                    .Include(submission => submission.Student)
+                    .Select(submission => new Submission
+                    {
+                        Id = submission.Id,
+                        Url = submission.Url,
+                        SubmissionDate = submission.SubmissionDate,
+                        StudentId = submission.StudentId,
+                        Student = new Student
+                        {
+                            FirstName = submission.Student!.FirstName,
+                            LastName = submission.Student!.LastName
+                        },
                     })
                     .ToListAsync();
 
-                studentFiles.Add(
-                    $"{studentsSubmission.SubmissionDate:yyyy-MM-dd-HH-mm}_{studentsSubmission.Student!.FirstName}-{studentsSubmission.Student.LastName}",
-                    new List<(string fileName, string content)>
-                    (
-                        codes.Select(code => (code.FileName, code.Content)).ToList()!
-                    )
-                );
+                // Verificar que haya al menos 2 entregas
+                if (studentsSubmissions == null || studentsSubmissions.Count < 2)
+                {
+                    return BadRequest(new
+                    {
+                        Success = false,
+                        Message = "There are not enough submissions to analyze"
+                    });
+                }
+                // Verificar que todos los Student no sean nulos
+                else if (studentsSubmissions.Any(submission => submission.Student == null))
+                {
+                    return BadRequest(new
+                    {
+                        Success = false,
+                        Message = "Error in DataBase"
+                    });
+                }
+
+                Dictionary<string, List<(string fileName, string content)>> studentFiles = [];
+
+                foreach (var studentsSubmission in studentsSubmissions)
+                {
+                    var codes = await _context!.Codes!
+                        .Where(code => code.SubmissionId == studentsSubmission.Id)
+                        .Select(code => new Code
+                        {
+                            FileName = code.FileName,
+                            Content = code.Content
+                        })
+                        .ToListAsync();
+
+                    studentFiles.Add(
+                        $"{studentsSubmission.SubmissionDate:yyyy-MM-dd-HH-mm}_{studentsSubmission.Student!.FirstName}-{studentsSubmission.Student.LastName}",
+                        new List<(string fileName, string content)>
+                        (
+                            codes.Select(code => (code.FileName, code.Content)).ToList()!
+                        )
+                    );
+                }
+
+                var result = await DolosZipGenerator.GenerateAssignmentFolder(assignment, studentFiles);
+
+                // Verificar que el resultado del análisis de Dolos no sea nulo
+                if (result == null)
+                {
+                    return BadRequest(new
+                    {
+                        Success = false,
+                        Message = "There was a problem with the fetch operation"
+                    });
+                }
+                // Verificar que el resultado haya sido exitoso
+                else if (!result.Success)
+                {
+                    return BadRequest(new
+                    {
+                        Success = false,
+                        Message = result.Message!
+                    });
+                }
+
+                assignment.DolosURLId = result.Data!.Id;
+
+                await _context.SaveChangesAsync();
+
+                BackgroundJob.Schedule(() =>
+                        HttpContext.RequestServices
+                            .GetRequiredService<HangFireServices>()
+                            .AssignmentDolosAnalysisEmail(
+                            result.Data.HTML_URL!,
+                            assignment.Course!.Teacher!.Email!,
+                            $"{assignment.Course!.Teacher!.FirstName} {assignment.Course.Teacher.LastName}",
+                            assignment.Course!.Name!,
+                            assignment.Title!
+                        ),
+                        new DateTimeOffset(DateTime.UtcNow)
+                    );
+
+                return Ok(result);
             }
-
-            var result = await DolosZipGenerator.GenerateAssignmentFolder(assignment, studentFiles);
-
-            if (result == null)
+            catch (Exception ex)
             {
-                return BadRequest("Error: There was a problem with the fetch operation");
+                return BadRequest(new
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? ex.Message
+                });
             }
-            else if (!result.Success)
-            {
-                return BadRequest($"Error: {result.Message}");
-            }
-
-            assignment.DolosURLId = result.Data!.Id;
-
-            await _context.SaveChangesAsync();
-
-            BackgroundJob.Schedule(() =>
-                    HttpContext.RequestServices
-                        .GetRequiredService<HangFireServices>()
-                        .AssignmentDolosAnalysisEmail(
-                        result.Data.HTML_URL!, 
-                        assignment.Course!.Teacher!.Email!, 
-                        $"{assignment.Course!.Teacher!.FirstName} {assignment.Course.Teacher.LastName}",
-                        assignment.Course!.Name!,
-                        assignment.Title!
-                    ),
-                    new DateTimeOffset(DateTime.UtcNow)
-                );
-
-            return Ok(result);
         }
 
+        //AÑADIR OPCIONES PARA ENVIAR ARCHIVOS, URLS (SIN ID DE ASIGNACIÓN)
         /// <summary>
         /// Análisis del plagio de una asignación usando Dolos. Se envía a un correo especificado.
         /// </summary>
         /// <param name="assignmentId">Id de la Asignación.</param>
         /// <param name="email">Dirección de email donde se envía la notificación.</param>
         /// <returns></returns>
+        [AllowAnonymous]
         [HttpPost]
         [Route("DolosAnalysisCustomEmail")]
         public async Task<ActionResult> DolosAnalysisCustomEmail(Guid assignmentId, string email)
@@ -669,119 +784,346 @@ namespace PlagiTracker.WebAPI.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Obtiene todas las asignaciones de un curso para un profesor
+        /// </summary>
+        /// <param name="courseId"></param>
+        /// <returns></returns>
         [HttpGet]
-        [Route("GetAllByCourse")]
-        public async Task<ActionResult> GetAllByCourse(Guid courseId)
+        [Route("GetAllByCourseForTeacher")]
+        public async Task<ActionResult> GetAllByCourseForTeacher(Guid courseId)
         {
             try
             {
-                var verifyTokenResult = VerifyToken(User.FindFirst("Scope")?.Value! , typeof(Teacher).Name);
+                #region Token Verification
+                string? scopeClaim = User.FindFirst("Scope")?.Value;
 
+                // Verificar scope token
+                var verifyTokenResult = VerifyToken(scopeClaim!, typeof(Teacher).Name);
                 if (!verifyTokenResult.Success)
                 {
-                    return Unauthorized(verifyTokenResult.Message);
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = verifyTokenResult.Message!
+                    });
                 }
 
-                var userIdClaim = User.FindFirst("Id")?.Value;
+                Guid userIdClaim = Guid.Parse(User.FindFirst("Id")?.Value!);
+                var user = await _context!.Users!.FindAsync(userIdClaim);
+
+                // Verificar si el id del token pertenece a un usuario
+                if (user == null)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Invalid token id"
+                    });
+                }
+                // Verificar si el usuario no está eliminado
+                else if (!user.IsEnabled)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Account is deleted"
+                    });
+                }
+                #endregion
 
                 var course = await _context!.Courses!.FindAsync(courseId);
+
+                // Verificar que el curso exista
                 if (course == null)
                 {
-                    return NotFound();
+                    return NotFound(new
+                    {
+                        Success = false,
+                        Message = "The course not exist"
+                    });
+                }
+                // Verificar que el profesor sea el dueño del curso
+                else if (course.TeacherId != userIdClaim)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "You are not the teacher of this course"
+                    });
                 }
                 else
                 {
-                    var assignments = await _context!.Assignments!.Where(a => a.CourseId == courseId).ToListAsync();
+                    var assignments = await _context!.Assignments!
+                        .Where(assignment => assignment.CourseId == courseId)
+                        .Select(assignment => new AssignmentResponse
+                        {
+                            Id = assignment.Id,
+                            Description = assignment.Description,
+                            Title = assignment.Title,
+                            SubmissionDate = assignment.SubmissionDate,
+                            AnalysisDate = assignment.AnalysisDate,
+                            IsAnalyzed = assignment.IsAnalyzed,
+                            DolosURLId = assignment.DolosURLId,
+                            CreatedAt = assignment.CreatedAt,
+                            UpdatedAt = assignment.UpdatedAt,
+                            CourseId = assignment.CourseId,
+                        })
+                        .ToListAsync();
+
+                    // Verificar que haya al menos una asignación
                     if (assignments == null || assignments.Count < 1)
                     {
-                        return NotFound("There are not assignments in this course.");
+                        return NotFound(new
+                        {
+                            Success = false,
+                            Message = "There are not assignments in this course"
+                        });
                     }
 
-                    return Ok(assignments);
+                    return Ok(new
+                    {
+                        Success = true,
+                        Data = assignments
+                    });
                 }
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? ex.Message
+                });
             }
         }
 
+        /// <summary>
+        /// Obtiene todas las asignaciones de un curso para un estudiante
+        /// </summary>
+        /// <param name="courseId"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("GetAllByCourseForStudent")]
-        public async Task<ActionResult> GetAllByCourseForStudent(Guid studentId, Guid courseId)
+        public async Task<ActionResult> GetAllByCourseForStudent(Guid courseId)
         {
             try
             {
-                var student = await _context!.Students!.FindAsync(studentId);
-                if (student == null)
+                #region Token Verification
+                string? scopeClaim = User.FindFirst("Scope")?.Value;
+
+                // Verificar scope token
+                var verifyTokenResult = VerifyToken(scopeClaim!, typeof(Student).Name);
+                if (!verifyTokenResult.Success)
                 {
-                    return NotFound("Student not exist");
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = verifyTokenResult.Message!
+                    });
                 }
+
+                Guid userIdClaim = Guid.Parse(User.FindFirst("Id")?.Value!);
+                var user = await _context!.Users!.FindAsync(userIdClaim);
+
+                // Verificar si el id del token pertenece a un usuario
+                if (user == null)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Invalid token id"
+                    });
+                }
+                // Verificar si el usuario no está eliminado
+                else if (!user.IsEnabled)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Account is deleted"
+                    });
+                }
+                #endregion
+
                 var course = await _context!.Courses!.FindAsync(courseId);
+
+                // Verificar que el curso exista
                 if (course == null)
                 {
-                    return NotFound("Course not exist");
+                    return NotFound(new
+                    {
+                        Success = false,
+                        Message = "The course not exist"
+                    });
                 }
+
+                var enrollment = await _context!.Enrollments!.FirstOrDefaultAsync(e => e.StudentId == userIdClaim && e.CourseId == courseId);
+                
+                // Verificar que el estudiante esté inscrito en el curso
+                if (enrollment == null)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "You are not enrolled in this course"
+                    });
+                }
+
                 var assignments = await _context!.Assignments!
                     .Where(a => a.CourseId == courseId)
-                    .Select(a => new Assignment
+                    .Select(a => new AssignmentSubmissionResponse.AssignmentResponse
                     {
                         Id = a.Id,
                         Title = a.Title,
                         Description = a.Description,
                         SubmissionDate = a.SubmissionDate,
+                        AnalysisDate = a.AnalysisDate,
+                        IsAnalyzed = a.IsAnalyzed,
+                        CreatedAt = a.CreatedAt,
+                        UpdatedAt = a.UpdatedAt,
+                        CourseId = a.CourseId,
                     })
                     .ToListAsync();
 
+                // Verificar que haya al menos una asignación
                 if (assignments == null || assignments.Count < 1)
                 {
-                    return NotFound("There are not assignments in this course.");
+                    return NotFound(new
+                    {
+                        Success = false,
+                        Message = "There are not assignments in this course"
+                    });
                 }
 
                 var submissions = await _context!.Submissions!
-                    .Where(s => s.StudentId == studentId && s.Assignment!.CourseId == courseId)
+                    .Where(s => s.StudentId == userIdClaim && s.Assignment!.CourseId == courseId)
                     .Include(s => s.Assignment)
-                    .Select(s => new Submission
+                    .Select(s => new AssignmentSubmissionResponse.SubmissionResponse
                     {
                         Id = s.Id,
                         Url = s.Url,
                         SubmissionDate = s.SubmissionDate,
                         Grade = s.Grade,
+                        UpdatedAt = s.UpdatedAt,
                         AssignmentId = s.AssignmentId,
                     })
                     .ToListAsync();
-                var assignmentsSubmissions = new List<AssignmentSubmissionResponse>();
+
+                List<AssignmentSubmissionResponse> assignmentsSubmissions = [];
+
                 foreach (var assignment in assignments)
                 {
                     var submission = submissions.FirstOrDefault(s => s.AssignmentId == assignment.Id);
                     assignmentsSubmissions.Add(new AssignmentSubmissionResponse { Assignment = assignment, Submission = submission! });
                 }
-                var response = assignmentsSubmissions as object;
-                return Ok(response);
+
+                return Ok(new
+                {
+                    Success = true,
+                    Data = assignmentsSubmissions
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? ex.Message
+                });
             }
         }
 
+        /// <summary>
+        /// Actualiza una asignación
+        /// </summary>
+        /// <param name="assignmentUpdateRequest"></param>
+        /// <returns></returns>
         [HttpPut]
         [Route("Update")]
         public async Task<ActionResult> Update(AssignmentUpdateRequest assignmentUpdateRequest)
         {
-            var assignment = await _context!.Assignments!.FindAsync(assignmentUpdateRequest.Id);
-
-            if (assignment == null)
+            try
             {
-                return NotFound();
+                #region Token Verification
+                string? scopeClaim = User.FindFirst("Scope")?.Value;
+
+                // Verificar scope token
+                var verifyTokenResult = VerifyToken(scopeClaim!, typeof(Teacher).Name);
+                if (!verifyTokenResult.Success)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = verifyTokenResult.Message!
+                    });
+                }
+
+                Guid userIdClaim = Guid.Parse(User.FindFirst("Id")?.Value!);
+                var user = await _context!.Users!.FindAsync(userIdClaim);
+
+                // Verificar si el id del token pertenece a un usuario
+                if (user == null)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Invalid token id"
+                    });
+                }
+                // Verificar si el usuario no está eliminado
+                else if (!user.IsEnabled)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Account is deleted"
+                    });
+                }
+                #endregion
+
+                var assignment = await _context!.Assignments!.FindAsync(assignmentUpdateRequest.Id);
+
+                // Verificar que la asignación exista
+                if (assignment == null)
+                {
+                    return NotFound(new
+                    {
+                        Success = false,
+                        Message = "Assignment not exist"
+                    });
+                }
+                // Verificar que la fecha de entrega sea menor a la fecha actual, debe haber un margen de 2 minutos
+                else if (assignmentUpdateRequest.SubmissionDate.ToUniversalTime() < DateTime.UtcNow.AddMinutes(2))
+                {
+                    return BadRequest(new
+                    {
+                        Success = false,
+                        Message = "The submission date must be greater than the current date"
+                    });
+                }
+                
+                assignment.Title = assignmentUpdateRequest.Title;
+                assignment.Description = assignmentUpdateRequest.Description;
+                assignment.SubmissionDate = assignmentUpdateRequest.SubmissionDate;
+                assignment.UpdatedAt = assignmentUpdateRequest.UpdateAt == DateTime.MinValue ? assignmentUpdateRequest.UpdateAt : DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    Success = true,
+                    Message = "Assignment updated"
+                });
             }
-
-            assignment.Description = assignmentUpdateRequest.Description;
-            assignment.Title = assignmentUpdateRequest.Title;
-            assignment.SubmissionDate = assignmentUpdateRequest.SubmissionDate;
-
-            await _context.SaveChangesAsync();
-            return Ok();
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? ex.Message
+                });
+            }
         }
 
         [HttpDelete]
@@ -790,28 +1132,92 @@ namespace PlagiTracker.WebAPI.Controllers
         {
             try
             {
-                var assignment = await _context!.Assignments!.FindAsync(id);
+                #region Token Verification
+                string? scopeClaim = User.FindFirst("Scope")?.Value;
 
+                // Verificar scope token
+                var verifyTokenResult = VerifyToken(scopeClaim!, typeof(Teacher).Name);
+                if (!verifyTokenResult.Success)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = verifyTokenResult.Message!
+                    });
+                }
+
+                Guid userIdClaim = Guid.Parse(User.FindFirst("Id")?.Value!);
+                var user = await _context!.Users!.FindAsync(userIdClaim);
+
+                // Verificar si el id del token pertenece a un usuario
+                if (user == null)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Invalid token id"
+                    });
+                }
+                // Verificar si el usuario no está eliminado
+                else if (!user.IsEnabled)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Account is deleted"
+                    });
+                }
+                #endregion
+
+                var assignment = await _context!.Assignments!
+                    .Include(a => a.Course)
+                    .FirstOrDefaultAsync(a => a.Id == id);
+
+                // Verificar que la asignación exista
                 if (assignment == null)
                 {
-                    return NotFound("Assignment not exist");
+                    return NotFound(new
+                    {
+                        Success = false,
+                        Message = "Assignment not exist"
+                    });
                 }
-
-                var course = await _context!.Courses!.FindAsync(assignment.CourseId);
-
-                if (course != null && course.IsArchived)
+                // Verificar que el usuario sea el profesor del curso
+                else if (assignment.Course!.TeacherId != userIdClaim)
                 {
-                    return BadRequest("The course is archived");
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "You are not the teacher of this course"
+                    });
+                }
+                // Verificar que la asignación no haya sido eliminada
+                else if (!assignment.IsEnabled)
+                {
+                    return BadRequest(new
+                    {
+                        Success = false,
+                        Message = "Assignment already deleted"
+                    });
                 }
 
-                _context.Assignments.Remove(assignment!);
+                assignment.IsEnabled = false;
+                assignment.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
-                return Ok();
+                return Ok(new
+                {
+                    Success = true,
+                    Message = "Assignment deleted"
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? ex.Message
+                });
             }
         }
         
