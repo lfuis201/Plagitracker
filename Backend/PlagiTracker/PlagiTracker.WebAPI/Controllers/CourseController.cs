@@ -1,6 +1,7 @@
 ﻿// Ignore Spelling: Unarchive
 
 using Hangfire;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PlagiTracker.Data.DataAccess;
@@ -10,6 +11,7 @@ using System.Transactions;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CourseController : ControllerBase

@@ -14,24 +14,30 @@ namespace PlagiTracker.WebAPI.Controllers
             _context = context ?? throw new ArgumentNullException(nameof(context), "Error: Error in Data Base connection");
         }
 
+        /// <summary>
+        /// Verifica el token de acceso
+        /// </summary>
+        /// <param name="scopeClaim">Alcance del token</param>
+        /// <param name="scopeClassName">Alcance esperado del token</param>
+        /// <returns></returns>
         protected Result<NullableAttribute> VerifyToken(string scopeClaim, string scopeClassName)
         {
             try
             {
                 if (string.IsNullOrEmpty(scopeClaim))
                 {
-                    return new(false, "Error in Scope Token");
+                    return new(false, "Scope token is null or empty");
                 }
                 else if (scopeClaim != scopeClassName)
                 {
-                    return new(false, "Error in Scope Token");
+                    return new(false, "Invalid scope token");
                 }
 
-                return new(true, "Token Verified");
+                return new(true, "Token verified");
             }
             catch (Exception ex)
             {
-                return new(false, $"Error: {ex.Message}");
+                return new(false, $"{ex.Message}");
             }
         }
     }
