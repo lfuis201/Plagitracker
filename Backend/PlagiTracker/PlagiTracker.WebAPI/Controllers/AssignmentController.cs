@@ -24,12 +24,18 @@ using System.Text;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AssignmentController(DataContext context) : CustomControllerBase(context)
     {
-        //[AllowAnonymous]
+        // Mensaje de excepción de clave duplicada
+        const string DUPLICATE_KEY_VALUE_EXCEPTION_MESSAGE = "23505: duplicate key value violates unique constraint";
+        
+        // Mensaje de excepción de título duplicado
+        const string TITLE_ALREADY_USED_EXCEPTION_MESSAGE = "IX_Assignments_CourseId_Title";
+
+        [AllowAnonymous]
         [HttpPost]
         [Route("JCode")]
         public async Task<ActionResult> JCode([FromBody] string code)
@@ -62,7 +68,7 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
-        //[AllowAnonymous]
+        [AllowAnonymous]
         [HttpPost]
         [Route("JCodeForFiles")]
         public async Task<ActionResult> JCodeForFiles(IFormFileCollection files)
@@ -108,7 +114,7 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
-        //[AllowAnonymous]
+        [AllowAnonymous]
         [HttpPost]
         [Route("ValidateAssignmentBodyST")]
         public async Task<ActionResult> ValidateAssignmentBodyST(List<string> codes)
@@ -185,6 +191,7 @@ namespace PlagiTracker.WebAPI.Controllers
         /// </summary>
         /// <param name="codes"></param>
         /// <returns></returns>
+        [AllowAnonymous]
         [HttpPost]
         [Route("ValidateJavaCodeWithCustomParser")]
         public ActionResult ValidateJavaCode(List<string> codes)
@@ -281,15 +288,66 @@ namespace PlagiTracker.WebAPI.Controllers
             return Ok(results);
         }
 
+        /// <summary>
+        /// Crea una nueva asignación
+        /// </summary>
+        /// <param name="assignmentRequest"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("Create")]
         public async Task<ActionResult> Create(AssignmentRequest assignmentRequest)
         {
             try
             {
-                if(assignmentRequest.SubmissionDate.ToUniversalTime() < DateTime.UtcNow)
+                #region Token Verification
+                string? scopeClaim = User.FindFirst("Scope")?.Value;
+
+                // Verificar scope token
+                var verifyTokenResult = VerifyToken(scopeClaim!, typeof(Teacher).Name);
+                if (!verifyTokenResult.Success)
+                {
+                    return Unauthorized(verifyTokenResult.Message);
+                }
+
+                Guid userIdClaim = Guid.Parse(User.FindFirst("Id")?.Value!);
+                var user = await _context!.Users!.FindAsync(userIdClaim);
+                
+                // Verificar si el id del token pertenece a un usuario
+                if (user == null)
+                {
+                    return Unauthorized("Invalid token id");
+                }
+                // Verificar si el usuario no está eliminado
+                else if (!user.IsEnabled)
+                {
+                    return Unauthorized("Account is deleted");
+                }
+                #endregion
+
+                // Crear una nueva asignación
+
+                // Verificar que la fecha de entrega sea menor a la fecha actual
+                if (assignmentRequest.SubmissionDate.ToUniversalTime() < DateTime.UtcNow)
                 {
                     return BadRequest("The submission date must be greater than the current date.");
+                }
+
+                var course = await _context!.Courses!.FindAsync(assignmentRequest.CourseId);
+                
+                // Verificar que el curso exista.
+                if (course == null)
+                {
+                    return NotFound("Course not exist");
+                }
+                // Verificar que el curso no esté archivado.
+                else if (course.IsArchived)
+                {
+                    return BadRequest("The course is archived");
+                }
+                // Verificar que el usuario sea el profesor del curso
+                else if (course.TeacherId != userIdClaim)
+                {
+                    return Unauthorized("You are not the teacher of this course");
                 }
 
                 var id = Guid.NewGuid();
@@ -304,11 +362,34 @@ namespace PlagiTracker.WebAPI.Controllers
                 });
 
                 await _context.SaveChangesAsync();
-                return Ok(id);
+
+                return Ok(new
+                {
+                    Success = true,
+                    Message = "Assignment created",
+                    Data = id
+                });
             }
             catch(Exception ex)
             {
-                return BadRequest(ex.Message);
+                if (
+                    ex.InnerException != null
+                    && ex.InnerException.Message.Contains(DUPLICATE_KEY_VALUE_EXCEPTION_MESSAGE)
+                    && ex.InnerException.Message.Contains(TITLE_ALREADY_USED_EXCEPTION_MESSAGE)
+                )
+                {
+                    return Conflict(new 
+                    {
+                        Success = false,
+                        Message = "Title already used"
+                    });
+                }
+
+                return BadRequest(new
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? ex.Message
+                });
             }
         }
 
