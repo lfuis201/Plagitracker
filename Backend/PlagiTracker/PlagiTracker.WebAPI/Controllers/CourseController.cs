@@ -1,28 +1,18 @@
 ﻿// Ignore Spelling: Unarchive
 
 using Hangfire;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Entities;
 using PlagiTracker.Data.Requests;
-using System.Transactions;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class CourseController : ControllerBase
+    public class CourseController(DataContext context) : CustomControllerBase(context)
     {
-        private readonly DataContext _context;
-
-        public CourseController(DataContext context)
-        {
-            _context = context ?? throw new ArgumentNullException(nameof(context), "Error: Data Base connection");
-        }
-
         [HttpPost]
         [Route("Create")]
         public async Task<ActionResult> Create(CourseRequest courseRequest)
@@ -39,91 +29,219 @@ namespace PlagiTracker.WebAPI.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Obtiene un curso por su id. Puede ser usado por el estudiante y el profesor
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("GetById")]
         public async Task<ActionResult> GetById(Guid id)
         {
-            var course = await _context!.Courses!
-                .FirstOrDefaultAsync(c => c.Id == id);
-
-            if (course == null)
+            try
             {
-                return NotFound();
+                #region Token Verification
+                string? scopeClaim = User.FindFirst("Scope")?.Value;
+
+                // Verificar scope token
+                var verifyTokenResult_1 = VerifyToken(scopeClaim!, typeof(Student).Name);
+                var verifyTokenResult_2 = VerifyToken(scopeClaim!, typeof(Teacher).Name);
+
+                if (!verifyTokenResult_1.Success && !verifyTokenResult_2.Success)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = verifyTokenResult_1.Message!
+                    });
+                }
+
+                Guid userIdClaim = Guid.Parse(User.FindFirst("Id")?.Value!);
+                var user = await _context!.Users!.FindAsync(userIdClaim);
+
+                // Verificar si el id del token pertenece a un usuario
+                if (user == null)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Invalid token id"
+                    });
+                }
+                // Verificar si el usuario no está eliminado
+                else if (!user.IsEnabled)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Account is deleted"
+                    });
+                }
+                #endregion
+
+                var course = await _context!.Courses!
+                    .Include(course => course.Teacher)
+                    .FirstOrDefaultAsync(course => course.Id == id);
+
+                if (course == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(new
+                {
+                    Success = true,
+                    Mesasse = "Course found",
+                    Data = course
+                });
             }
-
-            return Ok(new Course
+            catch (Exception ex)
             {
-                Id = course.Id,
-                Name = course.Name,
-                TeacherId = course.TeacherId
-            });
+                return BadRequest(new
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? ex.Message
+                });
+            }
         }
 
-        [HttpGet]
-        [Route("GetAllByAssignment")]
-        public async Task<ActionResult> GetAllByAssignment(Guid assignmentId)
-        {
-            // Verificar si la asignación existe
-            var assignment = await _context!.Assignments!.FindAsync(assignmentId);
-            if (assignment == null)
-            {
-                return NotFound("Assignment not found.");
-            }
-
-            // Obtener todas las entregas asociadas a la asignación, incluyendo la información del estudiante
-            var submissions = await _context!.Submissions!
-                .Include(s => s.Student) // Incluir información del estudiante
-                .Where(s => s.AssignmentId == assignmentId)
-                .ToListAsync();
-
-            // Verificar si hay entregas
-            if (submissions == null || submissions.Count == 0)
-            {
-                return NotFound("No submissions found for this assignment.");
-            }
-
-            // Retornar las entregas junto con la información del estudiante
-            return Ok(submissions.Select(s => new
-            {
-                SubmissionId = s.Id,
-                Url = s.Url,
-                SubmissionDate = s.SubmissionDate,
-                Grade = s.Grade,
-                StudentId = s.StudentId,
-                StudentFirstName = s!.Student!.FirstName,
-                StudentLastName = s.Student.LastName,
-                StudentEmail = s.Student.Email
-            }));
-        }
-
-
+        /// <summary>
+        /// Obtiene un curso por su nombre
+        /// </summary>
+        /// <remarks>
+        /// Puede ser usado por el estudiante y el profesor
+        /// </remarks>
+        /// <param name="name"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("GetByName")]
         public async Task<ActionResult> GetByName(string name)
         {
-            var course = await _context!.Courses!.FirstOrDefaultAsync(c => c.Name == name);
-
-            if (course == null)
+            try
             {
-                return NotFound();
+                #region Token Verification
+                string? scopeClaim = User.FindFirst("Scope")?.Value;
+
+                // Verificar scope token
+                var verifyTokenResult_1 = VerifyToken(scopeClaim!, typeof(Student).Name);
+                var verifyTokenResult_2 = VerifyToken(scopeClaim!, typeof(Teacher).Name);
+
+                if (!verifyTokenResult_1.Success && !verifyTokenResult_2.Success)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = verifyTokenResult_1.Message!
+                    });
+                }
+
+                Guid userIdClaim = Guid.Parse(User.FindFirst("Id")?.Value!);
+                var user = await _context!.Users!.FindAsync(userIdClaim);
+
+                // Verificar si el id del token pertenece a un usuario
+                if (user == null)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Invalid token id"
+                    });
+                }
+                // Verificar si el usuario no está eliminado
+                else if (!user.IsEnabled)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Account is deleted"
+                    });
+                }
+                #endregion
+
+                var course = await _context!.Courses!.FirstOrDefaultAsync(c => c.Name == name);
+
+                // Verificar si no se encontró el curso
+                if (course == null)
+                {
+                    return NotFound(new
+                    {
+                        Success = false,
+                        Message = "Course not found"
+                    });
+                }
+
+                return Ok(new
+                {
+                    Success = true,
+                    Message = "Course found",
+                    Data = new Course()
+                    {
+                        Id = course.Id,
+                        Name = course.Name,
+                        TeacherId = course.TeacherId
+                    }
+                });
             }
-
-            return Ok(new Course()
+            catch (Exception ex)
             {
-                Id = course.Id,
-                Name = course.Name,
-                TeacherId = course.TeacherId
-            });
+                return BadRequest(new
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? ex.Message
+                });
+            }
         }
 
+        /// <summary>
+        /// Obtiene todos los cursos del estudiante
+        /// </summary>
+        /// <param name="archived"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("GetAllByStudent")]
-        public async Task<ActionResult> GetAllByStudent(Guid studentId, bool archived)
+        public async Task<ActionResult> GetAllByStudent(bool archived)
         {
             try
             {
+                #region Token Verification
+                string? scopeClaim = User.FindFirst("Scope")?.Value;
+
+                // Verificar scope token
+                var verifyTokenResult = VerifyToken(scopeClaim!, typeof(Student).Name);
+                if (!verifyTokenResult.Success)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = verifyTokenResult.Message!
+                    });
+                }
+
+                Guid userIdClaim = Guid.Parse(User.FindFirst("Id")?.Value!);
+                var user = await _context!.Users!.FindAsync(userIdClaim);
+
+                // Verificar si el id del token pertenece a un usuario
+                if (user == null)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Invalid token id"
+                    });
+                }
+                // Verificar si el usuario no está eliminado
+                else if (!user.IsEnabled)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Account is deleted"
+                    });
+                }
+                #endregion
+
                 var enrollments = await _context!.Enrollments!
-                    .Where(e => e.StudentId == studentId && e.Course != null && e.Course.IsArchived == archived)
+                    .Where(e => e.StudentId == userIdClaim && e.Course != null && e.Course.IsArchived == archived)
                     .Include(e => e.Course)
                     .ThenInclude(c => c.Teacher)
                     .Include(e => e.Course)
@@ -146,36 +264,117 @@ namespace PlagiTracker.WebAPI.Controllers
                     })
                     .ToListAsync();
 
-                if (enrollments == null || enrollments.Count < 1)
+                if (enrollments == null)
                 {
-                    return NotFound();
+                    return NotFound(new
+                    {
+                        Success = false,
+                        Message = "No courses found"
+                    });
+                }
+                else if (enrollments.Count < 1)
+                {
+                    return NotFound(new
+                    {
+                        Success = true,
+                        Message = "No courses found"
+                    });
                 }
                 else
                 {
-                    return Ok(enrollments);
+                    return Ok(new
+                    {
+                        Success = true,
+                        Message = "Courses found",
+                        Data = enrollments
+                    });
                 }
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? ex.Message
+                });
             }
         }
 
+        /// <summary>
+        /// Obtiene todos los cursos del profesor
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [Route("GetAllByTeacher")]
-        public async Task<ActionResult<List<Course>>> GetAllByTeacher(Guid teacherId)
+        public async Task<ActionResult<List<Course>>> GetAllByTeacher()
         {
             try
             {
-                var courses = await _context!.Courses!.Where(c => c.TeacherId == teacherId && !c.IsArchived).ToListAsync();
+                #region Token Verification
+                string? scopeClaim = User.FindFirst("Scope")?.Value;
 
-                // Verificar si no se encontraron cursos
-                if (courses == null || courses.Count < 1)
+                // Verificar scope token
+                var verifyTokenResult = VerifyToken(scopeClaim!, typeof(Teacher).Name);
+                if (!verifyTokenResult.Success)
                 {
-                    return NotFound();
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = verifyTokenResult.Message!
+                    });
                 }
 
-                return Ok(courses);
+                Guid userIdClaim = Guid.Parse(User.FindFirst("Id")?.Value!);
+                var user = await _context!.Users!.FindAsync(userIdClaim);
+
+                // Verificar si el id del token pertenece a un usuario
+                if (user == null)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Invalid token id"
+                    });
+                }
+                // Verificar si el usuario no está eliminado
+                else if (!user.IsEnabled)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Account is deleted"
+                    });
+                }
+                #endregion
+
+                var courses = await _context!.Courses!
+                    .Where(c => c.TeacherId == userIdClaim && !c.IsArchived)
+                    .ToListAsync();
+
+                // Verificar si no se encontraron cursos
+                if (courses == null)
+                {
+                    return NotFound(new
+                    {
+                        Success = false,
+                        Message = "No courses found"
+                    });
+                }
+                else if (courses.Count < 1)
+                {
+                    return NotFound(new
+                    {
+                        Success = true,
+                        Message = "No courses found"
+                    });
+                }
+
+                return Ok(new
+                {
+                    Success = true,
+                    Message = "Courses found",
+                    Data = courses
+                });
             }
             catch (Exception ex)
             {
@@ -183,25 +382,81 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Obtiene todos los cursos archivados del profesor
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [Route("GetAllArchivedByTeacher")]
-        public async Task<ActionResult<List<Course>>> GetAllArchivedByTeacher(Guid teacherId)
+        public async Task<ActionResult<List<Course>>> GetAllArchivedByTeacher()
         {
             try
             {
-                var courses = await _context!.Courses!.Where(c => c.TeacherId == teacherId && c.IsArchived).ToListAsync();
+                #region Token Verification
+                string? scopeClaim = User.FindFirst("Scope")?.Value;
+
+                // Verificar scope token
+                var verifyTokenResult = VerifyToken(scopeClaim!, typeof(Teacher).Name);
+                if (!verifyTokenResult.Success)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = verifyTokenResult.Message!
+                    });
+                }
+
+                Guid userIdClaim = Guid.Parse(User.FindFirst("Id")?.Value!);
+                var user = await _context!.Users!.FindAsync(userIdClaim);
+
+                // Verificar si el id del token pertenece a un usuario
+                if (user == null)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Invalid token id"
+                    });
+                }
+                // Verificar si el usuario no está eliminado
+                else if (!user.IsEnabled)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Account is deleted"
+                    });
+                }
+                #endregion
+
+                var courses = await _context!.Courses!
+                    .Where(c => c.TeacherId == userIdClaim && c.IsArchived)
+                    .ToListAsync();
 
                 // Verificar si no se encontraron cursos
                 if (courses == null || courses.Count < 1)
                 {
-                    return NotFound();
+                    return NotFound(new
+                    {
+                        Success = false,
+                        Message = "No archived courses found"
+                    });
                 }
 
-                return Ok(courses);
+                return Ok(new
+                {
+                    Success = true,
+                    Message = "Archived courses found",
+                    Data = courses
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? ex.Message
+                });
             }
         }
 

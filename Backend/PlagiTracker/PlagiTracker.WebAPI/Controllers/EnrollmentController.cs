@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Entities;
@@ -8,15 +9,8 @@ namespace PlagiTracker.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EnrollmentController : ControllerBase
+    public class EnrollmentController(DataContext context) : CustomControllerBase(context)
     {
-        private readonly DataContext _context;
-
-        public EnrollmentController(DataContext context)
-        {
-            _context = context ?? throw new ArgumentNullException(nameof(context), "Error: Data Base connection");
-        }
-
         [HttpPost]
         [Route("Create")]
         public async Task<ActionResult> Create(Guid courseId, Guid studentId)
@@ -66,12 +60,57 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Inscribe a un estudiante en un curso
+        /// </summary>
+        /// <remarks>
+        /// Sólo los estudiantes pueden inscribirse en un curso
+        /// </remarks>
+        /// <param name="invitationId"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("Join/{invitationId}")]
-        public async Task<ActionResult> JoinCourse(Guid invitationId, [FromQuery] Guid studentId)
+        public async Task<ActionResult> JoinCourse(Guid invitationId)
         {
             try
             {
+                #region Token Verification
+                string? scopeClaim = User.FindFirst("Scope")?.Value;
+
+                // Verificar scope token
+                var verifyTokenResult = VerifyToken(scopeClaim!, typeof(Student).Name);
+                if (!verifyTokenResult.Success)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = verifyTokenResult.Message!
+                    });
+                }
+
+                Guid userIdClaim = Guid.Parse(User.FindFirst("Id")?.Value!);
+                var user = await _context!.Users!.FindAsync(userIdClaim);
+
+                // Verificar si el id del token pertenece a un usuario
+                if (user == null)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Invalid token id"
+                    });
+                }
+                // Verificar si el usuario no está eliminado
+                else if (!user.IsEnabled)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Account is deleted"
+                    });
+                }
+                #endregion
+
                 // Buscar el curso por el identificador de invitación
                 var course = await _context.Courses!.FirstOrDefaultAsync(c => c.InvitationId == invitationId);
                 if (course == null)
@@ -80,7 +119,7 @@ namespace PlagiTracker.WebAPI.Controllers
                 }
 
                 // Verificar si el estudiante existe
-                var student = await _context.Students!.FindAsync(studentId);
+                var student = await _context.Students!.FindAsync(user.Id);
                 if (student == null)
                 {
                     return NotFound("Student not found");
@@ -88,7 +127,7 @@ namespace PlagiTracker.WebAPI.Controllers
 
                 // Verificar si el estudiante ya está inscrito en el curso
                 var enrollment = await _context.Enrollments!
-                    .FirstOrDefaultAsync(e => e.CourseId == course.Id && e.StudentId == studentId);
+                    .FirstOrDefaultAsync(e => e.CourseId == course.Id && e.StudentId == user.Id);
                 if (enrollment != null)
                 {
                     return BadRequest("Student is already enrolled in the course");
@@ -98,7 +137,7 @@ namespace PlagiTracker.WebAPI.Controllers
                 await _context.Enrollments!.AddAsync(new Enrollment
                 {
                     CourseId = course.Id,
-                    StudentId = studentId,
+                    StudentId = user.Id,
                 });
 
                 await _context.SaveChangesAsync();
@@ -117,8 +156,9 @@ namespace PlagiTracker.WebAPI.Controllers
                 {
                     return Conflict(new
                     {
-                        title = "Enrollment Failed",
-                        message = "You are already enrolled in this course"
+                        Success = false,
+                        Title = "Enrollment Failed",
+                        Message = "You are already enrolled in this course"
                     });
                 }
 
@@ -126,36 +166,81 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
-        [HttpGet]
-        [Route("Get")]
-        public async Task<ActionResult> Get(Guid id)
-        {
-            var enrollment = await _context!.Enrollments!.FindAsync(id);
-
-            if (enrollment == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(new Enrollment()
-            {
-                StudentId = enrollment.StudentId,
-                CourseId = enrollment.CourseId
-            });
-        }
-
+        /// <summary>
+        /// Obtiene todas las inscripciones de un estudiante
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [Route("GetAllByStudent")]
-        public async Task<ActionResult> GetAllByStudent(Guid studentId)
+        public async Task<ActionResult> GetAllByStudent()
         {
-            var enrollments = await _context!.Enrollments!.Where(e => e.StudentId == studentId).ToListAsync();
-
-            if (enrollments == null || enrollments.Count < 1)
+            try
             {
-                return NotFound();
-            }
+                #region Token Verification
+                string? scopeClaim = User.FindFirst("Scope")?.Value;
 
-            return Ok(enrollments);
+                // Verificar scope token
+                var verifyTokenResult = VerifyToken(scopeClaim!, typeof(Student).Name);
+                if (!verifyTokenResult.Success)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = verifyTokenResult.Message!
+                    });
+                }
+
+                Guid userIdClaim = Guid.Parse(User.FindFirst("Id")?.Value!);
+                var user = await _context!.Users!.FindAsync(userIdClaim);
+
+                // Verificar si el id del token pertenece a un usuario
+                if (user == null)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Invalid token id"
+                    });
+                }
+                // Verificar si el usuario no está eliminado
+                else if (!user.IsEnabled)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Account is deleted"
+                    });
+                }
+                #endregion
+
+                var enrollments = await _context!.Enrollments!
+                    .Where(e => e.StudentId == user.Id)
+                    .ToListAsync();
+
+                // Verificar si el estudiante no está inscrito en ningún curso
+                if (enrollments == null || enrollments.Count < 1)
+                {
+                    return NotFound(new
+                    {
+                        Message = "No enrollments found"
+                    });
+                }
+
+                return Ok(new
+                {
+                    Success = true,
+                    Message = "Enrollments found",
+                    Data = enrollments
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? ex.Message
+                });
+            }
         }
 
         [HttpDelete]

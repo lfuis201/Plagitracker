@@ -15,11 +15,9 @@ using PlagiTracker.Data.DataAccess;
 using PlagiTracker.Data.Entities;
 using PlagiTracker.Data.Requests;
 using PlagiTracker.Data.Responses;
-using PlagiTracker.Services.EmailServices;
 using PlagiTracker.Services.FileServices;
 using PlagiTracker.Services.SeleniumServices;
 using PlagiTracker.WebAPI.HangFire;
-using System;
 using System.Text;
 
 namespace PlagiTracker.WebAPI.Controllers
@@ -1225,21 +1223,73 @@ namespace PlagiTracker.WebAPI.Controllers
         [Route("GetById")]
         public async Task<ActionResult> GetById(Guid id)
         {
-            var assignment = await _context!.Assignments!.FindAsync(id);
-
-            if (assignment == null)
+            try
             {
-                return NotFound();
+                #region Token Verification
+                string? scopeClaim = User.FindFirst("Scope")?.Value;
+
+                // Verificar scope token
+                var verifyTokenResult_1 = VerifyToken(scopeClaim!, typeof(Student).Name);
+                var verifyTokenResult_2 = VerifyToken(scopeClaim!, typeof(Teacher).Name);
+
+                if (!verifyTokenResult_1.Success && !verifyTokenResult_2.Success)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = verifyTokenResult_1.Message!
+                    });
+                }
+
+                Guid userIdClaim = Guid.Parse(User.FindFirst("Id")?.Value!);
+                var user = await _context!.Users!.FindAsync(userIdClaim);
+
+                // Verificar si el id del token pertenece a un usuario
+                if (user == null)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Invalid token id"
+                    });
+                }
+                // Verificar si el usuario no está eliminado
+                else if (!user.IsEnabled)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Account is deleted"
+                    });
+                }
+                #endregion
+                
+                var assignment = await _context!.Assignments!.FindAsync(id);
+
+                // Verificar que la asignación exista
+                if (assignment == null)
+                {
+                    return NotFound();
+                }
+                // ESPECIFICAR SI EL ESTUDIANTE ESTÁ INSCRITO EN EL CURSO, O EL PROFESOR ES EL PROFESOR DEL CURSO.
+
+                return Ok(new Assignment()
+                {
+                    Id = assignment.Id,
+                    Title = assignment.Title,
+                    Description = assignment.Description,
+                    SubmissionDate = assignment.SubmissionDate,
+                    CourseId = assignment.CourseId
+                });
             }
-
-            return Ok(new Assignment()
+            catch (Exception ex)
             {
-                Id = assignment.Id,
-                Title = assignment.Title,
-                Description = assignment.Description,
-                SubmissionDate = assignment.SubmissionDate,
-                CourseId = assignment.CourseId
-            });
+                return BadRequest(new
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? ex.Message
+                });
+            }
         }
     }
 }

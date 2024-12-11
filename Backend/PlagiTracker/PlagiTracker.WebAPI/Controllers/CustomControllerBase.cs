@@ -1,10 +1,12 @@
 ﻿using Antlr4.Runtime.Misc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PlagiTracker.Data;
 using PlagiTracker.Data.DataAccess;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
+    [Authorize]
     public abstract class CustomControllerBase : ControllerBase
     {
         protected readonly DataContext _context;
