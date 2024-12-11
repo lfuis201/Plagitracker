@@ -66,7 +66,14 @@ namespace PlagiTracker.Data.DataAccess
             });
 
             //Asignación
-            modelBuilder.Entity<Assignment>().HasIndex(a => a.Title).IsUnique();
+            modelBuilder.Entity<Assignment>(builder => { 
+                // Configura la concatenación del Id del Curso y el Título como única
+                builder.HasIndex(assignment => new
+                {
+                    assignment.CourseId, 
+                    assignment.Title,
+                }).IsUnique();
+            });
 
             //Entrega
             modelBuilder.Entity<Submission>(builder =>

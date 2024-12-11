@@ -1,5 +1,6 @@
 ﻿using Hangfire;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PlagiTracker.Data.DataAccess;
@@ -10,6 +11,7 @@ using System.Security.Cryptography;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TeacherController : CustomControllerBase, IUserController
@@ -23,6 +25,7 @@ namespace PlagiTracker.WebAPI.Controllers
 
         #region IUserController Implementation
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("SignUp")]
         public async Task<ActionResult> SignUp(SignUpRequest signUpRequest)
@@ -62,7 +65,7 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
-        //[AllowAnonymous]
+        [AllowAnonymous]
         [HttpPost]
         [Route("LogIn")]
         public async Task<ActionResult> LogIn(LogInRequest logInRequest)
@@ -160,6 +163,7 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("SendResetPasswordEmail")]
         public async Task<ActionResult> SendResetPasswordEmail(string email)
@@ -192,6 +196,7 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("ResetPasswordVerification")]
         public async Task<ActionResult> ResetPasswordVerification(string email, int code)
@@ -230,6 +235,7 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("ResetPassword")]
         public async Task<ActionResult> ResetPassword(ResetPasswordRequest resetPasswordRequest)
@@ -299,28 +305,42 @@ namespace PlagiTracker.WebAPI.Controllers
 
         #endregion
 
+        /// <summary>
+        /// Obtener la información de un profesor
+        /// </summary>
+        /// <param name="id">Id del profesor</param>
+        /// <returns></returns>
         [HttpGet]
         [Route("Get")]
-        public async Task<ActionResult> Get(BaseRequest baseRequest, Guid id)
+        public async Task<ActionResult> Get(Guid id)
         {
             try
             {
+                // Verificar scope token
                 string? scopeClaim = User.FindFirst("Scope")?.Value;
 
-                var verifyTokenResult = VerifyToken(scopeClaim, typeof(Teacher).Name);
+                var verifyTokenResult = VerifyToken(scopeClaim!, typeof(Teacher).Name);
 
                 if (!verifyTokenResult.Success)
                 {
                     return Unauthorized(verifyTokenResult.Message);
                 }
 
-                var userIdClaim = User.FindFirst("Id")?.Value;
+                // Verificar si el id del token es un usuario
+                string userIdClaim = User.FindFirst("Id")?.Value!;
 
-                if (verifyTokenResult.Success)
+                var user = await _context!.Users!.FindAsync(userIdClaim);
+
+                if (user == null)
                 {
-                    return Unauthorized(verifyTokenResult.Message);
+                    return Unauthorized("Invalid token id");
+                }
+                else if (!user.IsEnabled)
+                {
+                    return Unauthorized("Account is deleted");
                 }
 
+                // Obtener y retornar información del profesor
                 var teacher = await _context!.Teachers!.FindAsync(id);
 
                 if (teacher == null)
@@ -340,31 +360,179 @@ namespace PlagiTracker.WebAPI.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            
+        }
+
+        /// <summary>
+        /// Obteniendo información privada del profesor
+        /// </summary>
+        /// <remarks>Solo accesible por el profesor</remarks>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("GetPrivateInfo")]
+        public async Task<ActionResult> GetPrivateInfo()
+        {
+            try
+            {
+                // Verificar scope token
+                string? scopeClaim = User.FindFirst("Scope")?.Value;
+
+                var verifyTokenResult = VerifyToken(scopeClaim!, typeof(Teacher).Name);
+
+                if (!verifyTokenResult.Success)
+                {
+                    return Unauthorized(verifyTokenResult.Message);
+                }
+
+                // Verificar si el id del token es un usuario
+                Guid userIdClaim = Guid.Parse(User.FindFirst("Id")?.Value!);
+
+                var user = await _context!.Users!.FindAsync(userIdClaim);
+
+                if (user == null)
+                {
+                    return Unauthorized("Invalid token id");
+                }
+                else if (!user.IsEnabled)
+                {
+                    return Unauthorized("Account is deleted");
+                }
+
+                // Obtener y retornar información del profesor
+                var teacher = await _context!.Teachers!.FindAsync(user.Id);
+
+                if (teacher == null)
+                {
+                    return NotFound();
+                }
+
+                int activeCourse = await _context.Courses!
+                    .CountAsync(course => course.TeacherId == teacher.Id && course.IsEnabled && !course.IsArchived);
+
+                int archivedCourse = await _context.Courses!
+                    .CountAsync(course => course.TeacherId == teacher.Id && course.IsEnabled && course.IsArchived);
+
+                return Ok(new
+                {
+                    Id = teacher.Id!,
+                    FirstName = teacher.FirstName!,
+                    LastName = teacher.LastName!,
+                    Email = teacher.Email!,
+                    CreatedAt = teacher.CreatedAt!,
+                    ActiveCourse = activeCourse,
+                    ArchivedCourse = archivedCourse,
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut]
         [Route("Update")]
         public async Task<ActionResult> Update(TeacherUpdateRequest teacherUpdateRequest)
         {
-            var teacher = await _context!.Teachers!.FindAsync(teacherUpdateRequest.Id);
-            teacher!.FirstName = teacherUpdateRequest.FirstName;
-            teacher!.LastName = teacherUpdateRequest.LastName;
-            teacher!.Email = teacherUpdateRequest.Email;
+            try
+            {
+                // Verificar scope token
+                string? scopeClaim = User.FindFirst("Scope")?.Value;
 
-            await _context.SaveChangesAsync();
-            return Ok();
+                var verifyTokenResult = VerifyToken(scopeClaim!, typeof(Teacher).Name);
+
+                if (!verifyTokenResult.Success)
+                {
+                    return Unauthorized(verifyTokenResult.Message);
+                }
+
+                // Verificar si el id del token es un usuario
+                string userIdClaim = User.FindFirst("Id")?.Value!;
+
+                var user = await _context!.Users!.FindAsync(userIdClaim);
+
+                if (user == null)
+                {
+                    return Unauthorized("Invalid token id");
+                }
+                else if (!user.IsEnabled)
+                {
+                    return Unauthorized("Account is deleted");
+                }
+
+                // Actualizar información del profesor
+                var teacher = await _context!.Teachers!.FindAsync(user.Id);
+
+                teacher!.FirstName = teacherUpdateRequest.FirstName;
+                teacher!.LastName = teacherUpdateRequest.LastName;
+                teacher!.Email = teacherUpdateRequest.Email;
+                teacher!.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                if (
+                    ex.InnerException != null
+                    && ex.InnerException.Message.Contains("23505: duplicate key value violates unique constraint")
+                    && ex.InnerException.Message.Contains("IX_Users_Email")
+                )
+                {
+                    return Conflict(new { message = "Email already used." });
+                }
+
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete]
         [Route("Delete")]
-        public async Task<ActionResult> Delete(Guid id)
+        public async Task<ActionResult> Delete()
         {
-            var teacher = await _context!.Teachers!.FindAsync(id);
-            _context.Teachers.Remove(teacher!);
+            try
+            {
+                // Verificar scope token
+                string? scopeClaim = User.FindFirst("Scope")?.Value;
 
-            await _context.SaveChangesAsync();
-            return Ok();
+                var verifyTokenResult = VerifyToken(scopeClaim!, typeof(Teacher).Name);
+
+                if (!verifyTokenResult.Success)
+                {
+                    return Unauthorized(verifyTokenResult.Message);
+                }
+
+                // Verificar si el id del token es un usuario
+                Guid userIdClaim = Guid.Parse(User.FindFirst("Id")?.Value!);
+
+                var user = await _context!.Users!.FindAsync(userIdClaim);
+
+                if (user == null)
+                {
+                    return Unauthorized("Invalid token id");
+                }
+                else if (!user.IsEnabled)
+                {
+                    return BadRequest("Account is already deleted");
+                }
+
+                // Eliminar profesor (desactivar)
+                var teacher = await _context!.Teachers!.FindAsync(user.Id);
+                
+                if (teacher == null)
+                {
+                    return NotFound();
+                }
+
+                teacher!.IsEnabled = false;
+
+                await _context.SaveChangesAsync();
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
         }
     }
 }

@@ -43,7 +43,7 @@ namespace PlagiTracker.WebAPI.Controllers
 
             var claims = new[]
             {
-                new Claim("Id", Guid.NewGuid().ToString()),
+                new Claim("Id", userId.ToString()),
                 new Claim("Scope", entityClass.Name)
             };
 

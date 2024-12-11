@@ -14,13 +14,13 @@ namespace PlagiTracker.Data.Entities
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
 
-        [MaxLength(250)]
-        public string? Description { get; set; }
-
         [Required]
         [MinLength(10)]
         [MaxLength(50)]
         public string? Title { get; set; }
+
+        [MaxLength(250)]
+        public string? Description { get; set; }
 
         /// <summary>
         /// Fecha y hora límite de la entrega

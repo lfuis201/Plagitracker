@@ -1,5 +1,6 @@
 ﻿// Ignore Spelling: Replit
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PlagiTracker.Data.DataAccess;
@@ -10,6 +11,7 @@ using PlagiTracker.Services.SeleniumServices;
 
 namespace PlagiTracker.WebAPI.Controllers
 {
+    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class TestController : CustomControllerBase
@@ -17,6 +19,7 @@ namespace PlagiTracker.WebAPI.Controllers
         public TestController(DataContext context) : base(context)
         {
         }
+
         /*
         [HttpPost]
         [Route("ScrapeReplit")]
@@ -46,6 +49,7 @@ namespace PlagiTracker.WebAPI.Controllers
             }
         }
         */
+
         [HttpPost]
         [Route("DataBaseError")]
         public async Task<ActionResult> DataBaseError(Guid studentId)
@@ -124,7 +128,6 @@ namespace PlagiTracker.WebAPI.Controllers
                 return BadRequest(ex.ToString());
             }
         }
-
 
         [HttpPost]
         [Route("AssignmentDolosAnalysisEmail")]
