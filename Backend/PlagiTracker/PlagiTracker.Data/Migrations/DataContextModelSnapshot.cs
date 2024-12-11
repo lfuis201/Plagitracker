@@ -64,9 +64,7 @@ namespace PlagiTracker.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CourseId");
-
-                    b.HasIndex("Title")
+                    b.HasIndex("CourseId", "Title")
                         .IsUnique();
 
                     b.ToTable("Assignments");
